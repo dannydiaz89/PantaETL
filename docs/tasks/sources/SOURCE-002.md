@@ -1,7 +1,7 @@
 # SOURCE-002 — XLSX Source
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Sources  
 **Depends on:** WORKER-003, WORKER-004
 
@@ -21,7 +21,7 @@ Implement XLSX Source.
 
 ## Acceptance criteria
 
-- [ ] Produces supported Dataset.
+- [x] Produces supported Dataset.
 
 ## Validation
 
@@ -29,4 +29,5 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+The XLSX Source safely resolves a configured workbook and selected worksheet,
+then persists its parsed content as a tabular Parquet Dataset.
