@@ -1,7 +1,7 @@
 # SOURCE-001 — CSV Source
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Sources  
 **Depends on:** WORKER-003, WORKER-004
 
@@ -22,8 +22,8 @@ Implement CSV Source.
 
 ## Acceptance criteria
 
-- [ ] Produces supported Dataset.
-- [ ] No record contents in logs.
+- [x] Produces supported Dataset.
+- [x] No record contents in logs.
 
 ## Validation
 
@@ -31,4 +31,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+The local CSV Source validates root-relative input locations, parses configured
+delimited files, and persists a tabular Parquet Dataset. File and parsing
+errors use safe context only.
