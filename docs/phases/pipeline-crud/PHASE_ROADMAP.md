@@ -12,9 +12,9 @@ Task IDs must never appear in implementation comments or commit messages.
 | CRUD-002 | Pipeline repository read operations | COMPLETE | CRUD-001 | pipeline_reads |
 | CRUD-003 | Pipeline repository create operation | COMPLETE | CRUD-001 | pipeline_create |
 | CRUD-004 | Pipeline repository update operation | COMPLETE | CRUD-002, CRUD-003 | pipeline_update |
-| CRUD-005 | Pipeline repository delete operation | IN PROGRESS | CRUD-002 | pipeline_delete |
-| CRUD-006 | Pipeline duplication operation | BLOCKED | CRUD-003, CRUD-004 | Unassigned |
-| CRUD-007 | Pipeline run/state action service | IN PROGRESS | CRUD-002 | pipeline_actions |
+| CRUD-005 | Pipeline repository delete operation | COMPLETE | CRUD-002 | pipeline_delete |
+| CRUD-006 | Pipeline duplication operation | IN PROGRESS | CRUD-003, CRUD-004 | pipeline_duplicate |
+| CRUD-007 | Pipeline run/state action service | COMPLETE | CRUD-002 | pipeline_actions |
 | API-CRUD-001 | Pipeline list/create routes | BLOCKED | CRUD-002, CRUD-003 | Unassigned |
 | API-CRUD-002 | Pipeline get/update/delete routes | BLOCKED | CRUD-004, CRUD-005 | Unassigned |
 | API-CRUD-003 | Pipeline duplicate/run/state routes | BLOCKED | CRUD-006, CRUD-007 | Unassigned |

@@ -29,6 +29,19 @@ export type { CreatePipelineInput } from "./pipelines/create.js";
 export { updatePipeline } from "./pipelines/update.js";
 export type { UpdatePipelineInput } from "./pipelines/update.js";
 export {
+  PipelineActionConflictError,
+  disablePipelineForOwner,
+  enablePipelineForOwner,
+  runPipelineForOwner,
+} from "./pipelines/actions.js";
+export type {
+  EnqueuedPipelineRun,
+  PipelineActionConflictReason,
+  PipelineActionInput,
+  PipelineRunEnqueuer,
+  PipelineStateActionResult,
+} from "./pipelines/actions.js";
+export {
   DEFAULT_RETENTION_BATCH_SIZE,
   listExpiredArtifacts,
   listExpiredDatasets,

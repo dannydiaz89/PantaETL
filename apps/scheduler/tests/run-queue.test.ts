@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createPipelineRunInTransaction } from "../src/run-queue.js";
+import { PipelineRunEnqueueConflictError, createPipelineRunInTransaction } from "../src/run-queue.js";
 
 const pipelineId = "123e4567-e89b-12d3-a456-426614174301";
 
@@ -28,5 +28,18 @@ describe("createPipelineRunInTransaction", () => {
         new Date("2026-08-13T00:00:00.000Z"),
       ),
     ).rejects.toThrow("Cannot create a run until the pipeline has been reviewed and enabled.");
+  });
+
+  it("exposes a stable reason when the pipeline cannot run", async () => {
+    await expect(
+      createPipelineRunInTransaction(
+        transactionWithPipelineState("disabled"),
+        { pipelineId },
+        new Date("2026-08-13T00:00:00.000Z"),
+      ),
+    ).rejects.toMatchObject({
+      name: "PipelineRunEnqueueConflictError",
+      reason: "not_enabled",
+    } satisfies Partial<PipelineRunEnqueueConflictError>);
   });
 });

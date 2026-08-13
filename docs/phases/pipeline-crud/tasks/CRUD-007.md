@@ -1,7 +1,7 @@
 # CRUD-007 — Pipeline Run and State Action Service
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** pipeline_actions
 **Depends on:** CRUD-002
 
 ## Scope
@@ -10,12 +10,12 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Run rejects non-enabled pipelines.
-- [ ] Run uses existing execution enqueue infrastructure.
-- [ ] Enable/disable uses shared domain state rules.
-- [ ] Reject locked invalid transitions.
-- [ ] Owner-scope all actions.
-- [ ] Map domain conflicts cleanly for API layer.
+- [x] Run rejects non-enabled pipelines.
+- [x] Run uses existing execution enqueue infrastructure.
+- [x] Enable/disable uses shared domain state rules.
+- [x] Reject locked invalid transitions.
+- [x] Owner-scope all actions.
+- [x] Map domain conflicts cleanly for API layer.
 
 ## Required checks
 
@@ -30,3 +30,8 @@ Implement only the behavior described by this task and its acceptance criteria. 
 ## Notes / blockers
 
 None.
+
+## Implementation notes
+
+- Uses the scheduler's existing durable run queue and exposes stable, safe conflict reasons for route mapping.
+- Owner-scoped state actions use the shared pipeline-domain edit lock before persisting availability changes.

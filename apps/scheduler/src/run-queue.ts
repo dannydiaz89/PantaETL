@@ -35,6 +35,22 @@ export interface CreatedPipelineRun {
   readonly runId: string;
 }
 
+/** Stable reasons a persisted run cannot be created by the scheduler. */
+export type PipelineRunEnqueueConflictReason = "not_enabled" | "not_found";
+
+/** A scheduler conflict that callers can safely map to a control-plane response. */
+export class PipelineRunEnqueueConflictError extends Error {
+  /** Machine-readable reason the requested run was rejected. */
+  readonly reason: PipelineRunEnqueueConflictReason;
+
+  /** Creates a safe conflict error without exposing pipeline configuration. */
+  constructor(reason: PipelineRunEnqueueConflictReason, message: string) {
+    super(message);
+    this.name = "PipelineRunEnqueueConflictError";
+    this.reason = reason;
+  }
+}
+
 /** A pipeline whose next queued run was made active for worker processing. */
 export interface PromotedPipelineRun {
   readonly pipelineId: PipelineId;
@@ -87,7 +103,7 @@ export async function createPipelineRunInTransaction(
     .limit(1);
 
   if (!pipeline) {
-    throw new Error("Cannot create a run for a pipeline that does not exist.");
+    throw new PipelineRunEnqueueConflictError("not_found", "The requested pipeline was not found.");
   }
 
   assertPipelineCanCreateRun(pipeline.state);
@@ -158,9 +174,9 @@ function assertPipelineCanCreateRun(state: unknown): void {
     enqueuePipelineRun(createPipelineExecutionState(parsedState.data as PipelineState), "pending-run");
   } catch (error) {
     if (error instanceof PipelineStateTransitionError) {
-      throw new Error(
+      throw new PipelineRunEnqueueConflictError(
+        "not_enabled",
         "Cannot create a run until the pipeline has been reviewed and enabled.",
-        { cause: error },
       );
     }
 
