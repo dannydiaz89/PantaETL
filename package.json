@@ -5,7 +5,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm web:check",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm web:check && pnpm services:check",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "typecheck": "tsc --noEmit --project tsconfig.json",
@@ -13,7 +13,16 @@
     "web:check": "pnpm --filter web check",
     "web:dev": "pnpm --filter web dev",
     "web:generate-routes": "pnpm --filter web generate-routes",
-    "web:typecheck": "pnpm --filter web typecheck"
+    "web:typecheck": "pnpm --filter web typecheck",
+    "services:check": "pnpm scheduler:check && pnpm garbage-collector:check",
+    "scheduler:build": "pnpm --filter scheduler build",
+    "scheduler:check": "pnpm --filter scheduler check",
+    "scheduler:dev": "pnpm --filter scheduler dev",
+    "scheduler:start": "pnpm --filter scheduler start",
+    "garbage-collector:build": "pnpm --filter garbage-collector build",
+    "garbage-collector:check": "pnpm --filter garbage-collector check",
+    "garbage-collector:dev": "pnpm --filter garbage-collector dev",
+    "garbage-collector:start": "pnpm --filter garbage-collector start"
   },
   "packageManager": "pnpm@10.28.2",
   "pnpm": {
