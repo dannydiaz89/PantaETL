@@ -1,114 +1,157 @@
 # Contributing to PantaETL
 
-PantaETL is designed for concurrent contribution by humans and coding agents.
+Thanks for helping build PantaETL. This guide explains how to make a safe,
+reviewable change. For product context, architecture, prerequisites, and the
+local-stack walkthrough, start with the [README](README.md). This document
+focuses on the contribution workflow rather than repeating it.
 
-## Before contributing
+## Start here
 
-Read:
+Before changing code or documentation, read the material that defines the
+boundary of your change:
 
-- `AGENTS.md`
-- `ROADMAP.md`
-- the assigned `docs/tasks/*.md`
-- the relevant `docs/workstreams/*.md`
-- applicable architecture documents
-- applicable ADRs
+- [AGENTS.md](AGENTS.md) for repository-wide engineering rules;
+- [ROADMAP.md](ROADMAP.md) and the applicable task file for planned work;
+- the matching document in [docs/workstreams](docs/workstreams);
+- relevant [architecture documents](docs/architecture) and [ADRs](docs/adr).
 
-## Task claiming
+For planned work, follow the detailed [task workflow](docs/development/task-workflow.md):
+claim a `READY` task, verify its dependencies, mark it in progress, and update
+the task and roadmap only after its acceptance criteria pass. Do not take over
+an in-progress task without coordinating with its owner.
 
-Before starting a roadmap item:
+If your proposal is not represented by an existing task, discuss its scope and
+architecture impact before beginning broad implementation.
 
-- verify dependencies;
-- mark the detailed task IN PROGRESS;
-- add yourself as owner if an identifier is available;
-- update the roadmap row.
+## Local development and common commands
 
-Do not work on a task already owned by another contributor unless coordination is explicit.
+Install both the Node.js and Python environments once:
 
-## Branches and commits
+```bash
+pnpm setup
+```
 
-Prefer narrowly scoped branches.
+Copy [`.env.example`](.env.example) to `.env`, set the required local values,
+then start the normal development stack:
 
-Commit messages describe actual software behavior.
+```bash
+pnpm stack:up
+```
 
-Good:
+This manages local services and a Docker-backed PostgreSQL database. It is safe
+to run again to restart the supervised services while retaining local database
+data. Use `pnpm stack:status` to inspect the stack. Use the destructive
+`pnpm stack:reset` only when it is acceptable to discard local Compose volumes.
 
-- `Add pipeline state validation`
-- `Implement source checkpoint persistence`
-- `Add accessible select primitive`
+These are the commands contributors commonly need:
 
-Bad:
+| Purpose | Command |
+|---|---|
+| Regenerate contracts and route artifacts | `pnpm generate` |
+| Verify generated artifacts are current | `pnpm generate:check` |
+| Run TypeScript, service, web, and accessibility checks | `pnpm check` |
+| Run Python lint, format, type, and test checks | `pnpm worker:check` |
+| Run the web app alone | `pnpm dev` |
+| Generate a deliberate database migration | `pnpm db:migration:generate` |
+| Apply committed migrations locally | `pnpm db:migrate` |
 
-- `Complete TASK-001`
-- `Implement roadmap phase 2`
-- `Follow architecture section 4`
+Run the narrowest relevant check while iterating, then run the appropriate full
+checks before requesting review. CI runs TypeScript quality checks (including
+browser accessibility tests), Python checks, and Compose/migration validation
+on every push and pull request.
 
-## Pull requests
+## Change boundaries
 
-Explain:
+Keep a change focused on the package or service that owns it. The main ownership
+areas are:
 
-- behavior changed;
-- why it changed;
-- workstream;
-- contracts affected;
-- tests performed;
-- migration impact;
-- accessibility/localization impact where applicable.
+- `apps/web` — control plane and browser UI;
+- `apps/scheduler` — schedule claiming and run/job creation;
+- `apps/garbage-collector` — retention cleanup;
+- `packages/contracts` — cross-service contract interfaces;
+- `packages/database` — PostgreSQL schema and migrations;
+- `packages/ui` — design-system components;
+- `packages/pipeline` — pipeline domain rules;
+- `workers/python` — execution components and worker runtime.
 
-## Architecture changes
+Cross-boundary changes are sometimes necessary. When they are, update the
+shared contract deliberately, update every affected consumer, and validate the
+whole affected path. Do not duplicate a contract just to avoid that work.
 
-Create an ADR when materially altering:
+### Contracts and generated files
 
-- service boundaries;
-- storage strategy;
-- job queue strategy;
-- contract ownership;
-- Source/Transform/Export responsibilities;
-- authentication;
-- security boundaries;
-- deployment dependencies;
-- major framework choices.
+JSON Schema in [`schemas/contracts`](schemas/contracts) is the canonical
+cross-service contract source. Do not hand-edit generated TypeScript or Python
+contract artifacts. Change the schema, run `pnpm generate`, commit the generated
+output, and run `pnpm generate:check`.
 
-## Function documentation
+### Database changes
 
-Public/exported and non-trivial internal functions require useful descriptions.
+Use committed Drizzle migrations. Generate a migration with
+`pnpm db:migration:generate`, inspect both the SQL and migration metadata, and
+apply it to a fresh local database before review. Do not use schema push as a
+substitute for a migration.
 
-Comments explain non-obvious reasons and invariants, not obvious syntax.
+### Frontend changes
 
-## Frontend
+Use [`packages/ui`](packages/ui) for feature UI; application code must not
+import Radix primitives directly. All visible text must come from the typed
+locale catalog. Preserve light and dark themes, keyboard operation, focus
+management, reduced-motion support, and WCAG 2.2 AA behavior. Add or extend
+accessible browser coverage when a user interaction changes.
 
-All frontend work must:
+### Sources, transforms, exports, and secrets
 
-- use the design system;
-- remain accessible;
-- localize user-facing strings;
-- support light/dark themes;
-- avoid emojis;
-- use icons sparingly;
-- respect reduced motion.
+Preserve the execution model:
 
-## Python
+```text
+Trigger → Source → Transform(s) → Export
+```
 
-Use:
+Sources may access explicitly assigned credentials and external systems.
+Transforms operate only on datasets and must not use connection credentials or
+normal network I/O. Exports own destination delivery and retry behavior. Never
+put credentials, secret values, or record contents in browser responses, logs,
+errors, fixtures, or portable pipeline exports.
 
-- Python 3.13
-- uv
-- Ruff
-- mypy
-- pytest
-- Pydantic
-- Polars / PyArrow where appropriate
+## Branches, commits, and pull requests
 
-## TypeScript
+Use a narrowly scoped branch. Keep each commit independently understandable and
+avoid bundling formatting-only or unrelated refactors with behavior changes.
 
-Use:
+Commit messages should describe the software behavior, for example:
 
-- pnpm
-- Zod
-- Drizzle for normal relational work
-- raw PostgreSQL SQL where database-specific behavior is clearer
-- Vitest
-- Playwright
+- `Add atomic job claiming`
+- `Validate transform input contracts`
+- `Add pipeline artifact retention`
+
+Do not use task IDs, roadmap phases, or planning-document references in commit
+messages, source comments, runtime logs, or user-facing text.
+
+A pull request should state:
+
+- the behavior changed and why;
+- the affected service, package, or contract;
+- validation performed;
+- migration and rollout impact, if any;
+- accessibility, localization, and security considerations when relevant.
+
+For architecture-level changes—such as service boundaries, storage, queueing,
+authentication, contract ownership, or deployment dependencies—add an ADR and
+link it from the pull request.
+
+## Before requesting review
+
+- [ ] The change is scoped to its owner boundary, or cross-boundary impact is documented.
+- [ ] Public and non-trivial internal code has useful descriptions; comments explain invariants rather than syntax.
+- [ ] User-visible UI text is localized and affected UI interactions are accessible.
+- [ ] Secrets and record data cannot appear in logs, errors, browser responses, or exported definitions.
+- [ ] Generated contracts/routes are current, if applicable.
+- [ ] Database migrations are committed and validated, if applicable.
+- [ ] Relevant checks pass locally, including `pnpm check` and/or `pnpm worker:check`.
+- [ ] Task acceptance criteria and roadmap status are updated for planned work.
 
 ## License
 
-Contributions are distributed under the MIT License.
+By contributing, you agree that your contributions are distributed under the
+[MIT License](LICENSE).
