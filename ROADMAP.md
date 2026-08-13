@@ -186,7 +186,7 @@ These can also proceed concurrently once the worker runtime and registries are c
 | TRANSFORM-001 | Column transform set | Transforms | COMPLETE | WORKER-003, WORKER-004 | Codex |
 | TRANSFORM-002 | Row transform set | Transforms | COMPLETE | WORKER-003, WORKER-004 | Codex |
 | TRANSFORM-003 | Value/type transform set | Transforms | IN PROGRESS | WORKER-003, WORKER-004 | Codex |
-| TRANSFORM-004 | Document-to-tabular flatten transform | Transforms | BLOCKED | WORKER-003, WORKER-004 | Unassigned |
+| TRANSFORM-004 | Document-to-tabular flatten transform | Transforms | COMPLETE | WORKER-003, WORKER-004 | Codex |
 | EXPORT-001 | CSV artifact Export | Exports | COMPLETE | WORKER-003, WORKER-004, DB-004 | Codex |
 | EXPORT-002 | JSON artifact Export | Exports | COMPLETE | WORKER-003, WORKER-004, DB-004 | Codex |
 | EXPORT-003 | Parquet artifact Export | Exports | BLOCKED | WORKER-003, WORKER-004, DB-004 | Unassigned |

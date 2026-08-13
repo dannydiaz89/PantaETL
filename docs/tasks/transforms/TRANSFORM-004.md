@@ -1,7 +1,7 @@
 # TRANSFORM-004 — Document-to-Tabular Flatten Transform
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Transforms  
 **Depends on:** WORKER-003, WORKER-004
 
@@ -21,8 +21,8 @@ Implement flattening transform.
 
 ## Acceptance criteria
 
-- [ ] Output tabular.
-- [ ] Unsupported shapes fail clearly.
+- [x] Output tabular.
+- [x] Unsupported shapes fail clearly.
 
 ## Validation
 
@@ -30,4 +30,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+The document flatten Transform turns supported nested JSON objects into tabular
+Datasets, with explicit record paths and array behavior. Unsupported shapes,
+paths, and conflicts fail with safe, actionable errors.
