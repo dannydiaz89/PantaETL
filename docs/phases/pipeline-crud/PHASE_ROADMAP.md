@@ -22,7 +22,7 @@ Task IDs must never appear in implementation comments or commit messages.
 | UI-WIRE-001 | Pipeline query/mutation layer | COMPLETE | API-CRUD-001, API-CRUD-002 | web_pipeline_data |
 | UI-WIRE-002 | Pipeline workspace decomposition | COMPLETE | CRUD-001 | web_pipeline_decomposition |
 | UI-WIRE-003 | Replace pipeline fixtures | COMPLETE | UI-WIRE-001, UI-WIRE-002 | web_pipeline_api_data |
-| UI-WIRE-004 | Wire create/update/delete | BLOCKED | UI-WIRE-003 | Unassigned |
+| UI-WIRE-004 | Wire create/update/delete | COMPLETE | UI-WIRE-003 | ui_pipeline_mutations |
 | UI-WIRE-005 | Wire duplicate/run/enable-disable | BLOCKED | API-CRUD-003, UI-WIRE-003 | Unassigned |
 | UI-WIRE-006 | Loading/error/empty/accessibility states | BLOCKED | UI-WIRE-003 | Unassigned |
 | INT-CRUD-001 | Pipeline CRUD integration tests | BLOCKED | API-CRUD-004 | Unassigned |

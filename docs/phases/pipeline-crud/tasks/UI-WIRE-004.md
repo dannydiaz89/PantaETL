@@ -1,7 +1,7 @@
 # UI-WIRE-004 — Wire Pipeline Create Update Delete
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** ui_pipeline_mutations
 **Depends on:** UI-WIRE-003
 
 ## Scope
@@ -10,12 +10,12 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Create pipeline through API.
-- [ ] Edit idle pipeline through API.
-- [ ] Surface backend 409 lock accessibly.
-- [ ] Delete idle pipeline with confirmation.
-- [ ] Update cache/state after mutations.
-- [ ] Never prefill secrets from API.
+- [x] Create pipeline through API.
+- [x] Edit idle pipeline through API.
+- [x] Surface backend 409 lock accessibly.
+- [x] Delete idle pipeline with confirmation.
+- [x] Update cache/state after mutations.
+- [x] Never prefill secrets from API.
 
 ## Required checks
 
@@ -29,4 +29,4 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Notes / blockers
 
-None.
+Creation uses a non-secret starter pipeline; editor drafts remain local until an API mutation succeeds.

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import type { Pipeline } from "@pantaetl/contracts";
+import type { Pipeline, PipelineUpdateRequest } from "@pantaetl/contracts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@pantaetl/ui";
 
 import { useI18n } from "../../locale-provider.js";
+import { PipelineDeleteConfirmation } from "./pipeline-delete-confirmation.js";
 import { PipelineHistoryPanel } from "./pipeline-history-panel.js";
 import { PipelineOverviewPanel } from "./pipeline-overview-panel.js";
 import { PipelineSettingsPanel } from "./pipeline-settings-panel.js";
@@ -13,18 +14,41 @@ import { PipelineTriggerPanel } from "./pipeline-trigger-panel.js";
 
 /** Coordinates the selected pipeline's form and its configuration panels. */
 export function PipelineEditor({
+  deleteErrorMessage,
   editable,
+  isDeleting,
+  isSaving,
+  onDelete,
+  onSave,
   pipeline,
+  saveErrorMessage,
+  saveSucceeded,
 }: {
+  readonly deleteErrorMessage: string | undefined;
   readonly editable: boolean;
+  readonly isDeleting: boolean;
+  readonly isSaving: boolean;
+  readonly onDelete: () => void;
+  readonly onSave: (update: PipelineUpdateRequest) => void;
   readonly pipeline: Pipeline;
+  readonly saveErrorMessage: string | undefined;
+  readonly saveSucceeded: boolean;
 }) {
   const { t } = useI18n();
   const [draftName, setDraftName] = useState(pipeline.name);
-  const [saved, setSaved] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const nameError = submitted && draftName.trim().length === 0 ? t("pipeline.nameRequired") : undefined;
+
+  useEffect(() => {
+    setDraftName(pipeline.name);
+    setSubmitted(false);
+  }, [pipeline.id, pipeline.name]);
 
   function saveDraft(): void {
-    if (editable) setSaved(true);
+    setSubmitted(true);
+    if (!editable || draftName.trim().length === 0) return;
+
+    onSave({ name: draftName.trim() });
   }
 
   return (
@@ -34,7 +58,15 @@ export function PipelineEditor({
           <h2>{t("pipeline.editor.title")}</h2>
           <p>{t("pipeline.editor.description")}</p>
         </div>
-        <PipelineStateBadge state={pipeline.state} />
+        <div className="pipeline-editor__actions">
+          <PipelineStateBadge state={pipeline.state} />
+          <PipelineDeleteConfirmation
+            disabled={!editable}
+            errorMessage={deleteErrorMessage}
+            isDeleting={isDeleting}
+            onDelete={onDelete}
+          />
+        </div>
       </div>
       {!editable ? (
         <div className="pipeline-lock-notice" role="status">
@@ -42,6 +74,7 @@ export function PipelineEditor({
           <p>{t("pipeline.locked.description")}</p>
         </div>
       ) : null}
+      {saveErrorMessage === undefined ? null : <p className="pipeline-mutation-error" role="alert">{saveErrorMessage}</p>}
       <Tabs defaultValue="overview">
         <TabsList aria-label={t("pipeline.editor.title")}>
           <TabsTrigger value="overview">{t("pipeline.tab.overview")}</TabsTrigger>
@@ -56,8 +89,10 @@ export function PipelineEditor({
           <PipelineOverviewPanel
             draftName={draftName}
             editable={editable}
+            isSaving={isSaving}
+            nameError={nameError}
             onDraftNameChange={setDraftName}
-            saved={saved}
+            saved={saveSucceeded}
           />
         </TabsContent>
         <TabsContent value="source">

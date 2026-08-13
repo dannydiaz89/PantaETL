@@ -1,5 +1,10 @@
 import { AxeBuilder } from "@axe-core/playwright";
-import type { Pipeline } from "@pantaetl/contracts";
+import {
+  pipelineCreateRequestSchema,
+  pipelineCreateResponseSchema,
+  type Pipeline,
+  type PipelineCreateRequest,
+} from "@pantaetl/contracts";
 import { expect, test, type Page } from "@playwright/test";
 
 import { en } from "../src/locales/en.js";
@@ -107,11 +112,131 @@ test("pipeline editor loads a persisted pipeline through accessible query states
   await page.goto("/pipelines");
   await waitForApplication(page);
   await expect(page.locator(".pipeline-workspace")).toHaveAttribute("data-hydrated", "true");
-  const nameInput = page.getByLabel(en["pipeline.name"]);
+  const nameInput = page.locator(".pipeline-editor").getByLabel(en["pipeline.name"]);
 
   await expect(nameInput).toBeEnabled();
   await page.getByRole("tab", { name: en["pipeline.tab.trigger"] }).click();
   await expect(page.getByText(en["pipeline.trigger.description"])).toBeVisible();
+  await expectNoAccessibilityViolations(page);
+});
+
+test("pipeline name updates use the control-plane API and announce completion", async ({ page }) => {
+  let pipeline = persistedPipeline;
+
+  await page.route("**/api/pipelines**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    if (path === "/api/pipelines" && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify({ pipelines: [pipeline] }), contentType: "application/json" });
+      return;
+    }
+    if (path === `/api/pipelines/${pipeline.id}` && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
+      return;
+    }
+    if (path === `/api/pipelines/${pipeline.id}` && request.method() === "PATCH") {
+      pipeline = { ...pipeline, ...request.postDataJSON() };
+      await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/pipelines");
+  await waitForApplication(page);
+  const nameInput = page.locator(".pipeline-editor").getByLabel(en["pipeline.name"]);
+  await nameInput.fill("Updated persisted orders");
+  await page.getByRole("button", { name: en["pipeline.save"] }).click();
+  await expect(page.getByText(en["pipeline.saveSuccess"])).toBeVisible();
+  await expectNoAccessibilityViolations(page);
+});
+
+test("pipeline update conflicts are announced without exposing backend details", async ({ page }) => {
+  await page.route("**/api/pipelines**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    if (path === "/api/pipelines" && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify({ pipelines: [persistedPipeline] }), contentType: "application/json" });
+      return;
+    }
+    if (path === `/api/pipelines/${persistedPipeline.id}` && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify(persistedPipeline), contentType: "application/json" });
+      return;
+    }
+    if (path === `/api/pipelines/${persistedPipeline.id}` && request.method() === "PATCH") {
+      await route.fulfill({ body: JSON.stringify({ code: "pipeline_locked" }), contentType: "application/json", status: 409 });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/pipelines");
+  await waitForApplication(page);
+  await page.locator(".pipeline-editor").getByLabel(en["pipeline.name"]).fill("Blocked update");
+  await page.getByRole("button", { name: en["pipeline.save"] }).click();
+  await expect(page.getByRole("alert")).toContainText(en["pipeline.mutation.locked"]);
+  await expect(page.locator(".pipeline-editor").getByLabel(en["pipeline.name"])).toHaveValue("Blocked update");
+  await expectNoAccessibilityViolations(page);
+});
+
+test("pipeline create and deletion keep controls accessible and reconcile the workspace", async ({ page }) => {
+  let pipelines: Pipeline[] = [persistedPipeline];
+  let pipeline = persistedPipeline;
+
+  await page.route("**/api/pipelines**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+
+    if (path === "/api/pipelines" && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify({ pipelines }), contentType: "application/json" });
+      return;
+    }
+
+    if (path === "/api/pipelines" && request.method() === "POST") {
+      const created = persistedPipelineFromCreateRequest(pipelineCreateRequestSchema.parse(request.postDataJSON()));
+      pipelines = [...pipelines, created];
+      pipeline = created;
+      await route.fulfill({ body: JSON.stringify(created), contentType: "application/json", status: 201 });
+      return;
+    }
+
+    if (path === `/api/pipelines/${pipeline.id}` && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
+      return;
+    }
+
+    if (path === `/api/pipelines/${pipeline.id}` && request.method() === "PATCH") {
+      pipeline = { ...pipeline, ...request.postDataJSON(), updatedAt: "2026-08-13T12:30:00.000Z" };
+      pipelines = pipelines.map((candidate) => candidate.id === pipeline.id ? pipeline : candidate);
+      await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
+      return;
+    }
+
+    if (path === `/api/pipelines/${pipeline.id}` && request.method() === "DELETE") {
+      pipelines = pipelines.filter((candidate) => candidate.id !== pipeline.id);
+      await route.fulfill({ status: 204 });
+      return;
+    }
+
+    await route.fallback();
+  });
+
+  await page.goto("/pipelines");
+  await waitForApplication(page);
+  await page.getByRole("button", { name: en["pipeline.create.open"] }).click();
+  const createDialog = page.getByRole("dialog", { name: en["pipeline.create.title"] });
+  await createDialog.getByLabel(en["pipeline.name"]).fill("New orders");
+  await createDialog.getByLabel(en["pipeline.create.input"]).fill("imports/new-orders.csv");
+  await createDialog.getByLabel(en["pipeline.create.artifact"]).fill("new-orders.csv");
+  await createDialog.getByRole("button", { name: en["pipeline.create.submit"] }).click();
+  await expect(createDialog).toBeHidden();
+  await expect(page.locator(".pipeline-editor").getByLabel(en["pipeline.name"])).toHaveValue("New orders");
+
+  await page.getByRole("button", { name: en["pipeline.delete.open"] }).click();
+  const deleteConfirmation = page.getByRole("alertdialog", { name: en["pipeline.delete.title"] });
+  await deleteConfirmation.getByRole("button", { name: en["pipeline.delete.confirm"] }).click();
+  await expect(deleteConfirmation).toBeHidden();
+  await expect(page.locator(".pipeline-editor").getByLabel(en["pipeline.name"])).toHaveValue(persistedPipeline.name);
   await expectNoAccessibilityViolations(page);
 });
 
@@ -186,3 +311,22 @@ const persistedPipeline: Pipeline = {
   triggers: [],
   updatedAt: "2026-08-13T12:00:00.000Z",
 };
+
+/** Gives a successful create response server-owned identifiers and timestamps. */
+function persistedPipelineFromCreateRequest(request: PipelineCreateRequest): Pipeline {
+  const id = "433e4567-e89b-12d3-a456-426614174010";
+
+  return pipelineCreateResponseSchema.parse({
+    ...request,
+    createdAt: "2026-08-13T12:20:00.000Z",
+    id,
+    ownerUserId: "433e4567-e89b-12d3-a456-426614174004",
+    state: "draft",
+    triggers: request.triggers.map((trigger, index) => ({
+      ...trigger,
+      id: `433e4567-e89b-12d3-a456-42661417401${index + 1}`,
+      pipelineId: id,
+    })),
+    updatedAt: "2026-08-13T12:20:00.000Z",
+  });
+}

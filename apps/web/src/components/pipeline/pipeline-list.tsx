@@ -4,18 +4,25 @@ import type { Pipeline } from "@pantaetl/contracts";
 import { Button, DataTable, type DataTableColumn } from "@pantaetl/ui";
 
 import { useI18n } from "../../locale-provider.js";
+import { PipelineCreateDialog } from "./pipeline-create-dialog.js";
 import { PipelineStateBadge } from "./pipeline-state-badge.js";
 
 /** Renders the selectable pipeline library without coupling it to editor state. */
 export const PipelineList = memo(function PipelineList({
+  createErrorMessage,
+  isCreating,
   isError,
   isLoading,
+  onCreate,
   onRetry,
   onSelect,
   pipelines,
 }: {
+  readonly createErrorMessage: string | undefined;
+  readonly isCreating: boolean;
   readonly isError: boolean;
   readonly isLoading: boolean;
+  readonly onCreate: Parameters<typeof PipelineCreateDialog>[0]["onCreate"];
   readonly onRetry: () => void;
   readonly onSelect: (pipeline: Pipeline) => void;
   readonly pipelines: readonly Pipeline[];
@@ -61,6 +68,7 @@ export const PipelineList = memo(function PipelineList({
           <h1>{t("pipeline.list.title")}</h1>
           <p>{t("pipeline.list.description")}</p>
         </div>
+        <PipelineCreateDialog errorMessage={createErrorMessage} isCreating={isCreating} onCreate={onCreate} />
       </div>
       {isError ? (
         <div className="pipeline-query-state" role="alert">
