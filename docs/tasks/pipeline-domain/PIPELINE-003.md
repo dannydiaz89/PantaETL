@@ -1,7 +1,8 @@
 # PIPELINE-003 — Component Compatibility Rules
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
+**Workstream:** Pipeline Domain
 **Workstream:** Pipeline Domain  
 **Depends on:** PIPELINE-001, CONTRACT-004
 
@@ -21,7 +22,7 @@ Implement broad dataset-family compatibility checks across components.
 
 ## Acceptance criteria
 
-- [ ] Known incompatibility fails before execution.
+- [x] Known incompatibility fails before execution.
 
 ## Validation
 
@@ -29,4 +30,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Added metadata-driven dataset-family compatibility checks. Source and Export
+remain at the ends of the data chain, and Transform conversions must be declared
+through their distinct input and output families.

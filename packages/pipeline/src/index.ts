@@ -2,6 +2,12 @@
 export { buildPipelineTopology } from "./topology.js";
 export type { PipelineTopology, PipelineTopologyInput } from "./topology.js";
 export {
+  assertComponentsCompatible,
+  checkComponentCompatibility,
+  IncompatiblePipelineComponentsError,
+} from "./compatibility.js";
+export type { ComponentCompatibilityResult } from "./compatibility.js";
+export {
   completeActiveRun,
   createPipelineExecutionState,
   enqueuePipelineRun,
