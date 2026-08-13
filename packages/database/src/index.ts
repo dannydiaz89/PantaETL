@@ -1,2 +1,1 @@
-/** Public entrypoint reserved for PostgreSQL access and migrations. */
-export {};
+export { createDatabaseConnection, type DatabaseClient, type DatabaseConnection } from "./client.js";

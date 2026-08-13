@@ -148,7 +148,7 @@ An agent can work on the frontend while separate agents work on database, schedu
 
 | ID | Work Item | Workstream | Status | Depends On | Owner |
 |---|---|---|---|---|---|
-| DB-001 | Database implementation foundation | Database | BLOCKED | APP-005, CONTRACT-002 | Unassigned |
+| DB-001 | Database implementation foundation | Database | COMPLETE | APP-005, CONTRACT-002 | Codex |
 | DB-002 | Core control-plane schema | Database | BLOCKED | DB-001, CONTRACT-004, CONTRACT-005, CONTRACT-006 | Unassigned |
 | DB-003 | Job queue schema and indexes | Database | BLOCKED | DB-002 | Unassigned |
 | DB-004 | Checkpoint and retention schema | Database | BLOCKED | DB-002 | Unassigned |
@@ -165,7 +165,7 @@ An agent can work on the frontend while separate agents work on database, schedu
 
 | ID | Work Item | Workstream | Status | Depends On | Owner |
 |---|---|---|---|---|---|
-| WORKER-001 | Worker runtime foundation | Worker | BLOCKED | APP-004, CONTRACT-008 | Unassigned |
+| WORKER-001 | Worker runtime foundation | Worker | IN PROGRESS | APP-004, CONTRACT-008 | Codex |
 | WORKER-002 | PostgreSQL job claiming and heartbeat | Worker | BLOCKED | WORKER-001, DB-003 | Unassigned |
 | WORKER-003 | Dataset storage abstraction | Worker | BLOCKED | WORKER-001, CONTRACT-004 | Unassigned |
 | WORKER-004 | Source/Transform/Export registries | Worker | BLOCKED | WORKER-001, CONTRACT-003, PIPELINE-003 | Unassigned |
