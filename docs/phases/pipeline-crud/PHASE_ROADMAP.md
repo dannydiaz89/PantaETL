@@ -15,12 +15,12 @@ Task IDs must never appear in implementation comments or commit messages.
 | CRUD-005 | Pipeline repository delete operation | COMPLETE | CRUD-002 | pipeline_delete |
 | CRUD-006 | Pipeline duplication operation | COMPLETE | CRUD-003, CRUD-004 | pipeline_duplicate |
 | CRUD-007 | Pipeline run/state action service | COMPLETE | CRUD-002 | pipeline_actions |
-| API-CRUD-001 | Pipeline list/create routes | BLOCKED | CRUD-002, CRUD-003 | Unassigned |
-| API-CRUD-002 | Pipeline get/update/delete routes | BLOCKED | CRUD-004, CRUD-005 | Unassigned |
-| API-CRUD-003 | Pipeline duplicate/run/state routes | BLOCKED | CRUD-006, CRUD-007 | Unassigned |
+| API-CRUD-001 | Pipeline list/create routes | COMPLETE | CRUD-002, CRUD-003 | api_pipeline_collection |
+| API-CRUD-002 | Pipeline get/update/delete routes | IN PROGRESS | CRUD-004, CRUD-005 | api_pipeline_detail |
+| API-CRUD-003 | Pipeline duplicate/run/state routes | READY | CRUD-006, CRUD-007 | Unassigned |
 | API-CRUD-004 | OpenAPI coverage | BLOCKED | API-CRUD-001, API-CRUD-002, API-CRUD-003 | Unassigned |
 | UI-WIRE-001 | Pipeline query/mutation layer | BLOCKED | API-CRUD-001, API-CRUD-002 | Unassigned |
-| UI-WIRE-002 | Pipeline workspace decomposition | BLOCKED | CRUD-001 | Unassigned |
+| UI-WIRE-002 | Pipeline workspace decomposition | IN PROGRESS | CRUD-001 | web_pipeline_decomposition |
 | UI-WIRE-003 | Replace pipeline fixtures | BLOCKED | UI-WIRE-001, UI-WIRE-002 | Unassigned |
 | UI-WIRE-004 | Wire create/update/delete | BLOCKED | UI-WIRE-003 | Unassigned |
 | UI-WIRE-005 | Wire duplicate/run/enable-disable | BLOCKED | API-CRUD-003, UI-WIRE-003 | Unassigned |

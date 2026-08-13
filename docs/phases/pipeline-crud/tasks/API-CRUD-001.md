@@ -1,7 +1,7 @@
 # API-CRUD-001 — Pipeline List and Create Routes
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** api_pipeline_collection
 **Depends on:** CRUD-002, CRUD-003
 
 ## Scope
@@ -10,14 +10,14 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Add GET /api/pipelines.
-- [ ] Add POST /api/pipelines.
-- [ ] Require authentication.
-- [ ] GET returns only authorized pipelines.
-- [ ] POST does not trust caller-supplied owner.
-- [ ] POST returns 201.
-- [ ] Validate requests/responses with canonical contracts.
-- [ ] Add route tests.
+- [x] Add GET /api/pipelines.
+- [x] Add POST /api/pipelines.
+- [x] Require authentication.
+- [x] GET returns only authorized pipelines.
+- [x] POST does not trust caller-supplied owner.
+- [x] POST returns 201.
+- [x] Validate requests/responses with canonical contracts.
+- [x] Add route tests.
 
 ## Required checks
 
@@ -32,3 +32,7 @@ Implement only the behavior described by this task and its acceptance criteria. 
 ## Notes / blockers
 
 None.
+
+## Implementation notes
+
+- Both collection handlers derive ownership solely from the authenticated session and validate canonical request and response contracts.

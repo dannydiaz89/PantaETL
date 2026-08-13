@@ -21,8 +21,10 @@ import { Route as UsersRouteImport } from './routes/users'
 import { Route as ApiAuthenticationRouteImport } from './routes/api/authentication'
 import { Route as ApiDocsRouteImport } from './routes/api/docs'
 import { Route as ApiOpenapiDotjsonRouteImport } from './routes/api/openapi[.]json'
+import { Route as ApiPipelinesRouteImport } from './routes/api/pipelines'
 import { Route as ApiTokensRouteImport } from './routes/api/tokens'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiPipelinesPipelineIdRouteImport } from './routes/api/pipelines/$pipelineId'
 import { Route as ApiSystemHealthRouteImport } from './routes/api/system/health'
 import { Route as ApiTokensTokenIdRouteImport } from './routes/api/tokens/$tokenId'
 
@@ -86,6 +88,11 @@ const ApiOpenapiDotjsonRoute = ApiOpenapiDotjsonRouteImport.update({
   path: '/api/openapi.json',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPipelinesRoute = ApiPipelinesRouteImport.update({
+  id: '/api/pipelines',
+  path: '/api/pipelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTokensRoute = ApiTokensRouteImport.update({
   id: '/api/tokens',
   path: '/api/tokens',
@@ -95,6 +102,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPipelinesPipelineIdRoute = ApiPipelinesPipelineIdRouteImport.update({
+  id: '/$pipelineId',
+  path: '/$pipelineId',
+  getParentRoute: () => ApiPipelinesRoute,
 } as any)
 const ApiSystemHealthRoute = ApiSystemHealthRouteImport.update({
   id: '/api/system/health',
@@ -120,8 +132,10 @@ export interface FileRoutesByFullPath {
   '/api/authentication': typeof ApiAuthenticationRoute
   '/api/docs': typeof ApiDocsRoute
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
+  '/api/pipelines': typeof ApiPipelinesRouteWithChildren
   '/api/tokens': typeof ApiTokensRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRoute
   '/api/system/health': typeof ApiSystemHealthRoute
   '/api/tokens/$tokenId': typeof ApiTokensTokenIdRoute
 }
@@ -138,8 +152,10 @@ export interface FileRoutesByTo {
   '/api/authentication': typeof ApiAuthenticationRoute
   '/api/docs': typeof ApiDocsRoute
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
+  '/api/pipelines': typeof ApiPipelinesRouteWithChildren
   '/api/tokens': typeof ApiTokensRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRoute
   '/api/system/health': typeof ApiSystemHealthRoute
   '/api/tokens/$tokenId': typeof ApiTokensTokenIdRoute
 }
@@ -157,8 +173,10 @@ export interface FileRoutesById {
   '/api/authentication': typeof ApiAuthenticationRoute
   '/api/docs': typeof ApiDocsRoute
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
+  '/api/pipelines': typeof ApiPipelinesRouteWithChildren
   '/api/tokens': typeof ApiTokensRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRoute
   '/api/system/health': typeof ApiSystemHealthRoute
   '/api/tokens/$tokenId': typeof ApiTokensTokenIdRoute
 }
@@ -177,8 +195,10 @@ export interface FileRouteTypes {
     | '/api/authentication'
     | '/api/docs'
     | '/api/openapi.json'
+    | '/api/pipelines'
     | '/api/tokens'
     | '/api/auth/$'
+    | '/api/pipelines/$pipelineId'
     | '/api/system/health'
     | '/api/tokens/$tokenId'
   fileRoutesByTo: FileRoutesByTo
@@ -195,8 +215,10 @@ export interface FileRouteTypes {
     | '/api/authentication'
     | '/api/docs'
     | '/api/openapi.json'
+    | '/api/pipelines'
     | '/api/tokens'
     | '/api/auth/$'
+    | '/api/pipelines/$pipelineId'
     | '/api/system/health'
     | '/api/tokens/$tokenId'
   id:
@@ -213,8 +235,10 @@ export interface FileRouteTypes {
     | '/api/authentication'
     | '/api/docs'
     | '/api/openapi.json'
+    | '/api/pipelines'
     | '/api/tokens'
     | '/api/auth/$'
+    | '/api/pipelines/$pipelineId'
     | '/api/system/health'
     | '/api/tokens/$tokenId'
   fileRoutesById: FileRoutesById
@@ -232,6 +256,7 @@ export interface RootRouteChildren {
   ApiAuthenticationRoute: typeof ApiAuthenticationRoute
   ApiDocsRoute: typeof ApiDocsRoute
   ApiOpenapiDotjsonRoute: typeof ApiOpenapiDotjsonRoute
+  ApiPipelinesRoute: typeof ApiPipelinesRouteWithChildren
   ApiTokensRoute: typeof ApiTokensRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiSystemHealthRoute: typeof ApiSystemHealthRoute
@@ -323,6 +348,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOpenapiDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/pipelines': {
+      id: '/api/pipelines'
+      path: '/api/pipelines'
+      fullPath: '/api/pipelines'
+      preLoaderRoute: typeof ApiPipelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/tokens': {
       id: '/api/tokens'
       path: '/api/tokens'
@@ -336,6 +368,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/pipelines/$pipelineId': {
+      id: '/api/pipelines/$pipelineId'
+      path: '/$pipelineId'
+      fullPath: '/api/pipelines/$pipelineId'
+      preLoaderRoute: typeof ApiPipelinesPipelineIdRouteImport
+      parentRoute: typeof ApiPipelinesRoute
     }
     '/api/system/health': {
       id: '/api/system/health'
@@ -353,6 +392,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface ApiPipelinesRouteChildren {
+  ApiPipelinesPipelineIdRoute: typeof ApiPipelinesPipelineIdRoute
+}
+
+const ApiPipelinesRouteChildren: ApiPipelinesRouteChildren = {
+  ApiPipelinesPipelineIdRoute: ApiPipelinesPipelineIdRoute,
+}
+
+const ApiPipelinesRouteWithChildren = ApiPipelinesRoute._addFileChildren(
+  ApiPipelinesRouteChildren,
+)
 
 interface ApiTokensRouteChildren {
   ApiTokensTokenIdRoute: typeof ApiTokensTokenIdRoute
@@ -379,6 +430,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthenticationRoute: ApiAuthenticationRoute,
   ApiDocsRoute: ApiDocsRoute,
   ApiOpenapiDotjsonRoute: ApiOpenapiDotjsonRoute,
+  ApiPipelinesRoute: ApiPipelinesRouteWithChildren,
   ApiTokensRoute: ApiTokensRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiSystemHealthRoute: ApiSystemHealthRoute,
