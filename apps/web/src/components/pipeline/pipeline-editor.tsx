@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import type { Pipeline } from "@pantaetl/contracts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@pantaetl/ui";
 
@@ -11,24 +13,22 @@ import { PipelineTriggerPanel } from "./pipeline-trigger-panel.js";
 
 /** Coordinates the selected pipeline's form and its configuration panels. */
 export function PipelineEditor({
-  draftName,
   editable,
-  onDraftNameChange,
-  onSave,
   pipeline,
-  saved,
 }: {
-  readonly draftName: string;
   readonly editable: boolean;
-  readonly onDraftNameChange: (value: string) => void;
-  readonly onSave: () => void;
   readonly pipeline: Pipeline;
-  readonly saved: boolean;
 }) {
   const { t } = useI18n();
+  const [draftName, setDraftName] = useState(pipeline.name);
+  const [saved, setSaved] = useState(false);
+
+  function saveDraft(): void {
+    if (editable) setSaved(true);
+  }
 
   return (
-    <form className="pipeline-editor" onSubmit={(event) => { event.preventDefault(); onSave(); }}>
+    <form className="pipeline-editor" onSubmit={(event) => { event.preventDefault(); saveDraft(); }}>
       <div className="pipeline-section-heading">
         <div>
           <h2>{t("pipeline.editor.title")}</h2>
@@ -56,7 +56,7 @@ export function PipelineEditor({
           <PipelineOverviewPanel
             draftName={draftName}
             editable={editable}
-            onDraftNameChange={onDraftNameChange}
+            onDraftNameChange={setDraftName}
             saved={saved}
           />
         </TabsContent>

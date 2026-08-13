@@ -8,9 +8,15 @@ import { PipelineStateBadge } from "./pipeline-state-badge.js";
 
 /** Renders the selectable pipeline library without coupling it to editor state. */
 export const PipelineList = memo(function PipelineList({
+  isError,
+  isLoading,
+  onRetry,
   onSelect,
   pipelines,
 }: {
+  readonly isError: boolean;
+  readonly isLoading: boolean;
+  readonly onRetry: () => void;
   readonly onSelect: (pipeline: Pipeline) => void;
   readonly pipelines: readonly Pipeline[];
 }) {
@@ -56,15 +62,23 @@ export const PipelineList = memo(function PipelineList({
           <p>{t("pipeline.list.description")}</p>
         </div>
       </div>
-      <DataTable
-        caption={t("pipeline.table.caption")}
-        columns={columns}
-        data={pipelines}
-        emptyState={t("pipeline.table.empty")}
-        getColumnLabel={getColumnLabel}
-        loadingState={t("pipeline.table.loading")}
-        sortLabels={sortLabels}
-      />
+      {isError ? (
+        <div className="pipeline-query-state" role="alert">
+          <p>{t("pipeline.table.error")}</p>
+          <Button onClick={onRetry} variant="secondary">{t("pipeline.retry")}</Button>
+        </div>
+      ) : (
+        <DataTable
+          caption={t("pipeline.table.caption")}
+          columns={columns}
+          data={pipelines}
+          emptyState={t("pipeline.table.empty")}
+          getColumnLabel={getColumnLabel}
+          isLoading={isLoading}
+          loadingState={t("pipeline.table.loading")}
+          sortLabels={sortLabels}
+        />
+      )}
     </div>
   );
 });

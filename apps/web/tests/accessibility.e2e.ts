@@ -1,4 +1,5 @@
 import { AxeBuilder } from "@axe-core/playwright";
+import type { Pipeline } from "@pantaetl/contracts";
 import { expect, test, type Page } from "@playwright/test";
 
 import { en } from "../src/locales/en.js";
@@ -89,15 +90,25 @@ test("login form and account dialog meet the accessibility baseline", async ({ p
   await expect(page.getByRole("dialog")).toBeHidden();
 });
 
-test("pipeline editor exposes the active-run edit lock", async ({ page }) => {
+test("pipeline editor loads a persisted pipeline through accessible query states", async ({ page }) => {
+  await page.route("**/api/pipelines**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    if (request.method() !== "GET" || (path !== "/api/pipelines" && path !== `/api/pipelines/${persistedPipeline.id}`)) {
+      await route.fallback();
+      return;
+    }
+
+    await route.fulfill({
+      body: JSON.stringify(path === "/api/pipelines" ? { pipelines: [persistedPipeline] } : persistedPipeline),
+      contentType: "application/json",
+    });
+  });
   await page.goto("/pipelines");
   await waitForApplication(page);
   await expect(page.locator(".pipeline-workspace")).toHaveAttribute("data-hydrated", "true");
   const nameInput = page.getByLabel(en["pipeline.name"]);
 
-  await expect(nameInput).toBeDisabled();
-  await expect(page.getByRole("status")).toContainText(en["pipeline.locked.title"]);
-  await page.getByRole("button", { exact: true, name: en["pipeline.open"] }).nth(1).click();
   await expect(nameInput).toBeEnabled();
   await page.getByRole("tab", { name: en["pipeline.tab.trigger"] }).click();
   await expect(page.getByText(en["pipeline.trigger.description"])).toBeVisible();
@@ -147,3 +158,31 @@ test("settings retains an accessible administrator boundary", async ({ page }) =
   await expect(page.getByRole("heading", { name: en["settings.retention.title"] })).toBeVisible();
   await expectNoAccessibilityViolations(page);
 });
+
+const persistedPipeline: Pipeline = {
+  contractVersion: "v1",
+  createdAt: "2026-08-13T12:00:00.000Z",
+  edges: [{ fromStepId: "433e4567-e89b-12d3-a456-426614174002", toStepId: "433e4567-e89b-12d3-a456-426614174003" }],
+  id: "433e4567-e89b-12d3-a456-426614174001",
+  name: "Persisted orders",
+  ownerUserId: "433e4567-e89b-12d3-a456-426614174004",
+  state: "enabled",
+  steps: [
+    {
+      componentType: "source.csv",
+      componentVersion: "v1",
+      configuration: { secretBindings: [], values: { path: "orders.csv" } },
+      id: "433e4567-e89b-12d3-a456-426614174002",
+      kind: "source",
+    },
+    {
+      componentType: "export.json",
+      componentVersion: "v1",
+      configuration: { secretBindings: [], values: { path: "orders.json" } },
+      id: "433e4567-e89b-12d3-a456-426614174003",
+      kind: "export",
+    },
+  ],
+  triggers: [],
+  updatedAt: "2026-08-13T12:00:00.000Z",
+};

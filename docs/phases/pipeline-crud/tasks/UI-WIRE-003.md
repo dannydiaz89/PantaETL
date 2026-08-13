@@ -1,7 +1,7 @@
 # UI-WIRE-003 — Replace Pipeline Fixtures With Real Queries
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** web_pipeline_api_data
 **Depends on:** UI-WIRE-001, UI-WIRE-002
 
 ## Scope
@@ -10,12 +10,12 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Load pipeline list from API.
-- [ ] Load selected pipeline from API/cache.
-- [ ] Remove fixture-only locked pipeline behavior from primary path.
-- [ ] Use persisted execution state for editability.
-- [ ] Add loading/empty/error states.
-- [ ] Keep browser contract validation.
+- [x] Load pipeline list from API.
+- [x] Load selected pipeline from API/cache.
+- [x] Remove fixture-only locked pipeline behavior from primary path.
+- [x] Use persisted execution state for editability.
+- [x] Add loading/empty/error states.
+- [x] Keep browser contract validation.
 
 ## Required checks
 
@@ -29,4 +29,4 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Notes / blockers
 
-None.
+The workspace now reads pipeline data through the shared, contract-validating query layer.
