@@ -54,12 +54,28 @@ describe("pipeline portability", () => {
 
     expect(exported).not.toHaveProperty("id");
     expect(exported).not.toHaveProperty("triggers");
+    expect(exported.requiredCapabilities).toEqual([
+      { type: "source.rest-api", version: "v1" },
+      { type: "export.json", version: "v1" },
+    ]);
     expect(exported.steps[0]?.configuration).toEqual({
       values: { endpoint: "https://example.test/orders" },
       secretBindings: [],
     });
     expect(exported.steps[0]?.configuration.values).not.toBe(pipeline.steps[0]?.configuration.values);
     expect(duplicate).toMatchObject({ name: "Daily orders copy", state: "draft" });
+  });
+
+  it("rejects malformed pipeline data instead of exporting inline credentials", () => {
+    const unsafePipeline = {
+      ...pipeline,
+      steps: [{
+        ...pipeline.steps[0],
+        configuration: { secretBindings: [], values: { apiToken: "usable-secret" } },
+      }, pipeline.steps[1]],
+    } as Pipeline;
+
+    expect(() => exportPortablePipelineDefinition(unsafePipeline)).toThrow();
   });
 
   it("imports only when all component capabilities are available and leaves the pipeline in draft", () => {

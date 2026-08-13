@@ -196,11 +196,11 @@ These can also proceed concurrently once the worker runtime and registries are c
 
 | ID | Work Item | Workstream | Status | Depends On | Owner |
 |---|---|---|---|---|---|
-| OBS-001 | Structured run events and metrics | Observability | BLOCKED | DB-002, CONTRACT-005 | Unassigned |
+| OBS-001 | Structured run events and metrics | Observability | IN PROGRESS | DB-002, CONTRACT-005 | Codex |
 | OBS-002 | System health aggregation | Observability | BLOCKED | OBS-001, SCHED-003, WORKER-002, GC-001 | Unassigned |
-| API-001 | OpenAPI generation baseline | API | BLOCKED | CONTRACT-007, WEB-001 | Unassigned |
+| API-001 | OpenAPI generation baseline | API | IN PROGRESS | CONTRACT-007, WEB-001 | Codex |
 | API-002 | API token model and authentication | API | BLOCKED | API-001, WEB-003, DB-002 | Unassigned |
-| PORTABILITY-001 | Pipeline definition export | Portability | BLOCKED | PIPELINE-004, WEB-006 | Unassigned |
+| PORTABILITY-001 | Pipeline definition export | Portability | COMPLETE | PIPELINE-004, WEB-006 | Codex |
 | PORTABILITY-002 | Pipeline definition import | Portability | BLOCKED | PORTABILITY-001 | Unassigned |
 | INTEGRATION-001 | End-to-end file pipeline | Integration | BLOCKED | WEB-006, SCHED-003, SOURCE-001, TRANSFORM-001, EXPORT-001, GC-002 | Unassigned |
 | INTEGRATION-002 | End-to-end scheduled API pipeline | Integration | BLOCKED | WEB-006, SCHED-003, SOURCE-004, EXPORT-004, WORKER-006 | Unassigned |

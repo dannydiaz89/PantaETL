@@ -1,7 +1,7 @@
 # PORTABILITY-001 — Pipeline Definition Export
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Portability  
 **Depends on:** PIPELINE-004, WEB-006
 
@@ -21,7 +21,7 @@ Implement pipeline definition export.
 
 ## Acceptance criteria
 
-- [ ] No usable secrets.
+- [x] No usable secrets.
 
 ## Validation
 
@@ -29,4 +29,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Pipeline export validates the canonical pipeline contract, strips secret
+bindings and deployment identifiers, and lists required component capabilities
+for the receiving deployment.

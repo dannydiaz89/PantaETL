@@ -1,10 +1,18 @@
-import type { Pipeline, PipelineState } from "@pantaetl/contracts";
+import { pipelineSchema, type Pipeline, type PipelineState } from "@pantaetl/contracts";
 
 /** A component implementation available in the deployment receiving an import. */
 export interface AvailablePipelineCapability {
   /** Stable component type identifier. */
   readonly type: string;
   /** Supported component contract version. */
+  readonly version: string;
+}
+
+/** A component capability required for an exported definition to run after import. */
+export interface RequiredPipelineCapability {
+  /** Stable component type identifier. */
+  readonly type: string;
+  /** Required component contract version. */
   readonly version: string;
 }
 
@@ -20,6 +28,8 @@ export interface PortablePipelineDefinition {
   readonly contractVersion: Pipeline["contractVersion"];
   /** Human-readable pipeline name. */
   readonly name: string;
+  /** Unique component capabilities that the receiving deployment must provide. */
+  readonly requiredCapabilities: readonly RequiredPipelineCapability[];
   /** Component graph nodes with non-secret configuration values only. */
   readonly steps: Pipeline["steps"];
   /** Directed links between the portable step identifiers. */
@@ -49,11 +59,14 @@ export class UnavailablePipelineCapabilityError extends Error {
  * or import to deliberately re-enter or rebind its credentials.
  */
 export function exportPortablePipelineDefinition(pipeline: Pipeline): PortablePipelineDefinition {
+  const validatedPipeline = pipelineSchema.parse(pipeline) as Pipeline;
+
   return {
-    contractVersion: pipeline.contractVersion,
-    name: pipeline.name,
-    steps: copyPortableSteps(pipeline.steps),
-    edges: pipeline.edges.map((edge) => ({ ...edge })),
+    contractVersion: validatedPipeline.contractVersion,
+    name: validatedPipeline.name,
+    requiredCapabilities: requiredCapabilities(validatedPipeline.steps),
+    steps: copyPortableSteps(validatedPipeline.steps),
+    edges: validatedPipeline.edges.map((edge) => ({ ...edge })),
   };
 }
 
@@ -120,6 +133,24 @@ function copyPortableStep(step: Pipeline["steps"][number]): Pipeline["steps"][nu
 /** Copy JSON-safe contract values so exported configuration cannot mutate its source pipeline. */
 function copyPortableValues<Value>(values: Value): Value {
   return JSON.parse(JSON.stringify(values)) as Value;
+}
+
+/** List each component capability once in graph order for a receiving deployment. */
+function requiredCapabilities(
+  steps: Pipeline["steps"],
+): RequiredPipelineCapability[] {
+  const seen = new Set<string>();
+
+  return steps.flatMap((step) => {
+    const key = capabilityKey(step.componentType, step.componentVersion);
+
+    if (seen.has(key)) {
+      return [];
+    }
+
+    seen.add(key);
+    return [{ type: step.componentType, version: step.componentVersion }];
+  });
 }
 
 /** Build an unambiguous component type-and-version lookup key. */

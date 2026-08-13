@@ -17,6 +17,7 @@ export type {
   AvailablePipelineCapability,
   ImportedPipelineDefinition,
   PortablePipelineDefinition,
+  RequiredPipelineCapability,
 } from "./portability.js";
 export {
   completeActiveRun,
