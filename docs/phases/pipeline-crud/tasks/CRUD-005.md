@@ -1,7 +1,7 @@
 # CRUD-005 — Pipeline Repository Delete Operation
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** pipeline_delete
 **Depends on:** CRUD-002
 
 ## Scope
@@ -10,11 +10,11 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Owner-scope deletion.
-- [ ] Reject queued/running deletion.
-- [ ] Use intentional cascade behavior for components/edges/triggers.
-- [ ] Preserve historical runs where architecture intends.
-- [ ] Add database integration tests.
+- [x] Owner-scope deletion.
+- [x] Reject queued/running deletion.
+- [x] Use intentional cascade behavior for components/edges/triggers.
+- [x] Preserve historical runs where architecture intends.
+- [x] Add database integration tests.
 
 ## Required checks
 
@@ -29,3 +29,8 @@ Implement only the behavior described by this task and its acceptance criteria. 
 ## Notes / blockers
 
 None.
+
+## Implementation notes
+
+- Retained runs prevent deletion through the existing restrictive foreign key; components, edges, and triggers cascade only when no run history exists.
+- PostgreSQL integration coverage verifies both the cascade and retained-history paths.
