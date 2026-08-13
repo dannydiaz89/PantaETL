@@ -1,7 +1,7 @@
 # TRANSFORM-003 — Value and Type Transform Set
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** IN PROGRESS
+**Owner:** Codex
 **Workstream:** Transforms  
 **Depends on:** WORKER-003, WORKER-004
 
