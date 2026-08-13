@@ -62,6 +62,9 @@ class DatasetStorage(Protocol):
     def read_tabular(self, descriptor: DatasetDescriptor) -> pl.DataFrame:
         """Load a previously persisted tabular Dataset from its descriptor."""
 
+    def scan_tabular(self, descriptor: DatasetDescriptor) -> pl.LazyFrame:
+        """Open a previously persisted tabular Dataset without eagerly collecting it."""
+
     def persist_document(
         self, document: JsonDocument, lifecycle: DatasetLifecycle
     ) -> DatasetDescriptor:
@@ -162,6 +165,14 @@ class LocalDatasetStorage:
                 f"Temporary dataset is not valid Parquet: {descriptor.id}."
             ) from error
         return cast(pl.DataFrame, pl.from_arrow(table))
+
+    def scan_tabular(self, descriptor: DatasetDescriptor) -> pl.LazyFrame:
+        """Open an unencrypted local Parquet Dataset lazily for streaming Export sinks."""
+        if descriptor.storage.encrypted:
+            raise DatasetEncryptionError(
+                "Encrypted temporary datasets cannot be scanned without materialization."
+            )
+        return pl.scan_parquet(self._path_for_descriptor(descriptor, Family.tabular, "parquet"))
 
     def read_document(self, descriptor: DatasetDescriptor) -> JsonDocument:
         """Read a local JSON Dataset and decrypt it when its descriptor requires it."""

@@ -1,7 +1,7 @@
 # EXPORT-003 — Parquet Artifact Export
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Exports  
 **Depends on:** WORKER-003, WORKER-004, DB-004
 
@@ -21,7 +21,7 @@ Implement Parquet artifact Export.
 
 ## Acceptance criteria
 
-- [ ] Large output need not fit fully in RAM.
+- [x] Large output need not fit fully in RAM.
 
 ## Validation
 
@@ -29,4 +29,5 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+The Parquet Export streams unencrypted local Parquet inputs through Polars'
+lazy sink into an atomically published artifact with retained metadata.
