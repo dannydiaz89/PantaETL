@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "source",
+        "transform",
+        "export"
+      ]
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v\\d+$"
+    },
+    "displayNameKey": {
+      "type": "string",
+      "minLength": 1
+    },
+    "descriptionKey": {
+      "type": "string",
+      "minLength": 1
+    },
+    "configFields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z][a-zA-Z0-9_]*$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "textarea",
+              "number",
+              "boolean",
+              "select",
+              "json"
+            ]
+          },
+          "labelKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "descriptionKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "secret": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "labelKey": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "value",
+                "labelKey"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "key",
+          "type",
+          "labelKey",
+          "required",
+          "secret"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "inputFamilies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "any",
+          "document",
+          "tabular",
+          "file"
+        ]
+      }
+    },
+    "outputFamilies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "any",
+          "document",
+          "tabular",
+          "file"
+        ]
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "type",
+    "version",
+    "displayNameKey",
+    "descriptionKey",
+    "configFields",
+    "inputFamilies",
+    "outputFamilies"
+  ],
+  "additionalProperties": false,
+  "$id": "https://pantaetl.dev/schemas/component-metadata.schema.json"
+}

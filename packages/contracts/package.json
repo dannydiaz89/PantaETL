@@ -37,7 +37,9 @@
     "build": "tsc --project tsconfig.json",
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "test": "vitest run tests",
-    "check": "pnpm typecheck && pnpm test && pnpm build"
+    "generate:schemas": "pnpm build && node scripts/generate-schemas.mjs",
+    "check:schemas": "pnpm generate:schemas && node scripts/check-schemas.mjs",
+    "check": "pnpm typecheck && pnpm test && pnpm check:schemas"
   },
   "dependencies": {
     "zod": "^4.4.3"

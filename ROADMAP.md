@@ -106,7 +106,7 @@ Contracts are established only after all runtime/package boundaries exist.
 | CONTRACT-004 | Dataset and artifact contracts | Contracts | COMPLETE | CONTRACT-002 | Codex |
 | CONTRACT-005 | Job and run contracts | Contracts | COMPLETE | CONTRACT-002 | Codex |
 | CONTRACT-006 | Pipeline and trigger contracts | Contracts | COMPLETE | CONTRACT-002, CONTRACT-003 | Codex |
-| CONTRACT-007 | JSON Schema generation | Contracts | BLOCKED | CONTRACT-003, CONTRACT-004, CONTRACT-005, CONTRACT-006 | Unassigned |
+| CONTRACT-007 | JSON Schema generation | Contracts | COMPLETE | CONTRACT-003, CONTRACT-004, CONTRACT-005, CONTRACT-006 | Codex |
 | CONTRACT-008 | Pydantic interoperability proof | Contracts | BLOCKED | CONTRACT-007, APP-004 | Unassigned |
 | PIPELINE-001 | Pipeline domain foundation | Pipeline Domain | BLOCKED | CONTRACT-006, APP-005 | Unassigned |
 | PIPELINE-002 | Pipeline state machine | Pipeline Domain | BLOCKED | PIPELINE-001 | Unassigned |
