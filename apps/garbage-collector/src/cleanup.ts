@@ -2,14 +2,20 @@ import type {
   DatabaseClient,
   ExpiredArtifact,
   ExpiredDataset,
+  ExpiredRun,
+  ExpiredRunLog,
   ExpiredStagedUpload,
 } from '@pantaetl/database';
 import {
   deleteExpiredArtifact,
   deleteExpiredDataset,
+  deleteExpiredRun,
+  deleteExpiredRunLog,
   deleteExpiredStagedUpload,
   listExpiredArtifacts,
   listExpiredDatasets,
+  listExpiredRunLogs,
+  listExpiredRuns,
   listExpiredStagedUploads,
 } from '@pantaetl/database';
 
@@ -23,6 +29,10 @@ export interface RetentionRepository {
   deleteExpiredArtifact(id: string, now: Date): Promise<boolean>;
   deleteExpiredDataset(id: string, now: Date): Promise<boolean>;
   deleteExpiredStagedUpload(id: string, now: Date): Promise<boolean>;
+  listExpiredRuns(now: Date, batchSize: number): Promise<ExpiredRun[]>;
+  listExpiredRunLogs(now: Date, batchSize: number): Promise<ExpiredRunLog[]>;
+  deleteExpiredRun(id: string, now: Date): Promise<boolean>;
+  deleteExpiredRunLog(id: string, now: Date): Promise<boolean>;
 }
 
 /** Counters for one safe, bounded retention cleanup pass. */
@@ -42,7 +52,49 @@ export function createRetentionRepository(database: DatabaseClient): RetentionRe
     deleteExpiredArtifact: (id, now) => deleteExpiredArtifact(database, id, now),
     deleteExpiredDataset: (id, now) => deleteExpiredDataset(database, id, now),
     deleteExpiredStagedUpload: (id, now) => deleteExpiredStagedUpload(database, id, now),
+    listExpiredRuns: (now, batchSize) => listExpiredRuns(database, now, batchSize),
+    listExpiredRunLogs: (now, batchSize) => listExpiredRunLogs(database, now, batchSize),
+    deleteExpiredRun: (id, now) => deleteExpiredRun(database, id, now),
+    deleteExpiredRunLog: (id, now) => deleteExpiredRunLog(database, id, now),
   };
+}
+
+/** Counters for one safe pass over expired run history and operational logs. */
+export interface ExecutionCleanupSummary {
+  readonly logsDeleted: number;
+  readonly runCandidates: number;
+  readonly runsDeleted: number;
+}
+
+/**
+ * Removes explicitly expired logs before attempting terminal run deletion.
+ *
+ * Conditional metadata deletes make concurrent collectors and retrying a pass
+ * harmless; a run with remaining dependencies remains available for a later pass.
+ */
+export class ExecutionRetentionCleanup {
+  public constructor(
+    private readonly repository: RetentionRepository,
+    private readonly batchSize: number,
+  ) {}
+
+  /** Executes one bounded, ordered run/log retention pass. */
+  public async run(now: Date = new Date()): Promise<ExecutionCleanupSummary> {
+    const expiredLogs = await this.repository.listExpiredRunLogs(now, this.batchSize);
+    const deletedLogs = await Promise.all(
+      expiredLogs.map((log) => this.repository.deleteExpiredRunLog(log.id, now)),
+    );
+    const expiredRuns = await this.repository.listExpiredRuns(now, this.batchSize);
+    const deletedRuns = await Promise.all(
+      expiredRuns.map((run) => this.repository.deleteExpiredRun(run.id, now)),
+    );
+
+    return {
+      logsDeleted: countDeleted(deletedLogs),
+      runCandidates: expiredRuns.length,
+      runsDeleted: countDeleted(deletedRuns),
+    };
+  }
 }
 
 /**
@@ -112,4 +164,9 @@ function addSummaries(left: CleanupSummary, right: CleanupSummary): CleanupSumma
     failed: left.failed + right.failed,
     skipped: left.skipped + right.skipped,
   };
+}
+
+/** Counts successful conditional metadata deletes without mutable shared state. */
+function countDeleted(results: readonly boolean[]): number {
+  return results.filter(Boolean).length;
 }

@@ -1,11 +1,17 @@
 import type {
   ExpiredArtifact,
   ExpiredDataset,
+  ExpiredRun,
+  ExpiredRunLog,
   ExpiredStagedUpload,
 } from '@pantaetl/database';
 import { describe, expect, it, vi } from 'vitest';
 
-import { RetentionCleanup, type RetentionRepository } from '../src/cleanup.js';
+import {
+  ExecutionRetentionCleanup,
+  RetentionCleanup,
+  type RetentionRepository,
+} from '../src/cleanup.js';
 import type { RetentionStorage } from '../src/storage.js';
 
 const now = new Date('2026-08-13T00:00:00.000Z');
@@ -61,6 +67,46 @@ describe('retention cleanup', () => {
   });
 });
 
+describe('execution retention cleanup', () => {
+  it('removes explicitly expired logs before attempting terminal run cleanup', async () => {
+    const events: string[] = [];
+    const repository = repositoryWith({
+      logs: [{ id: 'log-1', runId: 'run-1', expiresAt: now }],
+      runs: [{ id: 'run-1', expiresAt: now }],
+    });
+    repository.deleteExpiredRunLog.mockImplementation(async () => {
+      events.push('log');
+      return true;
+    });
+    repository.deleteExpiredRun.mockImplementation(async () => {
+      events.push('run');
+      return true;
+    });
+
+    await expect(new ExecutionRetentionCleanup(repository, 10).run(now)).resolves.toEqual({
+      logsDeleted: 1,
+      runCandidates: 1,
+      runsDeleted: 1,
+    });
+    expect(events).toEqual(['log', 'run']);
+  });
+
+  it('accepts concurrent or repeated cleanup when conditional deletes find no remaining row', async () => {
+    const repository = repositoryWith({
+      logs: [{ id: 'log-1', runId: 'run-1', expiresAt: now }],
+      runs: [{ id: 'run-1', expiresAt: now }],
+    });
+    repository.deleteExpiredRunLog.mockResolvedValue(false);
+    repository.deleteExpiredRun.mockResolvedValue(false);
+
+    await expect(new ExecutionRetentionCleanup(repository, 10).run(now)).resolves.toEqual({
+      logsDeleted: 0,
+      runCandidates: 1,
+      runsDeleted: 0,
+    });
+  });
+});
+
 /** Creates one tracked, explicitly expired record for any storage-backed retention table. */
 function storageRecord(
   id: string,
@@ -74,18 +120,38 @@ function storageRecord(
 function repositoryWith({
   artifacts = [],
   datasets = [],
+  logs = [],
+  runs = [],
   uploads = [],
 }: {
   artifacts?: ExpiredArtifact[];
   datasets?: ExpiredDataset[];
+  logs?: ExpiredRunLog[];
+  runs?: ExpiredRun[];
   uploads?: ExpiredStagedUpload[];
-}): RetentionRepository {
+}): MockedRetentionRepository {
   return {
     listExpiredArtifacts: vi.fn().mockResolvedValue(artifacts),
     listExpiredDatasets: vi.fn().mockResolvedValue(datasets),
+    listExpiredRuns: vi.fn().mockResolvedValue(runs),
+    listExpiredRunLogs: vi.fn().mockResolvedValue(logs),
     listExpiredStagedUploads: vi.fn().mockResolvedValue(uploads),
     deleteExpiredArtifact: vi.fn().mockResolvedValue(true),
     deleteExpiredDataset: vi.fn().mockResolvedValue(true),
+    deleteExpiredRun: vi.fn().mockResolvedValue(true),
+    deleteExpiredRunLog: vi.fn().mockResolvedValue(true),
     deleteExpiredStagedUpload: vi.fn().mockResolvedValue(true),
   };
 }
+
+type BooleanDelete = (id: string, now: Date) => Promise<boolean>;
+type MockedRetentionRepository = Omit<
+  RetentionRepository,
+  'deleteExpiredArtifact' | 'deleteExpiredDataset' | 'deleteExpiredRun' | 'deleteExpiredRunLog' | 'deleteExpiredStagedUpload'
+> & {
+  deleteExpiredArtifact: ReturnType<typeof vi.fn<BooleanDelete>>;
+  deleteExpiredDataset: ReturnType<typeof vi.fn<BooleanDelete>>;
+  deleteExpiredRun: ReturnType<typeof vi.fn<BooleanDelete>>;
+  deleteExpiredRunLog: ReturnType<typeof vi.fn<BooleanDelete>>;
+  deleteExpiredStagedUpload: ReturnType<typeof vi.fn<BooleanDelete>>;
+};

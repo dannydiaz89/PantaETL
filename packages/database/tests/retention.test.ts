@@ -6,6 +6,7 @@ import {
   listExpiredDatasets,
   listExpiredRunLogs,
   listExpiredRuns,
+  listExpiredStagedUploads,
 } from "../src/retention.js";
 
 const database = {} as DatabaseClient;
@@ -17,6 +18,7 @@ describe("retention query boundary", () => {
     ["artifacts", listExpiredArtifacts],
     ["runs", listExpiredRuns],
     ["run logs", listExpiredRunLogs],
+    ["staged uploads", listExpiredStagedUploads],
   ])("rejects an unbounded %s retention read", async (_name, listExpired) => {
     await expect(listExpired(database, now, 0)).rejects.toThrow("Retention batch size must be a positive integer.");
   });

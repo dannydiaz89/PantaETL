@@ -1,8 +1,8 @@
-import { and, asc, eq, exists, inArray, lte } from "drizzle-orm";
+import { and, asc, eq, exists, inArray, lte, notExists } from "drizzle-orm";
 
 import type { DatabaseClient } from "./client.js";
 import { artifacts } from "./schema/artifacts.js";
-import { runLogs, runs } from "./schema/execution.js";
+import { jobs, runLogs, runSteps, runs } from "./schema/execution.js";
 import { datasets, stagedUploads } from "./schema/retention.js";
 
 /** The maximum number of explicitly expired records returned by one retention query. */
@@ -159,9 +159,68 @@ export async function listExpiredRuns(
   return db
     .select({ id: runs.id, expiresAt: runs.expiresAt })
     .from(runs)
-    .where(lte(runs.expiresAt, now))
+    .where(and(lte(runs.expiresAt, now), inArray(runs.state, terminalRunStates)))
     .orderBy(asc(runs.expiresAt), asc(runs.id))
     .limit(limit);
+}
+
+/** Removes a log record only while its explicit expiry remains elapsed. */
+export async function deleteExpiredRunLog(
+  db: DatabaseClient,
+  id: string,
+  now: Date = new Date(),
+): Promise<boolean> {
+  const deleted = await db
+    .delete(runLogs)
+    .where(and(eq(runLogs.id, id), lte(runLogs.expiresAt, now)))
+    .returning({ id: runLogs.id });
+
+  return deleted.length > 0;
+}
+
+/**
+ * Deletes one terminal run and its execution children only after all dependent
+ * artifacts, datasets, and logs have already been removed.
+ */
+export async function deleteExpiredRun(
+  db: DatabaseClient,
+  id: string,
+  now: Date = new Date(),
+): Promise<boolean> {
+  return db.transaction(async (transaction) => {
+    const eligibleRun = transaction
+      .select({ id: runs.id })
+      .from(runs)
+      .where(and(eq(runs.id, id), lte(runs.expiresAt, now), inArray(runs.state, terminalRunStates)));
+
+    await transaction.delete(jobs).where(and(eq(jobs.runId, id), exists(eligibleRun)));
+    await transaction.delete(runSteps).where(and(eq(runSteps.runId, id), exists(eligibleRun)));
+
+    const noRemainingLogs = notExists(
+      transaction.select({ id: runLogs.id }).from(runLogs).where(eq(runLogs.runId, runs.id)),
+    );
+    const noRemainingArtifacts = notExists(
+      transaction.select({ id: artifacts.id }).from(artifacts).where(eq(artifacts.runId, runs.id)),
+    );
+    const noRemainingDatasets = notExists(
+      transaction.select({ id: datasets.id }).from(datasets).where(eq(datasets.runId, runs.id)),
+    );
+    const deleted = await transaction
+      .delete(runs)
+      .where(
+        and(
+          eq(runs.id, id),
+          lte(runs.expiresAt, now),
+          inArray(runs.state, terminalRunStates),
+          noRemainingLogs,
+          noRemainingArtifacts,
+          noRemainingDatasets,
+        ),
+      )
+      .returning({ id: runs.id });
+
+    return deleted.length > 0;
+  });
 }
 
 /** Reads expired run log records for the log-retention cleanup task. */

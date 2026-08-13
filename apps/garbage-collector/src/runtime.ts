@@ -1,11 +1,14 @@
-import type { RetentionCleanup } from './cleanup.js';
+/** A bounded cleanup operation that can be run repeatedly. */
+export interface CleanupOperation {
+  run(): Promise<unknown>;
+}
 
 /** Starts and stops repeated bounded cleanup passes for one collector instance. */
 export class GarbageCollectorRuntime {
   private timer: NodeJS.Timeout | undefined;
 
   public constructor(
-    private readonly cleanup: RetentionCleanup,
+    private readonly cleanup: CleanupOperation,
     private readonly intervalMilliseconds: number,
     private readonly onCleanupFailure: () => void,
   ) {}
