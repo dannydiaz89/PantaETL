@@ -118,7 +118,13 @@ export async function createPipeline(
 }
 
 /** Validate graph connectivity and component direction before opening a write transaction. */
-function validatePipelineGraph(request: PipelineCreateRequest): void {
+/**
+ * Validate a complete writable graph before it is persisted or atomically replaced.
+ *
+ * Creation and replacement updates share this rule so both operations preserve the
+ * same Source-to-Export topology invariants.
+ */
+export function validatePipelineGraph(request: PipelineCreateRequest): void {
   const topology = buildPipelineTopology({
     edges: [...request.edges],
     steps: [...request.steps] as PipelineTopologyInput["steps"],

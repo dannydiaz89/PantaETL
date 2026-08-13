@@ -26,6 +26,8 @@ export { getPipeline, listPipelinesByOwner } from "./pipelines/read.js";
 export type { GetPipelineInput } from "./pipelines/read.js";
 export { createPipeline, InvalidPipelineTopologyError } from "./pipelines/create.js";
 export type { CreatePipelineInput } from "./pipelines/create.js";
+export { updatePipeline } from "./pipelines/update.js";
+export type { UpdatePipelineInput } from "./pipelines/update.js";
 export {
   DEFAULT_RETENTION_BATCH_SIZE,
   listExpiredArtifacts,
