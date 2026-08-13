@@ -1,7 +1,7 @@
 # FOUNDATION-001 — Repository Scaffolding
 
-**Status:** READY  
-**Owner:** Unassigned  
+**Status:** COMPLETE  
+**Owner:** Codex  
 **Workstream:** Foundation  
 **Depends on:** None
 
@@ -23,9 +23,9 @@ Create repository-level package manager and directory foundations.
 
 ## Acceptance criteria
 
-- [ ] `pnpm install` can run.
-- [ ] Directory ownership matches architecture.
-- [ ] No product feature implementation exists.
+- [x] `pnpm install` can run.
+- [x] Directory ownership matches architecture.
+- [x] No product feature implementation exists.
 
 ## Validation
 
@@ -33,4 +33,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Implemented the root pnpm workspace, TypeScript baseline, repository editor/ignore
+configuration, lockfile, and empty top-level ownership directories. Validated with
+`pnpm install --frozen-lockfile` and repository structure assertions.

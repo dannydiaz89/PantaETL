@@ -1,0 +1,25 @@
+# JavaScript and TypeScript
+node_modules/
+.pnpm-store/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environment and local tooling
+.env
+.env.*
+!.env.example
+*.log
+
+# Operating systems and editors
+.DS_Store
+.idea/
+.vscode/

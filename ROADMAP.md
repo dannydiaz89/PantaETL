@@ -71,7 +71,7 @@ The application skeleton comes before contracts so every service/package boundar
 
 | ID | Work Item | Workstream | Status | Depends On | Owner |
 |---|---|---|---|---|---|
-| FOUNDATION-001 | Repository scaffolding | Foundation | READY | — | Unassigned |
+| FOUNDATION-001 | Repository scaffolding | Foundation | COMPLETE | — | Codex |
 | FOUNDATION-002 | TypeScript quality baseline | Foundation | BLOCKED | FOUNDATION-001 | Unassigned |
 | FOUNDATION-003 | Python uv quality baseline | Foundation | BLOCKED | FOUNDATION-001 | Unassigned |
 | FOUNDATION-004 | GitHub Actions baseline | Foundation | BLOCKED | FOUNDATION-002, FOUNDATION-003 | Unassigned |
