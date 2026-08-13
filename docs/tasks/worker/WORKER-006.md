@@ -1,7 +1,7 @@
 # WORKER-006 — Checkpoint Execution Lifecycle
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Worker  
 **Depends on:** WORKER-002, DB-004, CONTRACT-005
 
@@ -22,8 +22,8 @@ Implement checkpoint read/candidate/commit lifecycle.
 
 ## Acceptance criteria
 
-- [ ] Failed pipeline does not advance checkpoint.
-- [ ] Concurrent same-pipeline checkpoint update cannot occur.
+- [x] Failed pipeline does not advance checkpoint.
+- [x] Concurrent same-pipeline checkpoint update cannot occur.
 
 ## Validation
 
@@ -31,4 +31,4 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Source-specific checkpoint candidates remain in worker memory until a successful terminal run is verified in the same transaction as an ownership-serializing pipeline lock and upsert.
