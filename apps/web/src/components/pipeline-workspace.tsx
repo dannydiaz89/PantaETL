@@ -18,13 +18,14 @@ import {
 } from "@pantaetl/ui";
 
 import { getPipelineExecutionState, parsePipeline } from "../lib/pipeline-boundary.js";
-import { t } from "../locales/index.js";
+import { useI18n } from "../locale-provider.js";
+import type { I18n } from "../locales/index.js";
 
 const lockedPipelineId = "123e4567-e89b-12d3-a456-426614174101";
 const ownerUserId = "123e4567-e89b-12d3-a456-426614174001";
 
 /** Contract-validated fixture data until the control-plane pipeline API is available. */
-function createPipelineFixtures(): Pipeline[] {
+function createPipelineFixtures(t: I18n["t"]): Pipeline[] {
   return [
     parsePipeline({
       contractVersion: "v1",
@@ -88,7 +89,8 @@ function step(id: string, kind: PipelineStep["kind"], componentType: string, val
 
 /** Form-led pipeline list and editor that reflects the shared execution lock invariant. */
 export function PipelineWorkspace() {
-  const [pipelines, setPipelines] = useState(createPipelineFixtures);
+  const { t } = useI18n();
+  const [pipelines, setPipelines] = useState(() => createPipelineFixtures(t));
   const [selectedId, setSelectedId] = useState(lockedPipelineId);
   const [hydrated, setHydrated] = useState(false);
   const selectedPipeline = pipelines.find((pipeline) => pipeline.id === selectedId) ?? pipelines[0];
@@ -174,6 +176,7 @@ export function PipelineWorkspace() {
 
 /** Isolates the performant table from form-only editor state changes. */
 const PipelineTable = memo(function PipelineTable({ onSelect, pipelines }: { readonly onSelect: (pipeline: Pipeline) => void; readonly pipelines: readonly Pipeline[] }) {
+  const { t } = useI18n();
   const columns = useMemo<readonly DataTableColumn<Pipeline>[]>(() => [
     { accessorKey: "name", header: t("pipeline.table.name") },
     {
@@ -195,7 +198,18 @@ const PipelineTable = memo(function PipelineTable({ onSelect, pipelines }: { rea
       header: t("pipeline.table.actions"),
       id: "actions",
     },
-  ], [onSelect]);
+  ], [onSelect, t]);
+
+  const sortLabels = useMemo(() => ({
+    ascending: () => t("pipeline.sort.ascending"),
+    descending: () => t("pipeline.sort.descending"),
+    none: () => t("pipeline.sort.none"),
+  }), [t]);
+  const getColumnLabel = useCallback((column: string) => column === "name" ? t("pipeline.table.name")
+    : column === "state" ? t("pipeline.table.state")
+      : column === "steps" ? t("pipeline.table.steps")
+        : column === "actions" ? t("pipeline.table.actions")
+          : column, [t]);
 
   return <DataTable
     caption={t("pipeline.table.caption")}
@@ -215,6 +229,7 @@ function executionState(pipeline: Pipeline) {
 }
 
 function PipelineStepSection({ description, kind, pipeline }: { readonly description: string; readonly kind: PipelineStep["kind"]; readonly pipeline: Pipeline }) {
+  const { t } = useI18n();
   const steps = pipeline.steps.filter((step) => step.kind === kind);
 
   return (
@@ -230,6 +245,7 @@ function PipelineStepSection({ description, kind, pipeline }: { readonly descrip
 }
 
 function TriggerSection({ triggers }: { readonly triggers: readonly Trigger[] }) {
+  const { t } = useI18n();
   return (
     <div className="pipeline-tab-panel">
       <p>{t("pipeline.trigger.description")}</p>
@@ -245,10 +261,17 @@ function TriggerSection({ triggers }: { readonly triggers: readonly Trigger[] })
 }
 
 function HistorySection({ editable }: { readonly editable: boolean }) {
+  const { t } = useI18n();
   return <div className="pipeline-tab-panel"><p>{t("pipeline.history.description")}</p><p><strong>{t("pipeline.history.active")}:</strong> {editable ? t("pipeline.history.none") : t("pipeline.locked.title")}</p></div>;
 }
 
 function SettingsSection({ editable, state }: { readonly editable: boolean; readonly state: PipelineState }) {
+  const { t } = useI18n();
+  const stateOptions = useMemo(() => [
+    { label: t("pipeline.state.draft"), value: "draft" },
+    { label: t("pipeline.state.enabled"), value: "enabled" },
+    { label: t("pipeline.state.disabled"), value: "disabled" },
+  ] as const, [t]);
   return (
     <div className="pipeline-tab-panel">
       <p>{t("pipeline.settings.description")}</p>
@@ -260,26 +283,6 @@ function SettingsSection({ editable, state }: { readonly editable: boolean; read
 }
 
 function PipelineStateBadge({ state }: { readonly state: PipelineState }) {
+  const { t } = useI18n();
   return <span className={`pipeline-state pipeline-state--${state}`}>{t(`pipeline.state.${state}`)}</span>;
 }
-
-const sortLabels = {
-  ascending: () => t("pipeline.sort.ascending"),
-  descending: () => t("pipeline.sort.descending"),
-  none: () => t("pipeline.sort.none"),
-};
-
-/** Returns localized accessible labels for the editor's sortable list columns. */
-function getColumnLabel(column: string): string {
-  return column === "name" ? t("pipeline.table.name")
-    : column === "state" ? t("pipeline.table.state")
-      : column === "steps" ? t("pipeline.table.steps")
-        : column === "actions" ? t("pipeline.table.actions")
-          : column;
-}
-
-const stateOptions = [
-  { label: t("pipeline.state.draft"), value: "draft" },
-  { label: t("pipeline.state.enabled"), value: "enabled" },
-  { label: t("pipeline.state.disabled"), value: "disabled" },
-] as const;

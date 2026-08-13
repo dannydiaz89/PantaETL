@@ -1,7 +1,8 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 
-import { t } from '../locales/index.js'
 import appCss from '../styles.css?url'
+import { LocaleProvider, useI18n } from '../locale-provider.js'
+import { defaultI18n } from '../locales/index.js'
 import { ThemeProvider } from '../theme-provider.js'
 
 export const Route = createRootRoute({
@@ -15,7 +16,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: t('app.name'),
+        title: defaultI18n.t('app.name'),
       },
     ],
     links: [
@@ -30,7 +31,17 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <LocaleProvider>
+      <LocalizedDocument>{children}</LocalizedDocument>
+    </LocaleProvider>
+  )
+}
+
+function LocalizedDocument({ children }: { children: React.ReactNode }) {
+  const { locale } = useI18n()
+
+  return (
+    <html lang={locale}>
       <head>
         <HeadContent />
       </head>

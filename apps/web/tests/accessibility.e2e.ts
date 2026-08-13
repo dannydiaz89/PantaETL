@@ -2,6 +2,7 @@ import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { en } from "../src/locales/en.js";
+import { LOCALE_STORAGE_KEY } from "../src/locale-provider.js";
 
 /** Fails with the selector, rule, and remediation URL for each detected violation. */
 async function expectNoAccessibilityViolations(page: Page) {
@@ -22,6 +23,14 @@ async function expectNoAccessibilityViolations(page: Page) {
 async function waitForApplication(page: Page) {
   await expect(page.locator(".app-shell")).toHaveAttribute("data-hydrated", "true");
 }
+
+test("uses the persisted locale for the document language", async ({ page }) => {
+  await page.addInitScript((storageKey) => window.localStorage.setItem(storageKey, "en-GB"), LOCALE_STORAGE_KEY);
+  await page.goto("/");
+  await waitForApplication(page);
+
+  await expect(page.locator("html")).toHaveAttribute("lang", "en-GB");
+});
 
 test("navigation is keyboard reachable and has no WCAG A/AA violations", async ({ page }) => {
   await page.goto("/");

@@ -5,7 +5,8 @@ import { memo, useCallback, useMemo, useState } from "react";
 import { artifactDescriptorSchema, runSchema, type ArtifactDescriptor, type Run, type RunState } from "@pantaetl/contracts";
 import { Button, DataTable, type DataTableColumn } from "@pantaetl/ui";
 
-import { formatDate, formatNumber, t } from "../locales/index.js";
+import { useI18n } from "../locale-provider.js";
+import type { I18n } from "../locales/index.js";
 
 const firstRunId = "123e4567-e89b-12d3-a456-426614175101";
 
@@ -77,6 +78,7 @@ function parseRun(value: unknown): Run {
 
 /** Run history workspace with safe metrics and artifact metadata. */
 export function RunWorkspace() {
+  const { t } = useI18n();
   const [runs] = useState(createRunFixtures);
   const [artifacts] = useState(createArtifactFixtures);
   const [selectedId, setSelectedId] = useState(firstRunId);
@@ -106,27 +108,42 @@ export function RunWorkspace() {
 
 /** Isolates the sortable execution table from selected-run detail state. */
 const RunTable = memo(function RunTable({ onSelect, runs }: { readonly onSelect: (run: Run) => void; readonly runs: readonly Run[] }) {
+  const { formatDate, formatNumber, t } = useI18n();
   const columns = useMemo<readonly DataTableColumn<Run>[]>(() => [
     { accessorKey: "id", cell: ({ row }) => row.original.id.slice(0, 8), header: t("runs.table.id") },
     { accessorKey: "state", cell: ({ row }) => <RunStateBadge state={row.original.state} />, header: t("runs.table.status") },
-    { accessorKey: "pipelineId", cell: ({ row }) => pipelineName(row.original.pipelineId), header: t("runs.table.pipeline") },
+    { accessorKey: "pipelineId", cell: ({ row }) => pipelineName(row.original.pipelineId, t), header: t("runs.table.pipeline") },
     { accessorKey: "startedAt", cell: ({ row }) => row.original.startedAt === undefined ? t("runs.metric.notAvailable") : formatDate(row.original.startedAt), header: t("runs.table.started") },
-    { cell: ({ row }) => formatDuration(runDuration(row.original)), header: t("runs.table.duration"), id: "duration" },
+    { cell: ({ row }) => formatDuration(runDuration(row.original), t, formatNumber), header: t("runs.table.duration"), id: "duration" },
     { cell: ({ row }) => <Button onClick={() => onSelect(row.original)} variant="ghost">{t("runs.view")}</Button>, header: t("runs.table.actions"), id: "actions" },
-  ], [onSelect]);
+  ], [formatDate, formatNumber, onSelect, t]);
+
+  const sortLabels = useMemo(() => ({
+    ascending: () => t("pipeline.sort.ascending"),
+    descending: () => t("pipeline.sort.descending"),
+    none: () => t("pipeline.sort.none"),
+  }), [t]);
+  const getColumnLabel = useCallback((column: string) => column === "id" ? t("runs.table.id")
+    : column === "state" ? t("runs.table.status")
+      : column === "pipelineId" ? t("runs.table.pipeline")
+        : column === "startedAt" ? t("runs.table.started")
+          : column === "duration" ? t("runs.table.duration")
+            : column === "actions" ? t("runs.table.actions")
+              : column, [t]);
 
   return <DataTable
     caption={t("runs.table.caption")}
     columns={columns}
     data={runs}
     emptyState={t("runs.table.empty")}
-    getColumnLabel={getRunColumnLabel}
+    getColumnLabel={getColumnLabel}
     loadingState={t("runs.table.loading")}
-    sortLabels={runSortLabels}
+    sortLabels={sortLabels}
   />;
 });
 
 function MetricSummary({ run }: { readonly run: Run }) {
+  const { formatNumber, t } = useI18n();
   const metrics = run.steps.reduce((total, step) => ({
     durationMilliseconds: total.durationMilliseconds + (step.metrics.durationMilliseconds ?? 0),
     recordsRead: total.recordsRead + (step.metrics.recordsRead ?? 0),
@@ -136,7 +153,7 @@ function MetricSummary({ run }: { readonly run: Run }) {
   return <dl className="run-metrics">
     <Metric label={t("runs.metric.recordsRead")} value={formatNumber(metrics.recordsRead)} />
     <Metric label={t("runs.metric.recordsWritten")} value={formatNumber(metrics.recordsWritten)} />
-    <Metric label={t("runs.metric.duration")} value={formatDuration(metrics.durationMilliseconds)} />
+    <Metric label={t("runs.metric.duration")} value={formatDuration(metrics.durationMilliseconds, t, formatNumber)} />
   </dl>;
 }
 
@@ -145,27 +162,45 @@ function Metric({ label, value }: { readonly label: string; readonly value: stri
 }
 
 function RunSteps({ run }: { readonly run: Run }) {
+  const { t } = useI18n();
+  const sortLabels = useMemo(() => ({
+    ascending: () => t("pipeline.sort.ascending"),
+    descending: () => t("pipeline.sort.descending"),
+    none: () => t("pipeline.sort.none"),
+  }), [t]);
+  const columns = useMemo<readonly DataTableColumn<Run["steps"][number]>[]>(() => [
+    { accessorKey: "componentId", cell: ({ row }) => componentName(row.original.componentId, t), header: t("runs.steps.component") },
+    { accessorKey: "state", cell: ({ row }) => <RunStateBadge state={row.original.state} />, header: t("runs.steps.status") },
+    { accessorKey: "warningCount", header: t("runs.steps.warnings") },
+  ], [t]);
+  const getColumnLabel = useCallback((column: string) => column === "componentId" ? t("runs.steps.component")
+    : column === "state" ? t("runs.steps.status")
+      : column === "warningCount" ? t("runs.steps.warnings")
+        : column, [t]);
+
   return <section className="run-subsection"><h3>{t("runs.steps.title")}</h3><DataTable
     caption={t("runs.steps.caption")}
-    columns={stepColumns}
+    columns={columns}
     data={run.steps}
     emptyState={t("runs.steps.empty")}
-    getColumnLabel={getStepColumnLabel}
+    getColumnLabel={getColumnLabel}
     key={run.id}
     loadingState={t("runs.table.loading")}
-    sortLabels={runSortLabels}
+    sortLabels={sortLabels}
   /></section>;
 }
 
 function ArtifactMetadata({ artifacts }: { readonly artifacts: readonly ArtifactDescriptor[] }) {
+  const { formatDate, formatNumber, t } = useI18n();
   return <section className="run-subsection"><h3>{t("runs.artifacts.title")}</h3><p>{t("runs.artifacts.description")}</p>{artifacts.length === 0 ? <p>{t("runs.artifacts.none")}</p> : <ul className="artifact-list">{artifacts.map((artifact) => <li key={artifact.id}><strong>{artifact.fileName}</strong><span>{artifact.format}</span><span>{formatNumber(artifact.sizeBytes, { style: "unit", unit: "byte", unitDisplay: "narrow" })}</span><span>{formatDate(artifact.retention.expiresAt)}</span></li>)}</ul>}</section>;
 }
 
 function RunStateBadge({ state }: { readonly state: RunState }) {
+  const { t } = useI18n();
   return <span className={`run-state run-state--${state}`}>{t(`runs.status.${state}`)}</span>;
 }
 
-function pipelineName(id: string): string {
+function pipelineName(id: string, t: I18n["t"]): string {
   return id.endsWith("101") ? t("runs.fixture.daily") : t("runs.fixture.customers");
 }
 
@@ -173,27 +208,12 @@ function runDuration(run: Run): number | undefined {
   return run.completedAt === undefined || run.startedAt === undefined ? undefined : new Date(run.completedAt).getTime() - new Date(run.startedAt).getTime();
 }
 
-function formatDuration(milliseconds: number | undefined): string {
+function formatDuration(milliseconds: number | undefined, t: I18n["t"], formatNumber: I18n["formatNumber"]): string {
   return milliseconds === undefined ? t("runs.metric.notAvailable") : formatNumber(milliseconds / 1_000, { maximumFractionDigits: 1, style: "unit", unit: "second", unitDisplay: "narrow" });
 }
 
-function getRunColumnLabel(column: string): string {
-  return column === "id" ? t("runs.table.id") : column === "state" ? t("runs.table.status") : column === "pipelineId" ? t("runs.table.pipeline") : column === "startedAt" ? t("runs.table.started") : column === "duration" ? t("runs.table.duration") : column === "actions" ? t("runs.table.actions") : column;
-}
-
-function getStepColumnLabel(column: string): string {
-  return column === "componentId" ? t("runs.steps.component") : column === "state" ? t("runs.steps.status") : column === "warningCount" ? t("runs.steps.warnings") : column;
-}
-
-const runSortLabels = { ascending: () => t("pipeline.sort.ascending"), descending: () => t("pipeline.sort.descending"), none: () => t("pipeline.sort.none") };
-const stepColumns: readonly DataTableColumn<Run["steps"][number]>[] = [
-  { accessorKey: "componentId", cell: ({ row }) => componentName(row.original.componentId), header: t("runs.steps.component") },
-  { accessorKey: "state", cell: ({ row }) => <RunStateBadge state={row.original.state} />, header: t("runs.steps.status") },
-  { accessorKey: "warningCount", header: t("runs.steps.warnings") },
-];
-
 /** Maps safe persisted component identifiers to localized display labels in the fixture view. */
-function componentName(componentId: string): string {
+function componentName(componentId: string, t: I18n["t"]): string {
   return componentId.endsWith("102") ? t("runs.component.csv")
     : componentId.endsWith("103") ? t("runs.component.normalize")
       : componentId.endsWith("104") ? t("runs.component.postgres")

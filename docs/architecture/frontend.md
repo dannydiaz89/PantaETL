@@ -61,7 +61,9 @@ All user-facing text is localized.
 
 English is the first locale, not hardcoded source.
 
-Localization covers labels, buttons, errors, empty states, runtime statuses, dates, numbers, units, relative times, and pluralization.
+The web app uses typed locale catalogs through a locale provider. The provider resolves a persisted user preference or browser preference to a supported locale, updates the document language, and exposes a locale-aware translation and formatting API to rendered screens.
+
+Localization covers labels, buttons, errors, empty states, runtime statuses, dates, numbers, units, relative times, and pluralization. Every additional catalog must satisfy the English catalog's keys at compile time.
 
 ## Navigation
 

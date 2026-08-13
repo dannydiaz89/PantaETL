@@ -4,12 +4,13 @@ import { useState } from "react";
 import { Button, Field, Input } from "@pantaetl/ui";
 
 import { authClient } from "../auth/client.js";
-import { t } from "../locales/index.js";
+import { useI18n } from "../locale-provider.js";
 
 /** Guest route reserved for the local password sign-in form. */
 export const Route = createFileRoute("/login")({ component: Login });
 
 function Login() {
+  const { t } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasError, setHasError] = useState(false);
 

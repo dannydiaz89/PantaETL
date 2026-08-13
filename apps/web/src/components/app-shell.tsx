@@ -23,7 +23,7 @@ import {
   type IconProps,
 } from "@pantaetl/ui";
 
-import { t } from "../locales/index.js";
+import { useI18n } from "../locale-provider.js";
 import { useTheme } from "../theme-provider.js";
 
 interface NavigationItem {
@@ -47,6 +47,7 @@ const SIDEBAR_COLLAPSED_STORAGE_KEY = "pantaetl.sidebar-collapsed";
 /** Restrained control-plane shell used by every authenticated product screen. */
 export function AppShell({ children }: { readonly children: ReactNode }) {
   const location = useRouterState({ select: (state) => state.location.pathname });
+  const { t } = useI18n();
   const { setTheme, theme } = useTheme();
   const nextTheme = theme === "light" ? "dark" : "light";
   const [hydrated, setHydrated] = useState(false);
