@@ -1,6 +1,6 @@
 # TRANSFORM-003 — Value and Type Transform Set
 
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 **Owner:** Codex
 **Workstream:** Transforms  
 **Depends on:** WORKER-003, WORKER-004
@@ -22,7 +22,7 @@ Implement value/type transforms.
 
 ## Acceptance criteria
 
-- [ ] No network/secrets.
+- [x] No network/secrets.
 
 ## Validation
 
@@ -30,4 +30,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Cast, replace, fill-null, and string normalization transforms operate only on
+temporary Datasets through the storage boundary; they receive neither secrets
+nor network clients.
