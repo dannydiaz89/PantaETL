@@ -157,9 +157,9 @@ An agent can work on the frontend while separate agents work on database, schedu
 | SCHED-001 | Scheduler runtime foundation | Scheduler | COMPLETE | APP-003, DB-003, PIPELINE-002 | Codex |
 | SCHED-002 | Due-schedule claiming | Scheduler | READY | SCHED-001 | Unassigned |
 | SCHED-003 | Run/job creation and same-pipeline queueing | Scheduler | BLOCKED | SCHED-002, CONTRACT-005 | Unassigned |
-| GC-001 | Garbage-collector runtime foundation | Garbage Collector | IN PROGRESS | APP-003, DB-004 | Codex |
-| GC-002 | Dataset/artifact cleanup | Garbage Collector | BLOCKED | GC-001, WORKER-003 | Unassigned |
-| GC-003 | Run/log retention cleanup | Garbage Collector | BLOCKED | GC-001 | Unassigned |
+| GC-001 | Garbage-collector runtime foundation | Garbage Collector | COMPLETE | APP-003, DB-004 | Codex |
+| GC-002 | Dataset/artifact cleanup | Garbage Collector | READY | GC-001, WORKER-003 | Unassigned |
+| GC-003 | Run/log retention cleanup | Garbage Collector | READY | GC-001 | Unassigned |
 
 ## Track C — Python Execution Backend
 

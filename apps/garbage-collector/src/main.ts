@@ -1,24 +1,21 @@
-import { createServer } from 'node:http';
+import { createDatabaseConnection } from '@pantaetl/database';
 
 import { loadConfig } from './config.js';
 import { writeLog } from './logging.js';
+import { createGarbageCollectorServer } from './server.js';
 
 const config = loadConfig('garbage-collector', 3011);
+const database = createDatabaseConnection(config.databaseUrl);
 
-const server = createServer((request, response) => {
-  if (request.method === 'GET' && request.url === '/health') {
-    response.writeHead(200, { 'content-type': 'application/json' });
-    response.end(JSON.stringify({ service: config.serviceName, status: 'ok' }));
-    return;
-  }
-
-  response.writeHead(404, { 'content-type': 'application/json' });
-  response.end(JSON.stringify({ error: 'not_found' }));
+const server = createGarbageCollectorServer(config, {
+  checkDatabase: async () => {
+    await database.sql`select 1`;
+  },
 });
 
 function stop(signal: NodeJS.Signals): void {
   writeLog('info', 'service_stopping', { service: config.serviceName, signal });
-  server.close((error) => {
+  server.close(async (error) => {
     if (error) {
       writeLog('error', 'service_stop_failed', {
         error: error.message,
@@ -28,7 +25,16 @@ function stop(signal: NodeJS.Signals): void {
       return;
     }
 
-    writeLog('info', 'service_stopped', { service: config.serviceName });
+    try {
+      await database.close();
+      writeLog('info', 'service_stopped', { service: config.serviceName });
+    } catch (closeError) {
+      writeLog('error', 'service_stop_failed', {
+        error: closeError instanceof Error ? closeError.message : 'unknown',
+        service: config.serviceName,
+      });
+      process.exitCode = 1;
+    }
   });
 }
 
