@@ -78,14 +78,29 @@ pnpm install --frozen-lockfile
 uv sync --frozen
 ```
 
-Start the current web shell:
+Create your ignored local environment file and replace the example authentication
+secret before starting services:
 
 ```bash
-pnpm web:dev
+cp .env.example .env
 ```
 
-It listens on [http://localhost:3000](http://localhost:3000). To run the other
-service shells individually:
+Start the web control plane directly, without Docker:
+
+```bash
+pnpm dev
+```
+
+It listens on [http://localhost:3000](http://localhost:3000). `pnpm dev` loads
+the root `.env` for server-side settings; only `VITE_`-prefixed values would be
+available to browser code, so database credentials and authentication secrets
+remain server-only.
+
+For database-backed authentication while running without Docker, point
+`DATABASE_URL` in `.env` at an already-running local PostgreSQL instance. The
+database/user in the template must exist and have the current migrations applied.
+
+To run the other service shells individually:
 
 ```bash
 pnpm scheduler:dev
@@ -101,6 +116,11 @@ docker compose up --build
 
 The Compose services expose web on port 3000, scheduler on 3010, garbage
 collector on 3011, and worker on 3020.
+
+Compose reads the same ignored `.env`, but derives each container's database URL
+using the internal PostgreSQL hostname. Production deployments must provide
+their own environment or secret-management values rather than copying the
+example file.
 
 ## Quality checks
 
