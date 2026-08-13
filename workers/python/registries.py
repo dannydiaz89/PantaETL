@@ -5,6 +5,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Protocol
 
+from .generated.artifact_descriptor import ArtifactDescriptor
 from .generated.component_metadata import ComponentMetadata, Kind, Option, Type
 from .generated.dataset_descriptor import DatasetDescriptor
 from .generated.source_execution_request import SourceExecutionRequest
@@ -43,7 +44,7 @@ class ExportExecutor(Protocol):
         self,
         dataset: DatasetDescriptor,
         configuration: ComponentConfiguration,
-    ) -> None: ...
+    ) -> ArtifactDescriptor: ...
 
 
 @dataclass(frozen=True, slots=True)

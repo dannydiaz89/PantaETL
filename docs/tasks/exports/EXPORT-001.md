@@ -1,7 +1,7 @@
 # EXPORT-001 — CSV Artifact Export
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Exports  
 **Depends on:** WORKER-003, WORKER-004, DB-004
 
@@ -21,8 +21,8 @@ Implement CSV artifact Export.
 
 ## Acceptance criteria
 
-- [ ] Default 30-day retention.
-- [ ] No partial final file on retry.
+- [x] Default 30-day retention.
+- [x] No partial final file on retry.
 
 ## Validation
 
@@ -30,4 +30,5 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+The CSV Export atomically publishes local artifacts, writes a durable descriptor
+with the default 30-day retention, and records metadata only after finalization.
