@@ -1,7 +1,7 @@
 # CRUD-003 — Pipeline Repository Create Operation
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** pipeline_create
 **Depends on:** CRUD-001
 
 ## Scope
@@ -10,12 +10,12 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Create pipeline/components/edges/triggers atomically.
-- [ ] Assign owner from trusted authenticated context.
-- [ ] Validate topology/configuration before commit.
-- [ ] Do not persist secrets as ordinary configuration JSON.
-- [ ] Return canonical validated Pipeline.
-- [ ] Rollback fully on failure.
+- [x] Create pipeline/components/edges/triggers atomically.
+- [x] Assign owner from trusted authenticated context.
+- [x] Validate topology/configuration before commit.
+- [x] Do not persist secrets as ordinary configuration JSON.
+- [x] Return canonical validated Pipeline.
+- [x] Rollback fully on failure.
 
 ## Required checks
 
@@ -30,3 +30,8 @@ Implement only the behavior described by this task and its acceptance criteria. 
 ## Notes / blockers
 
 None.
+
+## Implementation notes
+
+- Validates the graph and canonical request before opening a database transaction.
+- Persists each graph table atomically, separating configuration values from secret-binding references.

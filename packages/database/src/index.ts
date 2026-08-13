@@ -24,6 +24,8 @@ export { hydratePipeline } from "./pipelines/hydration.js";
 export type { PersistedPipelineGraph } from "./pipelines/hydration.js";
 export { getPipeline, listPipelinesByOwner } from "./pipelines/read.js";
 export type { GetPipelineInput } from "./pipelines/read.js";
+export { createPipeline, InvalidPipelineTopologyError } from "./pipelines/create.js";
+export type { CreatePipelineInput } from "./pipelines/create.js";
 export {
   DEFAULT_RETENTION_BATCH_SIZE,
   listExpiredArtifacts,

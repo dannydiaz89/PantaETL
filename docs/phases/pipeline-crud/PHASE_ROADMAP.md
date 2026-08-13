@@ -10,7 +10,7 @@ Task IDs must never appear in implementation comments or commit messages.
 |---|---|---|---|---|
 | CRUD-001 | Pipeline API contracts | COMPLETE | — | Codex |
 | CRUD-002 | Pipeline repository read operations | COMPLETE | CRUD-001 | pipeline_reads |
-| CRUD-003 | Pipeline repository create operation | IN PROGRESS | CRUD-001 | pipeline_create |
+| CRUD-003 | Pipeline repository create operation | COMPLETE | CRUD-001 | pipeline_create |
 | CRUD-004 | Pipeline repository update operation | BLOCKED | CRUD-002, CRUD-003 | Unassigned |
 | CRUD-005 | Pipeline repository delete operation | BLOCKED | CRUD-002 | Unassigned |
 | CRUD-006 | Pipeline duplication operation | BLOCKED | CRUD-003, CRUD-004 | Unassigned |

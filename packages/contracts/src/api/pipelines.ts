@@ -44,7 +44,9 @@ export interface PipelineListResponse {
 }
 
 /** Trigger input that the control plane assigns to its newly created pipeline. */
-export type WritablePipelineTrigger = Omit<Trigger, "id" | "pipelineId">;
+export type WritablePipelineTrigger =
+  | Omit<Extract<Trigger, { type: "manual" }>, "id" | "pipelineId">
+  | Omit<Extract<Trigger, { type: "schedule" }>, "id" | "pipelineId">;
 
 /** Pipeline graph input accepted on creation without caller-controlled ownership or timestamps. */
 export interface PipelineCreateRequest {
