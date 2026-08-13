@@ -1,5 +1,6 @@
 export { createDatabaseConnection, type DatabaseClient, type DatabaseConnection } from "./client.js";
 export { claimNextJob, type ClaimedJob } from "./queue.js";
+export { accounts, sessions, users, verifications } from "./schema/users.js";
 export { jobs, runs, runSteps } from "./schema/execution.js";
 export {
   calculateRunLogExpiry,

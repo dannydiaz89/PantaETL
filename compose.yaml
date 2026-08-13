@@ -25,6 +25,9 @@ services:
       HOST: 0.0.0.0
       PORT: 3000
       DATABASE_URL: postgresql://pantaetl:pantaetl-dev@postgres:5432/pantaetl
+      BETTER_AUTH_SECRET: local-development-secret-change-before-production-2026
+      BETTER_AUTH_URL: http://localhost:3000
+      BETTER_AUTH_TRUSTED_ORIGINS: http://localhost:3000
     depends_on:
       postgres:
         condition: service_healthy

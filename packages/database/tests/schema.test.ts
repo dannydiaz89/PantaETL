@@ -2,15 +2,18 @@ import { getTableConfig } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
 import {
+  accounts,
   artifacts,
   jobs,
   pipelineComponents,
   pipelines,
   pipelineTriggers,
   runSteps,
+  sessions,
   runs,
   settings,
   users,
+  verifications,
 } from "../src/schema/index.js";
 
 describe("core control-plane schema", () => {
@@ -26,6 +29,13 @@ describe("core control-plane schema", () => {
       artifacts,
       settings,
     ]).toHaveLength(9);
+  });
+
+  it("stores password credentials and revocable sessions outside browser-visible data", () => {
+    expect(getTableConfig(accounts).name).toBe("accounts");
+    expect(getTableConfig(sessions).name).toBe("sessions");
+    expect(getTableConfig(verifications).name).toBe("verifications");
+    expect(users.emailVerified.notNull).toBe(true);
   });
 
   it("requires every pipeline to have an explicitly owned user", () => {
