@@ -1,7 +1,7 @@
 # FOUNDATION-002 — TypeScript Quality Baseline
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE  
+**Owner:** Codex  
 **Workstream:** Foundation  
 **Depends on:** FOUNDATION-001
 
@@ -21,9 +21,9 @@ Establish TypeScript quality conventions used by all TypeScript packages/service
 
 ## Acceptance criteria
 
-- [ ] Typecheck runs successfully.
-- [ ] Vitest command succeeds on scaffold.
-- [ ] Scripts are reusable by CI.
+- [x] Typecheck runs successfully.
+- [x] Vitest command succeeds on scaffold.
+- [x] Scripts are reusable by CI.
 
 ## Validation
 
@@ -31,4 +31,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Added strict TypeScript compiler settings, ESLint flat configuration, Vitest
+configuration, and root `lint`, `typecheck`, `test`, and aggregate `check` scripts.
+TypeScript is pinned within the supported TypeScript-ESLint peer range.
