@@ -1,14 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { t } from '../locales/index.js'
+import { TopLevelPage } from '../components/top-level-page.js'
 
 export const Route = createFileRoute('/')({ component: Home })
 
 function Home() {
-  return (
-    <main>
-      <h1>{t('overview.title')}</h1>
-      <p>{t('overview.description')}</p>
-    </main>
-  )
+  return <TopLevelPage description={t('overview.description')} eyebrow={t('app.name')} title={t('overview.title')} />
 }

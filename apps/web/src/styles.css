@@ -12,3 +12,18 @@ body {
   margin: 0;
   min-height: 100dvh;
 }
+
+.app-shell { display: grid; grid-template-columns: 15rem minmax(0, 1fr); min-height: 100dvh; }
+.app-sidebar { background: var(--panta-sidebar); color: var(--panta-sidebar-text); display: flex; flex-direction: column; min-height: 100%; padding: 1rem 0.75rem; }
+.app-brand { align-items: center; color: inherit; display: flex; font-size: 1rem; font-weight: 750; gap: 0.625rem; padding: 0.5rem; text-decoration: none; }
+.app-brand__mark { align-items: center; background: var(--panta-primary); border-radius: 0.3rem; color: var(--panta-primary-text); display: inline-flex; font-size: 0.75rem; height: 1.25rem; justify-content: center; width: 1.25rem; }
+.app-navigation { display: grid; gap: 0.25rem; margin-top: 1.75rem; }
+.app-navigation__link { align-items: center; border-radius: var(--panta-radius-sm); color: var(--panta-sidebar-muted); display: flex; font-size: 0.875rem; gap: 0.625rem; padding: 0.625rem 0.75rem; text-decoration: none; }
+.app-navigation__link:hover, .app-navigation__link--active { background: var(--panta-sidebar-active); color: var(--panta-sidebar-text); }
+.app-sidebar__bottom { border-top: 1px solid var(--panta-sidebar-border); display: grid; gap: 0.5rem; margin-top: auto; padding-top: 1rem; }
+.app-theme-button { color: var(--panta-sidebar-text); justify-self: start; }
+.app-user { align-items: center; display: flex; gap: 0.625rem; margin-top: 0.5rem; padding: 0.5rem; }
+.app-user__avatar { align-items: center; background: var(--panta-sidebar-avatar); border-radius: 50%; display: inline-flex; font-size: 0.75rem; height: 2rem; justify-content: center; width: 2rem; }
+.app-user strong, .app-user small { display: block; }.app-user strong { font-size: 0.8125rem; }.app-user small { color: var(--panta-sidebar-muted); font-size: 0.6875rem; margin-top: 0.125rem; }
+.app-content { min-width: 0; padding: clamp(1rem, 3vw, 2.5rem); }.app-page { margin: 0 auto; max-width: 90rem; }.app-page__eyebrow { color: var(--panta-primary); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; margin: 0; text-transform: uppercase; }.app-page h1 { font-size: clamp(1.5rem, 2vw, 2rem); letter-spacing: -0.03em; margin: 0.5rem 0; }.app-page p { color: var(--panta-muted); max-width: 42rem; }
+@media (max-width: 46rem) { .app-shell { grid-template-columns: 1fr; }.app-sidebar { min-height: auto; }.app-navigation { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 0.75rem; }.app-navigation__link { justify-content: center; }.app-navigation__link svg { display: none; }.app-sidebar__bottom { display: none; } }

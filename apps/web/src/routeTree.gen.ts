@@ -11,7 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PipelinesRouteImport } from './routes/pipelines'
+import { Route as PluginsRouteImport } from './routes/plugins'
 import { Route as ProtectedRouteImport } from './routes/protected'
+import { Route as RunsRouteImport } from './routes/runs'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SystemRouteImport } from './routes/system'
+import { Route as UsersRouteImport } from './routes/users'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -24,9 +30,39 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PipelinesRoute = PipelinesRouteImport.update({
+  id: '/pipelines',
+  path: '/pipelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PluginsRoute = PluginsRouteImport.update({
+  id: '/plugins',
+  path: '/plugins',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/protected',
   path: '/protected',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RunsRoute = RunsRouteImport.update({
+  id: '/runs',
+  path: '/runs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SystemRoute = SystemRouteImport.update({
+  id: '/system',
+  path: '/system',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -38,34 +74,89 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/pipelines': typeof PipelinesRoute
+  '/plugins': typeof PluginsRoute
   '/protected': typeof ProtectedRoute
+  '/runs': typeof RunsRoute
+  '/settings': typeof SettingsRoute
+  '/system': typeof SystemRoute
+  '/users': typeof UsersRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/pipelines': typeof PipelinesRoute
+  '/plugins': typeof PluginsRoute
   '/protected': typeof ProtectedRoute
+  '/runs': typeof RunsRoute
+  '/settings': typeof SettingsRoute
+  '/system': typeof SystemRoute
+  '/users': typeof UsersRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/pipelines': typeof PipelinesRoute
+  '/plugins': typeof PluginsRoute
   '/protected': typeof ProtectedRoute
+  '/runs': typeof RunsRoute
+  '/settings': typeof SettingsRoute
+  '/system': typeof SystemRoute
+  '/users': typeof UsersRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/protected' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/pipelines'
+    | '/plugins'
+    | '/protected'
+    | '/runs'
+    | '/settings'
+    | '/system'
+    | '/users'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/protected' | '/api/auth/$'
-  id: '__root__' | '/' | '/login' | '/protected' | '/api/auth/$'
+  to:
+    | '/'
+    | '/login'
+    | '/pipelines'
+    | '/plugins'
+    | '/protected'
+    | '/runs'
+    | '/settings'
+    | '/system'
+    | '/users'
+    | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/pipelines'
+    | '/plugins'
+    | '/protected'
+    | '/runs'
+    | '/settings'
+    | '/system'
+    | '/users'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  PipelinesRoute: typeof PipelinesRoute
+  PluginsRoute: typeof PluginsRoute
   ProtectedRoute: typeof ProtectedRoute
+  RunsRoute: typeof RunsRoute
+  SettingsRoute: typeof SettingsRoute
+  SystemRoute: typeof SystemRoute
+  UsersRoute: typeof UsersRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -85,11 +176,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pipelines': {
+      id: '/pipelines'
+      path: '/pipelines'
+      fullPath: '/pipelines'
+      preLoaderRoute: typeof PipelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plugins': {
+      id: '/plugins'
+      path: '/plugins'
+      fullPath: '/plugins'
+      preLoaderRoute: typeof PluginsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/protected': {
       id: '/protected'
       path: '/protected'
       fullPath: '/protected'
       preLoaderRoute: typeof ProtectedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/runs': {
+      id: '/runs'
+      path: '/runs'
+      fullPath: '/runs'
+      preLoaderRoute: typeof RunsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/system': {
+      id: '/system'
+      path: '/system'
+      fullPath: '/system'
+      preLoaderRoute: typeof SystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -105,7 +238,13 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  PipelinesRoute: PipelinesRoute,
+  PluginsRoute: PluginsRoute,
   ProtectedRoute: ProtectedRoute,
+  RunsRoute: RunsRoute,
+  SettingsRoute: SettingsRoute,
+  SystemRoute: SystemRoute,
+  UsersRoute: UsersRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
