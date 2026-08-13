@@ -16,7 +16,7 @@ Task IDs must never appear in implementation comments or commit messages.
 | CRUD-006 | Pipeline duplication operation | COMPLETE | CRUD-003, CRUD-004 | pipeline_duplicate |
 | CRUD-007 | Pipeline run/state action service | COMPLETE | CRUD-002 | pipeline_actions |
 | API-CRUD-001 | Pipeline list/create routes | COMPLETE | CRUD-002, CRUD-003 | api_pipeline_collection |
-| API-CRUD-002 | Pipeline get/update/delete routes | IN PROGRESS | CRUD-004, CRUD-005 | api_pipeline_detail |
+| API-CRUD-002 | Pipeline get/update/delete routes | COMPLETE | CRUD-004, CRUD-005 | api_pipeline_detail |
 | API-CRUD-003 | Pipeline duplicate/run/state routes | READY | CRUD-006, CRUD-007 | Unassigned |
 | API-CRUD-004 | OpenAPI coverage | BLOCKED | API-CRUD-001, API-CRUD-002, API-CRUD-003 | Unassigned |
 | UI-WIRE-001 | Pipeline query/mutation layer | BLOCKED | API-CRUD-001, API-CRUD-002 | Unassigned |

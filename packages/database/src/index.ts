@@ -28,6 +28,12 @@ export { createPipeline, InvalidPipelineTopologyError } from "./pipelines/create
 export type { CreatePipelineInput } from "./pipelines/create.js";
 export { updatePipeline } from "./pipelines/update.js";
 export type { UpdatePipelineInput } from "./pipelines/update.js";
+export {
+  deletePipeline,
+  PipelineDeletionHasRunHistoryError,
+  PipelineDeletionLockedError,
+} from "./pipelines/delete.js";
+export type { DeletePipelineInput } from "./pipelines/delete.js";
 export { duplicatePipeline } from "./pipelines/duplicate.js";
 export type { DuplicatePipelineInput } from "./pipelines/duplicate.js";
 export {
