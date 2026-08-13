@@ -23,6 +23,7 @@ import { Route as ApiDocsRouteImport } from './routes/api/docs'
 import { Route as ApiOpenapiDotjsonRouteImport } from './routes/api/openapi[.]json'
 import { Route as ApiTokensRouteImport } from './routes/api/tokens'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiSystemHealthRouteImport } from './routes/api/system/health'
 import { Route as ApiTokensTokenIdRouteImport } from './routes/api/tokens/$tokenId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -95,6 +96,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSystemHealthRoute = ApiSystemHealthRouteImport.update({
+  id: '/api/system/health',
+  path: '/api/system/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTokensTokenIdRoute = ApiTokensTokenIdRouteImport.update({
   id: '/$tokenId',
   path: '/$tokenId',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
   '/api/tokens': typeof ApiTokensRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/system/health': typeof ApiSystemHealthRoute
   '/api/tokens/$tokenId': typeof ApiTokensTokenIdRoute
 }
 export interface FileRoutesByTo {
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
   '/api/tokens': typeof ApiTokensRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/system/health': typeof ApiSystemHealthRoute
   '/api/tokens/$tokenId': typeof ApiTokensTokenIdRoute
 }
 export interface FileRoutesById {
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
   '/api/tokens': typeof ApiTokensRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/system/health': typeof ApiSystemHealthRoute
   '/api/tokens/$tokenId': typeof ApiTokensTokenIdRoute
 }
 export interface FileRouteTypes {
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/api/openapi.json'
     | '/api/tokens'
     | '/api/auth/$'
+    | '/api/system/health'
     | '/api/tokens/$tokenId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/api/openapi.json'
     | '/api/tokens'
     | '/api/auth/$'
+    | '/api/system/health'
     | '/api/tokens/$tokenId'
   id:
     | '__root__'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/api/openapi.json'
     | '/api/tokens'
     | '/api/auth/$'
+    | '/api/system/health'
     | '/api/tokens/$tokenId'
   fileRoutesById: FileRoutesById
 }
@@ -222,6 +234,7 @@ export interface RootRouteChildren {
   ApiOpenapiDotjsonRoute: typeof ApiOpenapiDotjsonRoute
   ApiTokensRoute: typeof ApiTokensRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiSystemHealthRoute: typeof ApiSystemHealthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/system/health': {
+      id: '/api/system/health'
+      path: '/api/system/health'
+      fullPath: '/api/system/health'
+      preLoaderRoute: typeof ApiSystemHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/tokens/$tokenId': {
       id: '/api/tokens/$tokenId'
       path: '/$tokenId'
@@ -361,6 +381,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiOpenapiDotjsonRoute: ApiOpenapiDotjsonRoute,
   ApiTokensRoute: ApiTokensRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiSystemHealthRoute: ApiSystemHealthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

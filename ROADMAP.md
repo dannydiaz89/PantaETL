@@ -197,7 +197,7 @@ These can also proceed concurrently once the worker runtime and registries are c
 | ID | Work Item | Workstream | Status | Depends On | Owner |
 |---|---|---|---|---|---|
 | OBS-001 | Structured run events and metrics | Observability | COMPLETE | DB-002, CONTRACT-005 | Codex |
-| OBS-002 | System health aggregation | Observability | IN PROGRESS | OBS-001, SCHED-003, WORKER-002, GC-001 | Codex |
+| OBS-002 | System health aggregation | Observability | COMPLETE | OBS-001, SCHED-003, WORKER-002, GC-001 | Codex |
 | API-001 | OpenAPI generation baseline | API | COMPLETE | CONTRACT-007, WEB-001 | Codex |
 | API-002 | API token model and authentication | API | COMPLETE | API-001, WEB-003, DB-002 | Codex |
 | PORTABILITY-001 | Pipeline definition export | Portability | COMPLETE | PIPELINE-004, WEB-006 | Codex |
