@@ -5,7 +5,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm web:check && pnpm services:check && pnpm worker:check",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm web:check && pnpm services:check && pnpm packages:check && pnpm worker:check",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "typecheck": "tsc --noEmit --project tsconfig.json",
@@ -24,7 +24,8 @@
     "garbage-collector:dev": "pnpm --filter garbage-collector dev",
     "garbage-collector:start": "pnpm --filter garbage-collector start",
     "worker:check": "uv run ruff check workers tests && uv run ruff format --check workers tests && uv run mypy workers && uv run pytest",
-    "worker:dev": "uv run python -m workers.python"
+    "worker:dev": "uv run python -m workers.python",
+    "packages:check": "pnpm --filter @pantaetl/contracts check && pnpm --filter @pantaetl/database check && pnpm --filter @pantaetl/ui check && pnpm --filter @pantaetl/config check && pnpm --filter @pantaetl/logging check && pnpm --filter @pantaetl/pipeline check"
   },
   "packageManager": "pnpm@10.28.2",
   "pnpm": {
