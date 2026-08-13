@@ -1,7 +1,7 @@
 # WORKER-005 — Cancellation and Terminal Cleanup Signaling
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Worker  
 **Depends on:** WORKER-002, WORKER-003
 
@@ -22,7 +22,7 @@ Implement cooperative cancellation and cleanup eligibility.
 
 ## Acceptance criteria
 
-- [ ] Cancelled work does not continue invisibly.
+- [x] Cancelled work does not continue invisibly.
 
 ## Validation
 
@@ -30,4 +30,4 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Cancellation is polled cooperatively, terminal job and run transitions are ownership-guarded, and temporary datasets become cleanup-eligible only after the run is terminal.

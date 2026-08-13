@@ -39,6 +39,9 @@ class JobQueueCursor(Protocol):
     def fetchone(self) -> Mapping[str, object] | None:
         """Return the sole row updated by one queue transition."""
 
+    def fetchall(self) -> list[Mapping[str, object]]:
+        """Return rows updated by a queue transition affecting multiple jobs."""
+
 
 ConnectionFactory = Callable[[str], JobQueueConnection]
 
@@ -123,6 +126,62 @@ WHERE id = %(job_id)s AND state = 'running' AND worker_id = %(worker_id)s
 {_RETURNING_JOB}
 """
 
+_CANCELLATION_REQUESTED = """
+SELECT EXISTS (
+  SELECT 1
+  FROM jobs
+  INNER JOIN runs ON runs.id = jobs.run_id
+  WHERE jobs.id = %(job_id)s
+    AND jobs.state = 'running'
+    AND jobs.worker_id = %(worker_id)s
+    AND runs.cancellation_requested_at IS NOT NULL
+) AS "cancellationRequested"
+"""
+
+_CANCEL_IF_REQUESTED = f"""
+UPDATE jobs AS job
+SET
+  state = 'cancelled',
+  worker_id = NULL,
+  claimed_at = NULL,
+  heartbeat_at = NULL,
+  completed_at = %(now)s
+FROM runs
+WHERE job.id = %(job_id)s
+  AND job.run_id = runs.id
+  AND job.state = 'running'
+  AND job.worker_id = %(worker_id)s
+  AND runs.cancellation_requested_at IS NOT NULL
+{_RETURNING_JOB}
+"""
+
+_CANCEL_PENDING_FOR_RUN = f"""
+UPDATE jobs AS job
+SET
+  state = 'cancelled',
+  completed_at = %(now)s
+FROM runs
+WHERE job.run_id = %(run_id)s
+  AND job.run_id = runs.id
+  AND job.state = 'queued'
+  AND runs.cancellation_requested_at IS NOT NULL
+{_RETURNING_JOB}
+"""
+
+_FINALIZE_CANCELLED_RUN = """
+UPDATE runs
+SET state = 'cancelled', completed_at = %(now)s
+WHERE id = %(run_id)s
+  AND state = 'running'
+  AND cancellation_requested_at IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM jobs
+    WHERE jobs.run_id = runs.id AND jobs.state IN ('queued', 'running')
+  )
+RETURNING id
+"""
+
 
 class PostgresJobQueue:
     """Claim and update jobs through operations that commit before ETL can begin.
@@ -139,7 +198,7 @@ class PostgresJobQueue:
         connection_factory: ConnectionFactory | None = None,
     ) -> None:
         """Configure a queue for one PostgreSQL database without opening a connection."""
-        self._database_url = _validate_database_url(database_url)
+        self._database_url = validate_database_url(database_url)
         self._connection_factory = connection_factory or _connect
 
     def claim_next(self, worker_id: UUID, *, now: datetime | None = None) -> Job | None:
@@ -169,6 +228,38 @@ class PostgresJobQueue:
             {"job_id": job_id, "worker_id": worker_id, "now": _queue_time(now)},
         )
 
+    def cancellation_requested(self, job_id: UUID, worker_id: UUID) -> bool:
+        """Check whether the run owning this active job has requested cancellation."""
+        with self._connection_factory(self._database_url) as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(_CANCELLATION_REQUESTED, {"job_id": job_id, "worker_id": worker_id})
+                row = cursor.fetchone()
+
+        return bool(row and row["cancellationRequested"])
+
+    def cancel_if_requested(
+        self, job_id: UUID, worker_id: UUID, *, now: datetime | None = None
+    ) -> Job | None:
+        """Terminally cancel an owned job only after its run has requested it."""
+        return self._transition(
+            _CANCEL_IF_REQUESTED,
+            {"job_id": job_id, "worker_id": worker_id, "now": _queue_time(now)},
+        )
+
+    def cancel_pending_for_run(self, run_id: UUID, *, now: datetime | None = None) -> list[Job]:
+        """Stop queued sibling jobs after their run has requested cancellation."""
+        return self._transitions(
+            _CANCEL_PENDING_FOR_RUN,
+            {"run_id": run_id, "now": _queue_time(now)},
+        )
+
+    def finalize_cancelled_run(self, run_id: UUID, *, now: datetime | None = None) -> bool:
+        """Mark a cancellation-requested run terminal after all its jobs have stopped."""
+        with self._connection_factory(self._database_url) as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(_FINALIZE_CANCELLED_RUN, {"run_id": run_id, "now": _queue_time(now)})
+                return cursor.fetchone() is not None
+
     def _transition(self, query: str, parameters: Mapping[str, object]) -> Job | None:
         """Run one state transition in a transaction that ends before returning work."""
         with self._connection_factory(self._database_url) as connection:
@@ -177,6 +268,15 @@ class PostgresJobQueue:
                 row = cursor.fetchone()
 
         return _job_from_row(row) if row is not None else None
+
+    def _transitions(self, query: str, parameters: Mapping[str, object]) -> list[Job]:
+        """Run a bounded multi-row terminal transition before returning to execution."""
+        with self._connection_factory(self._database_url) as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(query, parameters)
+                rows = cursor.fetchall()
+
+        return [_job_from_row(row) for row in rows]
 
 
 def _connect(database_url: str) -> JobQueueConnection:
@@ -192,7 +292,7 @@ def _queue_time(value: datetime | None) -> datetime:
     return timestamp
 
 
-def _validate_database_url(database_url: str) -> str:
+def validate_database_url(database_url: str) -> str:
     """Reject missing or non-PostgreSQL connection URLs without exposing credentials."""
     normalized = database_url.strip()
     if normalized.startswith(("postgres://", "postgresql://")):

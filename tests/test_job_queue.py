@@ -45,6 +45,10 @@ class FakeCursor:
         """Return the scripted result of the transition."""
         return self._row
 
+    def fetchall(self) -> list[Mapping[str, object]]:
+        """Return a scripted multi-row result for terminal queue transitions."""
+        return [] if self._row is None else [self._row]
+
 
 class FakeConnection:
     """Connection double that exposes the transaction boundary used by the queue."""
@@ -181,6 +185,35 @@ def test_failure_requeues_with_delay_or_completes_after_retry_exhaustion() -> No
     assert "WHEN attempt < retry_max_attempts THEN 'queued'::job_state" in failure_query
     assert "make_interval(secs => retry_delay_seconds)" in failure_query
     assert "worker_id = NULL" in failure_query
+
+
+def test_queue_observes_and_terminally_cancels_requested_work() -> None:
+    """Require a run-level request before stopping active and still-queued jobs."""
+    queue, connections = _queue(
+        [
+            {"cancellationRequested": True},
+            _job_row(JOB_ONE, state="cancelled", worker_id=None),
+            _job_row(JOB_TWO, state="cancelled", worker_id=None),
+            {"id": RUN_ID},
+        ]
+    )
+
+    assert queue.cancellation_requested(JOB_ONE, WORKER_ONE) is True
+    cancelled = queue.cancel_if_requested(JOB_ONE, WORKER_ONE, now=NOW)
+    pending = queue.cancel_pending_for_run(RUN_ID, now=NOW)
+    finalized = queue.finalize_cancelled_run(RUN_ID, now=NOW)
+
+    assert cancelled is not None and cancelled.state == "cancelled"
+    assert [job.id for job in pending] == [JOB_TWO]
+    observed_query = connections.connections[0].queries[0][0]
+    cancelled_query = connections.connections[1].queries[0][0]
+    pending_query = connections.connections[2].queries[0][0]
+    finalize_query = connections.connections[3].queries[0][0]
+    assert "runs.cancellation_requested_at IS NOT NULL" in observed_query
+    assert "state = 'cancelled'" in cancelled_query
+    assert "job.state = 'queued'" in pending_query
+    assert finalized is True
+    assert "state IN ('queued', 'running')" in finalize_query
 
 
 @pytest.mark.parametrize("database_url", ["", "https://example.test/database", "mysql://queue"])
