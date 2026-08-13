@@ -76,3 +76,13 @@ test("pipeline editor exposes the active-run edit lock", async ({ page }) => {
   await expect(page.getByText(en["pipeline.trigger.description"])).toBeVisible();
   await expectNoAccessibilityViolations(page);
 });
+
+test("run history shows safe metadata in accessible tables", async ({ page }) => {
+  await page.goto("/runs");
+  await waitForApplication(page);
+  await expect(page.getByText(en["runs.metric.recordsRead"], { exact: true })).toBeVisible();
+  await expect(page.locator("body")).not.toContainText("artifacts/");
+  await page.getByRole("button", { exact: true, name: en["runs.view"] }).nth(1).click();
+  await expect(page.locator(".run-details").getByText(en["runs.status.running"], { exact: true }).first()).toBeVisible();
+  await expectNoAccessibilityViolations(page);
+});

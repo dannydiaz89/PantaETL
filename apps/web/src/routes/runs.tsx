@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { TopLevelPage } from "../components/top-level-page.js";
-import { t } from "../locales/index.js";
+import { AppShell } from "../components/app-shell.js";
+import { RunWorkspace } from "../components/run-workspace.js";
 
-export const Route = createFileRoute("/runs")({ component: Runs });
+export const Route = createFileRoute("/runs")({ component: Runs, ssr: false });
 
 function Runs() {
-  return <TopLevelPage description={t("page.runs.description")} eyebrow={t("app.name")} title={t("page.runs.title")} />;
+  return <AppShell><RunWorkspace /></AppShell>;
 }

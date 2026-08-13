@@ -141,7 +141,7 @@ An agent can work on the frontend while separate agents work on database, schedu
 | WEB-004 | First-admin and password-reset flows | Web | COMPLETE | WEB-003 | Codex |
 | WEB-005 | Application navigation shell | Web | COMPLETE | WEB-002, UI-003 | Codex |
 | WEB-006 | Pipeline list/editor foundation | Web | COMPLETE | WEB-005, PIPELINE-003 | Codex |
-| WEB-007 | Runs and history UI foundation | Web | BLOCKED | WEB-005, CONTRACT-005 | Unassigned |
+| WEB-007 | Runs and history UI foundation | Web | COMPLETE | WEB-005, CONTRACT-005 | Codex |
 | WEB-008 | System and settings UI foundation | Web | BLOCKED | WEB-005, OBS-002 | Unassigned |
 
 ## Track B — Database and Control-Plane Backend
