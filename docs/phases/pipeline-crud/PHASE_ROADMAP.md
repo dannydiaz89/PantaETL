@@ -24,7 +24,7 @@ Task IDs must never appear in implementation comments or commit messages.
 | UI-WIRE-003 | Replace pipeline fixtures | COMPLETE | UI-WIRE-001, UI-WIRE-002 | web_pipeline_api_data |
 | UI-WIRE-004 | Wire create/update/delete | COMPLETE | UI-WIRE-003 | ui_pipeline_mutations |
 | UI-WIRE-005 | Wire duplicate/run/enable-disable | COMPLETE | API-CRUD-003, UI-WIRE-003 | ui_pipeline_actions |
-| UI-WIRE-006 | Loading/error/empty/accessibility states | BLOCKED | UI-WIRE-003 | Unassigned |
+| UI-WIRE-006 | Loading/error/empty/accessibility states | COMPLETE | UI-WIRE-003 | ui_pipeline_states |
 | INT-CRUD-001 | Pipeline CRUD integration tests | COMPLETE | API-CRUD-004 | pipeline_crud_integration |
 | INT-CRUD-002 | Pipeline UI E2E tests | BLOCKED | UI-WIRE-004, UI-WIRE-005, UI-WIRE-006 | Unassigned |
 | INT-CRUD-003 | Remove obsolete fixtures | BLOCKED | INT-CRUD-002 | Unassigned |

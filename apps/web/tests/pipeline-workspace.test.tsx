@@ -34,7 +34,23 @@ describe("PipelineWorkspace", () => {
     );
 
     expect(markup).toContain(en["pipeline.table.loading"]);
+    expect(markup).toContain('aria-busy="true"');
+    expect(markup).toContain('role="status"');
     expect(markup).not.toContain(en["pipeline.editor.title"]);
+  });
+
+  it("gives an empty library a localized creation path", () => {
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(pipelineQueryKeys.list(), { pipelines: [] });
+    const markup = renderToStaticMarkup(
+      <QueryClientProvider client={queryClient}>
+        <LocaleProvider><PipelineWorkspace /></LocaleProvider>
+      </QueryClientProvider>,
+    );
+
+    expect(markup).toContain(en["pipeline.table.empty"]);
+    expect(markup).toContain(en["pipeline.table.emptyDescription"]);
+    expect(markup).toContain(en["pipeline.create.open"]);
   });
 });
 

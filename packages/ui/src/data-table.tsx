@@ -67,11 +67,11 @@ export function DataTable<TData extends RowData>({
   });
 
   if (isLoading) {
-    return <div aria-live="polite" className="ui-data-table__state">{loadingState}</div>;
+    return <div aria-busy="true" aria-live="polite" className="ui-data-table__state" role="status">{loadingState}</div>;
   }
 
   if (data.length === 0) {
-    return <div className="ui-data-table__state">{emptyState}</div>;
+    return <div className="ui-data-table__state" role="status">{emptyState}</div>;
   }
 
   return (

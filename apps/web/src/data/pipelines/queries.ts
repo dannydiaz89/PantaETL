@@ -9,6 +9,7 @@ export function pipelineListQueryOptions(client: PipelineApiClient = pipelineApi
   return queryOptions({
     queryFn: client.list,
     queryKey: pipelineQueryKeys.list(),
+    retry: false,
   });
 }
 
@@ -20,6 +21,7 @@ export function pipelineDetailQueryOptions(
   return queryOptions({
     queryFn: () => client.get(request),
     queryKey: pipelineQueryKeys.detail(request),
+    retry: false,
   });
 }
 

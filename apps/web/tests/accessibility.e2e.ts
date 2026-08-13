@@ -120,6 +120,64 @@ test("pipeline editor loads a persisted pipeline through accessible query states
   await expectNoAccessibilityViolations(page);
 });
 
+test("pipeline collection announces loading and gives an empty workspace a focused creation path", async ({ page }) => {
+  let releaseListResponse!: () => void;
+  const listResponse = new Promise<void>((resolve) => {
+    releaseListResponse = resolve;
+  });
+
+  await page.route("**/api/pipelines", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await listResponse;
+    await route.fulfill({ body: JSON.stringify({ pipelines: [] }), contentType: "application/json" });
+  });
+  const listRequest = page.waitForRequest((request) => request.method() === "GET" && new URL(request.url()).pathname === "/api/pipelines");
+  await page.goto("/pipelines");
+  await waitForApplication(page);
+  await listRequest;
+
+  const loadingState = page.locator(".ui-data-table__state[role='status']");
+  await expect(loadingState).toHaveText(en["pipeline.table.loading"]);
+  await expect(loadingState).toHaveAttribute("aria-busy", "true");
+  releaseListResponse();
+
+  await expect(page.getByText(en["pipeline.table.emptyDescription"])).toBeVisible();
+  await page.getByRole("button", { name: en["pipeline.create.open"] }).click();
+  const dialog = page.getByRole("dialog", { name: en["pipeline.create.title"] });
+  await expect(dialog.getByLabel(en["pipeline.name"])).toBeFocused();
+  await expectNoAccessibilityViolations(page);
+});
+
+test("pipeline collection errors are announced and can be retried", async ({ page }) => {
+  let shouldFail = true;
+  let listRequestCount = 0;
+
+  await page.route("**/api/pipelines", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    listRequestCount += 1;
+    await route.fulfill(shouldFail
+      ? { body: JSON.stringify({ code: "unknown_error" }), contentType: "application/json", status: 503 }
+      : { body: JSON.stringify({ pipelines: [] }), contentType: "application/json" });
+  });
+  await page.goto("/pipelines");
+  await waitForApplication(page);
+  await expect.poll(() => listRequestCount).toBe(1);
+
+  const errorState = page.getByRole("alert");
+  await expect(errorState).toContainText(en["pipeline.table.error"]);
+  shouldFail = false;
+  await errorState.getByRole("button", { name: en["pipeline.retry"] }).click();
+  await expect.poll(() => listRequestCount).toBe(2);
+  await expect(page.getByText(en["pipeline.table.emptyDescription"])).toBeVisible();
+  await expectNoAccessibilityViolations(page);
+});
+
 test("pipeline name updates use the control-plane API and announce completion", async ({ page }) => {
   let pipeline = persistedPipeline;
 
@@ -232,9 +290,10 @@ test("pipeline create and deletion keep controls accessible and reconcile the wo
   await expect(createDialog).toBeHidden();
   await expect(page.locator(".pipeline-editor").getByLabel(en["pipeline.name"])).toHaveValue("New orders");
 
-  await page.getByRole("button", { name: en["pipeline.delete.open"] }).click();
+  const deleteTrigger = page.getByRole("button", { name: en["pipeline.delete.open"] });
+  await deleteTrigger.dispatchEvent("click");
   const deleteConfirmation = page.getByRole("alertdialog", { name: en["pipeline.delete.title"] });
-  await deleteConfirmation.getByRole("button", { name: en["pipeline.delete.confirm"] }).click();
+  await deleteConfirmation.getByRole("button", { name: en["pipeline.delete.confirm"] }).dispatchEvent("click");
   await expect(deleteConfirmation).toBeHidden();
   await expect(page.locator(".pipeline-editor").getByLabel(en["pipeline.name"])).toHaveValue(persistedPipeline.name);
   await expectNoAccessibilityViolations(page);

@@ -13,6 +13,7 @@ export const PipelineList = memo(function PipelineList({
   isCreating,
   isError,
   isLoading,
+  isRetrying,
   onCreate,
   onRetry,
   onSelect,
@@ -22,6 +23,7 @@ export const PipelineList = memo(function PipelineList({
   readonly isCreating: boolean;
   readonly isError: boolean;
   readonly isLoading: boolean;
+  readonly isRetrying: boolean;
   readonly onCreate: Parameters<typeof PipelineCreateDialog>[0]["onCreate"];
   readonly onRetry: () => void;
   readonly onSelect: (pipeline: Pipeline) => void;
@@ -68,19 +70,27 @@ export const PipelineList = memo(function PipelineList({
           <h1>{t("pipeline.list.title")}</h1>
           <p>{t("pipeline.list.description")}</p>
         </div>
-        <PipelineCreateDialog errorMessage={createErrorMessage} isCreating={isCreating} onCreate={onCreate} />
+        {pipelines.length > 0 || isLoading || isError ? (
+          <PipelineCreateDialog errorMessage={createErrorMessage} isCreating={isCreating} onCreate={onCreate} />
+        ) : null}
       </div>
       {isError ? (
-        <div className="pipeline-query-state" role="alert">
+        <div aria-live="assertive" className="pipeline-query-state" role="alert">
           <p>{t("pipeline.table.error")}</p>
-          <Button onClick={onRetry} variant="secondary">{t("pipeline.retry")}</Button>
+          <Button disabled={isRetrying} onClick={onRetry} variant="secondary">{t("pipeline.retry")}</Button>
         </div>
       ) : (
         <DataTable
           caption={t("pipeline.table.caption")}
           columns={columns}
           data={pipelines}
-          emptyState={t("pipeline.table.empty")}
+          emptyState={(
+            <PipelineEmptyState
+              createErrorMessage={createErrorMessage}
+              isCreating={isCreating}
+              onCreate={onCreate}
+            />
+          )}
           getColumnLabel={getColumnLabel}
           isLoading={isLoading}
           loadingState={t("pipeline.table.loading")}
@@ -90,3 +100,24 @@ export const PipelineList = memo(function PipelineList({
     </div>
   );
 });
+
+/** Gives an empty library a clear next step without relying on the toolbar action. */
+function PipelineEmptyState({
+  createErrorMessage,
+  isCreating,
+  onCreate,
+}: {
+  readonly createErrorMessage: string | undefined;
+  readonly isCreating: boolean;
+  readonly onCreate: Parameters<typeof PipelineCreateDialog>[0]["onCreate"];
+}) {
+  const { t } = useI18n();
+
+  return (
+    <div className="pipeline-empty-state">
+      <p>{t("pipeline.table.empty")}</p>
+      <p>{t("pipeline.table.emptyDescription")}</p>
+      <PipelineCreateDialog errorMessage={createErrorMessage} isCreating={isCreating} onCreate={onCreate} />
+    </div>
+  );
+}

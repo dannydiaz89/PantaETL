@@ -19,6 +19,7 @@ describe("pipeline action controls", () => {
     expect(markup).toContain(en["pipeline.actions.duplicate"]);
     expect(markup).toContain(en["pipeline.actions.run"]);
     expect(markup).toContain("aria-labelledby=\"pipeline-actions-title\"");
+    expect(markup).toContain('aria-busy="false"');
     expect(markup).toContain("disabled=\"\"");
   });
 });

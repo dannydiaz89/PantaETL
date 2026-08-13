@@ -82,6 +82,7 @@ export const en = {
   "pipeline.table.actions": "Actions",
   "pipeline.table.caption": "Pipelines available in this workspace",
   "pipeline.table.empty": "No pipelines are available.",
+  "pipeline.table.emptyDescription": "Create a draft pipeline to configure its source, transformations, and export.",
   "pipeline.table.loading": "Loading pipelines.",
   "pipeline.table.error": "Pipelines are currently unavailable.",
   "pipeline.retry": "Try again",

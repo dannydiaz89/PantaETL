@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 
 import type { Pipeline, PipelineUpdateRequest } from "@pantaetl/contracts";
 import { Button } from "@pantaetl/ui";
@@ -26,6 +26,9 @@ export function PipelineWorkspace() {
   const createMutation = useCreatePipelineMutation();
   const updateMutation = useUpdatePipelineMutation();
   const deleteMutation = useDeletePipelineMutation();
+  const createInFlight = useRef(false);
+  const deleteInFlight = useRef(false);
+  const updateInFlight = useRef(false);
   const [selectedId, setSelectedId] = useState<string | undefined>();
   const [lastSavedPipelineId, setLastSavedPipelineId] = useState<string | undefined>();
   const pipelines = listQuery.data?.pipelines ?? [];
@@ -39,13 +42,43 @@ export function PipelineWorkspace() {
     request: Parameters<typeof createMutation.mutate>[0],
     onSuccess: () => void,
   ) => {
+    if (createInFlight.current) return;
+    createInFlight.current = true;
     createMutation.mutate(request, {
       onSuccess: (pipeline) => {
         setSelectedId(pipeline.id);
         onSuccess();
       },
+      onSettled: () => {
+        createInFlight.current = false;
+      },
     });
   }, [createMutation]);
+
+  const deletePipeline = useCallback((pipelineId: string) => {
+    if (deleteInFlight.current) return;
+    deleteInFlight.current = true;
+    deleteMutation.mutate({ pipelineId }, {
+      onSuccess: () => setSelectedId(undefined),
+      onSettled: () => {
+        deleteInFlight.current = false;
+      },
+    });
+  }, [deleteMutation]);
+
+  const updatePipeline = useCallback((pipelineId: string, update: PipelineUpdateRequest) => {
+    if (updateInFlight.current) return;
+    updateInFlight.current = true;
+    updateMutation.mutate(
+      { pipelineId, update },
+      {
+        onSuccess: () => setLastSavedPipelineId(pipelineId),
+        onSettled: () => {
+          updateInFlight.current = false;
+        },
+      },
+    );
+  }, [updateMutation]);
 
   return (
     <section className="pipeline-workspace" data-hydrated={listQuery.isSuccess ? "true" : "false"}>
@@ -54,6 +87,7 @@ export function PipelineWorkspace() {
         isCreating={createMutation.isPending}
         isError={listQuery.isError}
         isLoading={listQuery.isPending}
+        isRetrying={listQuery.isFetching}
         onCreate={createPipeline}
         onRetry={() => void listQuery.refetch()}
         onSelect={selectPipeline}
@@ -64,11 +98,8 @@ export function PipelineWorkspace() {
           deleteErrorMessage={getPipelineMutationErrorMessage(deleteMutation.error, t)}
           isDeleting={deleteMutation.isPending}
           isSaving={updateMutation.isPending}
-          onDelete={(pipelineId) => deleteMutation.mutate({ pipelineId }, { onSuccess: () => setSelectedId(undefined) })}
-          onSave={(pipelineId, update) => updateMutation.mutate(
-            { pipelineId, update },
-            { onSuccess: () => setLastSavedPipelineId(pipelineId) },
-          )}
+          onDelete={deletePipeline}
+          onSave={updatePipeline}
           pipelineId={selectedPipelineId}
           saveErrorMessage={getPipelineMutationErrorMessage(updateMutation.error, t)}
           saveSucceeded={lastSavedPipelineId === selectedPipelineId && updateMutation.isSuccess}

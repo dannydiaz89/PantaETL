@@ -1,7 +1,7 @@
 # UI-WIRE-006 — Pipeline Loading Error Empty Accessibility States
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** ui_pipeline_states
 **Depends on:** UI-WIRE-003
 
 ## Scope
@@ -10,12 +10,12 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Accessible initial loading state.
-- [ ] Useful empty state/create action.
-- [ ] Retryable error state where appropriate.
-- [ ] Prevent duplicate writes while mutation pending.
-- [ ] Preserve keyboard/focus/reduced-motion behavior.
-- [ ] Add representative accessibility tests.
+- [x] Accessible initial loading state.
+- [x] Useful empty state/create action.
+- [x] Retryable error state where appropriate.
+- [x] Prevent duplicate writes while mutation pending.
+- [x] Preserve keyboard/focus/reduced-motion behavior.
+- [x] Add representative accessibility tests.
 
 ## Required checks
 
@@ -29,4 +29,4 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Notes / blockers
 
-None.
+Pipeline query failures now present the explicit retry state immediately, and browser coverage exercises loading, empty, error, retry, and mutation-pending states.

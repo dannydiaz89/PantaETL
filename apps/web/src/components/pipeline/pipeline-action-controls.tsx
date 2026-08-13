@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import type { PipelineDetailRequest, PipelineState } from "@pantaetl/contracts";
 import { Button } from "@pantaetl/ui";
@@ -28,25 +28,48 @@ export function PipelineActionControls({
   const run = useRunPipelineMutation();
   const enable = useEnablePipelineMutation();
   const disable = useDisablePipelineMutation();
+  const actionInFlight = useRef(false);
   const isBusy = duplicate.isPending || run.isPending || enable.isPending || disable.isPending;
 
   function handleDuplicate(): void {
+    if (actionInFlight.current) return;
+    actionInFlight.current = true;
     setFeedback(undefined);
-    duplicate.mutate({ pipelineId }, { onError: showError, onSuccess: () => showSuccess("pipeline.actions.duplicateSuccess") });
+    duplicate.mutate({ pipelineId }, {
+      onError: showError,
+      onSettled: releaseAction,
+      onSuccess: () => showSuccess("pipeline.actions.duplicateSuccess"),
+    });
   }
 
   function handleRun(): void {
+    if (actionInFlight.current) return;
+    actionInFlight.current = true;
     setFeedback(undefined);
-    run.mutate({ pipelineId }, { onError: showError, onSuccess: () => showSuccess("pipeline.actions.runSuccess") });
+    run.mutate({ pipelineId }, {
+      onError: showError,
+      onSettled: releaseAction,
+      onSuccess: () => showSuccess("pipeline.actions.runSuccess"),
+    });
   }
 
   function handleStateChange(action: "disable" | "enable"): void {
+    if (actionInFlight.current) return;
+    actionInFlight.current = true;
     setFeedback(undefined);
     const mutation = action === "enable" ? enable : disable;
     mutation.mutate(
       { pipelineId },
-      { onError: showError, onSuccess: () => showSuccess(action === "enable" ? "pipeline.actions.enableSuccess" : "pipeline.actions.disableSuccess") },
+      {
+        onError: showError,
+        onSettled: releaseAction,
+        onSuccess: () => showSuccess(action === "enable" ? "pipeline.actions.enableSuccess" : "pipeline.actions.disableSuccess"),
+      },
     );
+  }
+
+  function releaseAction(): void {
+    actionInFlight.current = false;
   }
 
   function showError(error: Error): void {
@@ -58,7 +81,7 @@ export function PipelineActionControls({
   }
 
   return (
-    <section aria-labelledby="pipeline-actions-title" className="pipeline-action-controls">
+    <section aria-busy={isBusy} aria-labelledby="pipeline-actions-title" className="pipeline-action-controls">
       <div>
         <h3 id="pipeline-actions-title">{t("pipeline.actions.title")}</h3>
         <p>{t("pipeline.actions.description")}</p>
