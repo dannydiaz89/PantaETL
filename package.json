@@ -31,7 +31,7 @@
     "worker:check": "uv run ruff check workers tests && uv run ruff format --check workers tests && uv run mypy workers && uv run pytest",
     "worker:dev": "uv run --env-file .env python -m workers.python",
     "packages:build": "pnpm --filter @pantaetl/contracts build && pnpm --filter @pantaetl/config build && pnpm --filter @pantaetl/logging build && pnpm --filter @pantaetl/pipeline build && pnpm --filter @pantaetl/database build && pnpm --filter @pantaetl/ui build",
-    "packages:check": "pnpm --filter @pantaetl/contracts check && pnpm --filter @pantaetl/database check && pnpm --filter @pantaetl/ui check && pnpm --filter @pantaetl/config check && pnpm --filter @pantaetl/logging check && pnpm --filter @pantaetl/pipeline check",
+    "packages:check": "pnpm --filter @pantaetl/contracts check && pnpm --filter @pantaetl/pipeline check && pnpm --filter @pantaetl/database check && pnpm --filter @pantaetl/ui check && pnpm --filter @pantaetl/config check && pnpm --filter @pantaetl/logging check",
     "db:migration:generate": "pnpm --filter @pantaetl/database migrate:generate",
     "db:migrate": "node scripts/development.mjs migrate",
     "stack:up": "node scripts/development.mjs stack-up",
