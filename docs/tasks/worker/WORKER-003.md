@@ -1,7 +1,8 @@
 # WORKER-003 — Dataset Storage Abstraction
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
+**Workstream:** Worker
 **Workstream:** Worker  
 **Depends on:** WORKER-001, CONTRACT-004
 
@@ -22,8 +23,8 @@ Implement local internal Dataset storage abstraction.
 
 ## Acceptance criteria
 
-- [ ] Can persist/read datasets.
-- [ ] Pipeline logic storage-independent.
+- [x] Can persist/read datasets.
+- [x] Pipeline logic storage-independent.
 
 ## Validation
 
@@ -31,4 +32,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Added a Dataset storage protocol and local Parquet implementation that returns
+generated descriptors, supports optional encryption at rest, uses safe
+root-relative locations, and performs idempotent expiry cleanup.

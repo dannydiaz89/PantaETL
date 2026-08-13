@@ -167,7 +167,7 @@ An agent can work on the frontend while separate agents work on database, schedu
 |---|---|---|---|---|---|
 | WORKER-001 | Worker runtime foundation | Worker | COMPLETE | APP-004, CONTRACT-008 | Codex |
 | WORKER-002 | PostgreSQL job claiming and heartbeat | Worker | BLOCKED | WORKER-001, DB-003 | Unassigned |
-| WORKER-003 | Dataset storage abstraction | Worker | IN PROGRESS | WORKER-001, CONTRACT-004 | Codex |
+| WORKER-003 | Dataset storage abstraction | Worker | COMPLETE | WORKER-001, CONTRACT-004 | Codex |
 | WORKER-004 | Source/Transform/Export registries | Worker | COMPLETE | WORKER-001, CONTRACT-003, PIPELINE-003 | Codex |
 | WORKER-005 | Cancellation and terminal cleanup signaling | Worker | BLOCKED | WORKER-002, WORKER-003 | Unassigned |
 | WORKER-006 | Checkpoint execution lifecycle | Worker | BLOCKED | WORKER-002, DB-004, CONTRACT-005 | Unassigned |
