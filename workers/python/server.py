@@ -1,4 +1,4 @@
-"""HTTP health shell for the Python worker application."""
+"""HTTP health endpoint for the Python worker runtime."""
 
 import json
 import signal
@@ -8,19 +8,27 @@ from threading import Thread
 from types import FrameType
 from typing import cast
 
-from .config import ServiceConfig
+from .config import WorkerConfig
 from .service_logging import write_log
 
 
 class HealthHandler(BaseHTTPRequestHandler):
-    """Serve the worker health endpoint while rejecting unimplemented routes."""
+    """Serve worker runtime health while rejecting unimplemented routes."""
 
     server_version = "PantaETLWorker/0.0"
 
     def do_GET(self) -> None:
         """Return worker health or a safe not-found response."""
         if self.path == "/health":
-            self._send_json(HTTPStatus.OK, {"service": "worker", "status": "ok"})
+            worker_server = cast("WorkerHTTPServer", self.server)
+            self._send_json(
+                HTTPStatus.OK,
+                {
+                    "service": worker_server.config.service_name,
+                    "status": "ok",
+                    "workerId": str(worker_server.config.worker_id),
+                },
+            )
             return
 
         self._send_json(HTTPStatus.NOT_FOUND, {"error": "not_found"})
@@ -37,9 +45,23 @@ class HealthHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
 
-def run_server(config: ServiceConfig) -> None:
+class WorkerHTTPServer(ThreadingHTTPServer):
+    """HTTP server carrying immutable runtime settings for health responses."""
+
+    def __init__(self, config: WorkerConfig) -> None:
+        """Bind a health server to the configured worker address and identity."""
+        super().__init__((config.host, config.port), HealthHandler)
+        self.config = config
+
+
+def create_server(config: WorkerConfig) -> WorkerHTTPServer:
+    """Create a worker health server without starting its request loop."""
+    return WorkerHTTPServer(config)
+
+
+def run_server(config: WorkerConfig) -> None:
     """Run the worker health server and close it cleanly on process signals."""
-    server = ThreadingHTTPServer((config.host, config.port), HealthHandler)
+    server = create_server(config)
 
     def stop(signum: int, _frame: FrameType | None) -> None:
         signal_name = signal.Signals(signum).name

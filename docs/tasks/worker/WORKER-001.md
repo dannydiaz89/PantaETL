@@ -1,7 +1,8 @@
 # WORKER-001 — Worker Runtime Foundation
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
+**Workstream:** Worker
 **Workstream:** Worker  
 **Depends on:** APP-004, CONTRACT-008
 
@@ -22,8 +23,8 @@ Connect worker scaffold to validated contracts and runtime structure.
 
 ## Acceptance criteria
 
-- [ ] Runs under uv.
-- [ ] Quality checks pass.
+- [x] Runs under uv.
+- [x] Quality checks pass.
 
 ## Validation
 
@@ -31,4 +32,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Added generated-Pydantic contract loaders, a correlated Source-job runtime context,
+worker identity/configuration validation, a health endpoint, and safe structured
+logging with recursive secret redaction.
