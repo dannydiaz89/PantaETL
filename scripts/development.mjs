@@ -401,6 +401,7 @@ async function buildPackages() {
 async function generateArtifacts() {
   await run(pnpm, ["--filter", "@pantaetl/contracts", "generate:types"]);
   await run("uv", ["run", "python", "scripts/generate_python_contract_models.py"]);
+  await run("uv", ["run", "python", "scripts/generate_component_capability_catalog.py"]);
   await buildPackages();
   await run(pnpm, ["web:build"]);
 }
@@ -409,6 +410,7 @@ async function generateArtifacts() {
 async function checkGeneratedArtifacts() {
   await run(pnpm, ["--filter", "@pantaetl/contracts", "check:types"]);
   await run("uv", ["run", "python", "scripts/check_python_contract_models.py"]);
+  await run("uv", ["run", "python", "scripts/generate_component_capability_catalog.py", "--check"]);
 }
 
 /** Start Docker PostgreSQL, migrate it, then supervise all local services. */

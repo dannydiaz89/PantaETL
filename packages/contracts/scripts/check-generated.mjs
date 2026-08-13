@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath, URL } from "node:url";
 
 const repositoryRoot = fileURLToPath(new URL("../../../", import.meta.url));
-const generatedPath = "packages/contracts/src/generated";
+const generatedTypePathspec = ":(glob)packages/contracts/src/generated/**/*.ts";
 
 /** Run Git with generated TypeScript paths relative to the repository root. */
 function runGit(arguments_) {
@@ -13,7 +13,7 @@ function runGit(arguments_) {
 }
 
 try {
-  runGit(["diff", "--exit-code", "--", generatedPath]);
+  runGit(["diff", "--exit-code", "--", generatedTypePathspec]);
 } catch {
   throw new Error("Generated TypeScript contract types are stale. Run pnpm generate:types.");
 }
@@ -23,7 +23,7 @@ const untrackedFiles = runGit([
   "--others",
   "--exclude-standard",
   "--",
-  generatedPath,
+  generatedTypePathspec,
 ]).trim();
 
 if (untrackedFiles) {

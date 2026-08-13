@@ -1,0 +1,897 @@
+[
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "fileName",
+        "labelKey": "components.exports.csv.fileName",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      }
+    ],
+    "descriptionKey": "components.exports.csv.description",
+    "displayNameKey": "components.exports.csv.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "export",
+    "outputFamilies": [],
+    "type": "export.csv",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "fileName",
+        "labelKey": "components.exports.json.fileName",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      }
+    ],
+    "descriptionKey": "components.exports.json.description",
+    "displayNameKey": "components.exports.json.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "export",
+    "outputFamilies": [],
+    "type": "export.json",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "fileName",
+        "labelKey": "components.exports.parquet.fileName",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      }
+    ],
+    "descriptionKey": "components.exports.parquet.description",
+    "displayNameKey": "components.exports.parquet.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "export",
+    "outputFamilies": [],
+    "type": "export.parquet",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "targetTable",
+        "labelKey": "components.exports.postgres.targetTable",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "writeMode",
+        "labelKey": "components.exports.postgres.writeMode",
+        "options": [
+          {
+            "labelKey": "components.exports.postgres.writeMode.replace",
+            "value": "replace"
+          },
+          {
+            "labelKey": "components.exports.postgres.writeMode.append",
+            "value": "append"
+          }
+        ],
+        "required": false,
+        "secret": false,
+        "type": "select"
+      },
+      {
+        "descriptionKey": null,
+        "key": "connectionUrl",
+        "labelKey": "components.exports.postgres.connectionUrl",
+        "options": null,
+        "required": true,
+        "secret": true,
+        "type": "text"
+      }
+    ],
+    "descriptionKey": "components.exports.postgres.description",
+    "displayNameKey": "components.exports.postgres.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "export",
+    "outputFamilies": [],
+    "type": "export.postgres",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "sourcePath",
+        "labelKey": "components.sources.csv.sourcePath",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "hasHeader",
+        "labelKey": "components.sources.csv.hasHeader",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "boolean"
+      },
+      {
+        "descriptionKey": null,
+        "key": "separator",
+        "labelKey": "components.sources.csv.separator",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      }
+    ],
+    "descriptionKey": "components.sources.csv.description",
+    "displayNameKey": "components.sources.csv.name",
+    "inputFamilies": [],
+    "kind": "source",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "source.csv",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "sourcePath",
+        "labelKey": "components.sources.json.sourcePath",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      }
+    ],
+    "descriptionKey": "components.sources.json.description",
+    "displayNameKey": "components.sources.json.name",
+    "inputFamilies": [],
+    "kind": "source",
+    "outputFamilies": [
+      "document"
+    ],
+    "type": "source.json",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "connectionUrl",
+        "labelKey": "components.sources.postgres.connectionUrl",
+        "options": null,
+        "required": true,
+        "secret": true,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "table",
+        "labelKey": "components.sources.postgres.table",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "query",
+        "labelKey": "components.sources.postgres.query",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "textarea"
+      },
+      {
+        "descriptionKey": null,
+        "key": "chunkSize",
+        "labelKey": "components.sources.postgres.chunkSize",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "number"
+      },
+      {
+        "descriptionKey": null,
+        "key": "checkpointColumn",
+        "labelKey": "components.sources.postgres.checkpointColumn",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      }
+    ],
+    "descriptionKey": "components.sources.postgres.description",
+    "displayNameKey": "components.sources.postgres.name",
+    "inputFamilies": [],
+    "kind": "source",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "source.postgres",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "url",
+        "labelKey": "components.sources.rest.url",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "path",
+        "labelKey": "components.sources.rest.path",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "queryParams",
+        "labelKey": "components.sources.rest.queryParams",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "json"
+      },
+      {
+        "descriptionKey": null,
+        "key": "headers",
+        "labelKey": "components.sources.rest.headers",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "json"
+      },
+      {
+        "descriptionKey": null,
+        "key": "apiToken",
+        "labelKey": "components.sources.rest.apiToken",
+        "options": null,
+        "required": false,
+        "secret": true,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "authHeader",
+        "labelKey": "components.sources.rest.authHeader",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "authScheme",
+        "labelKey": "components.sources.rest.authScheme",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "nextPagePath",
+        "labelKey": "components.sources.rest.nextPagePath",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "pageParameter",
+        "labelKey": "components.sources.rest.pageParameter",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "checkpointPath",
+        "labelKey": "components.sources.rest.checkpointPath",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "checkpointParameter",
+        "labelKey": "components.sources.rest.checkpointParameter",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "maxPages",
+        "labelKey": "components.sources.rest.maxPages",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "number"
+      }
+    ],
+    "descriptionKey": "components.sources.rest.description",
+    "displayNameKey": "components.sources.rest.name",
+    "inputFamilies": [],
+    "kind": "source",
+    "outputFamilies": [
+      "document"
+    ],
+    "type": "source.rest",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "sourcePath",
+        "labelKey": "components.sources.xlsx.sourcePath",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "sheetName",
+        "labelKey": "components.sources.xlsx.sheetName",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "hasHeader",
+        "labelKey": "components.sources.xlsx.hasHeader",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "boolean"
+      }
+    ],
+    "descriptionKey": "components.sources.xlsx.description",
+    "displayNameKey": "components.sources.xlsx.name",
+    "inputFamilies": [],
+    "kind": "source",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "source.xlsx",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "columns",
+        "labelKey": "components.transforms.columns.drop.columns",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "json"
+      }
+    ],
+    "descriptionKey": "components.transforms.columns.drop.description",
+    "displayNameKey": "components.transforms.columns.drop.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.columns.drop",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "renames",
+        "labelKey": "components.transforms.columns.rename.renames",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "json"
+      }
+    ],
+    "descriptionKey": "components.transforms.columns.rename.description",
+    "displayNameKey": "components.transforms.columns.rename.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.columns.rename",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "columns",
+        "labelKey": "components.transforms.columns.reorder.columns",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "json"
+      }
+    ],
+    "descriptionKey": "components.transforms.columns.reorder.description",
+    "displayNameKey": "components.transforms.columns.reorder.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.columns.reorder",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "columns",
+        "labelKey": "components.transforms.columns.select.columns",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "json"
+      }
+    ],
+    "descriptionKey": "components.transforms.columns.select.description",
+    "displayNameKey": "components.transforms.columns.select.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.columns.select",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "record_path",
+        "labelKey": "components.transforms.document.flatten.recordPath",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "json"
+      },
+      {
+        "descriptionKey": null,
+        "key": "array_mode",
+        "labelKey": "components.transforms.document.flatten.arrayMode",
+        "options": [
+          {
+            "labelKey": "components.transforms.document.flatten.arrayMode.json",
+            "value": "json"
+          },
+          {
+            "labelKey": "components.transforms.document.flatten.arrayMode.explode",
+            "value": "explode"
+          }
+        ],
+        "required": false,
+        "secret": false,
+        "type": "select"
+      },
+      {
+        "descriptionKey": null,
+        "key": "separator",
+        "labelKey": "components.transforms.document.flatten.separator",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "text"
+      }
+    ],
+    "descriptionKey": "components.transforms.document.flatten.description",
+    "displayNameKey": "components.transforms.document.flatten.name",
+    "inputFamilies": [
+      "document"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.document.flatten",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "columns",
+        "labelKey": "components.transforms.rows.deduplicate.columns",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "json"
+      },
+      {
+        "descriptionKey": null,
+        "key": "keep",
+        "labelKey": "components.transforms.rows.deduplicate.keep",
+        "options": [
+          {
+            "labelKey": "components.transforms.rows.deduplicate.keep.first",
+            "value": "first"
+          },
+          {
+            "labelKey": "components.transforms.rows.deduplicate.keep.last",
+            "value": "last"
+          },
+          {
+            "labelKey": "components.transforms.rows.deduplicate.keep.none",
+            "value": "none"
+          }
+        ],
+        "required": false,
+        "secret": false,
+        "type": "select"
+      }
+    ],
+    "descriptionKey": "components.transforms.rows.deduplicate.description",
+    "displayNameKey": "components.transforms.rows.deduplicate.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.rows.deduplicate",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "column",
+        "labelKey": "components.transforms.rows.filter.column",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "operator",
+        "labelKey": "components.transforms.rows.filter.operator",
+        "options": [
+          {
+            "labelKey": "components.transforms.rows.filter.operator.equals",
+            "value": "equals"
+          },
+          {
+            "labelKey": "components.transforms.rows.filter.operator.notEquals",
+            "value": "notEquals"
+          },
+          {
+            "labelKey": "components.transforms.rows.filter.operator.greaterThan",
+            "value": "greaterThan"
+          },
+          {
+            "labelKey": "components.transforms.rows.filter.operator.greaterThanOrEqual",
+            "value": "greaterThanOrEqual"
+          },
+          {
+            "labelKey": "components.transforms.rows.filter.operator.lessThan",
+            "value": "lessThan"
+          },
+          {
+            "labelKey": "components.transforms.rows.filter.operator.lessThanOrEqual",
+            "value": "lessThanOrEqual"
+          },
+          {
+            "labelKey": "components.transforms.rows.filter.operator.isNull",
+            "value": "isNull"
+          },
+          {
+            "labelKey": "components.transforms.rows.filter.operator.isNotNull",
+            "value": "isNotNull"
+          }
+        ],
+        "required": true,
+        "secret": false,
+        "type": "select"
+      },
+      {
+        "descriptionKey": null,
+        "key": "value",
+        "labelKey": "components.transforms.rows.filter.value",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "json"
+      }
+    ],
+    "descriptionKey": "components.transforms.rows.filter.description",
+    "displayNameKey": "components.transforms.rows.filter.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.rows.filter",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "count",
+        "labelKey": "components.transforms.rows.limit.count",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "number"
+      }
+    ],
+    "descriptionKey": "components.transforms.rows.limit.description",
+    "displayNameKey": "components.transforms.rows.limit.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.rows.limit",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "columns",
+        "labelKey": "components.transforms.rows.sort.columns",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "json"
+      }
+    ],
+    "descriptionKey": "components.transforms.rows.sort.description",
+    "displayNameKey": "components.transforms.rows.sort.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.rows.sort",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "column",
+        "labelKey": "components.transforms.values.cast.column",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "data_type",
+        "labelKey": "components.transforms.values.cast.dataType",
+        "options": [
+          {
+            "labelKey": "components.transforms.values.cast.dataType.text",
+            "value": "text"
+          },
+          {
+            "labelKey": "components.transforms.values.cast.dataType.integer",
+            "value": "integer"
+          },
+          {
+            "labelKey": "components.transforms.values.cast.dataType.float",
+            "value": "float"
+          },
+          {
+            "labelKey": "components.transforms.values.cast.dataType.boolean",
+            "value": "boolean"
+          },
+          {
+            "labelKey": "components.transforms.values.cast.dataType.date",
+            "value": "date"
+          },
+          {
+            "labelKey": "components.transforms.values.cast.dataType.datetime",
+            "value": "datetime"
+          }
+        ],
+        "required": true,
+        "secret": false,
+        "type": "select"
+      },
+      {
+        "descriptionKey": null,
+        "key": "strict",
+        "labelKey": "components.transforms.values.cast.strict",
+        "options": null,
+        "required": false,
+        "secret": false,
+        "type": "boolean"
+      }
+    ],
+    "descriptionKey": "components.transforms.values.cast.description",
+    "displayNameKey": "components.transforms.values.cast.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.values.cast",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "column",
+        "labelKey": "components.transforms.values.fillNull.column",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "value",
+        "labelKey": "components.transforms.values.fillNull.value",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "json"
+      }
+    ],
+    "descriptionKey": "components.transforms.values.fillNull.description",
+    "displayNameKey": "components.transforms.values.fillNull.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.values.fill-null",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "column",
+        "labelKey": "components.transforms.values.normalizeString.column",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "operation",
+        "labelKey": "components.transforms.values.normalizeString.operation",
+        "options": [
+          {
+            "labelKey": "components.transforms.values.normalizeString.operation.trim",
+            "value": "trim"
+          },
+          {
+            "labelKey": "components.transforms.values.normalizeString.operation.lowercase",
+            "value": "lowercase"
+          },
+          {
+            "labelKey": "components.transforms.values.normalizeString.operation.uppercase",
+            "value": "uppercase"
+          },
+          {
+            "labelKey": "components.transforms.values.normalizeString.operation.normalizeWhitespace",
+            "value": "normalizeWhitespace"
+          }
+        ],
+        "required": true,
+        "secret": false,
+        "type": "select"
+      }
+    ],
+    "descriptionKey": "components.transforms.values.normalizeString.description",
+    "displayNameKey": "components.transforms.values.normalizeString.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.values.normalize-string",
+    "version": "v1"
+  },
+  {
+    "configFields": [
+      {
+        "descriptionKey": null,
+        "key": "column",
+        "labelKey": "components.transforms.values.replace.column",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "text"
+      },
+      {
+        "descriptionKey": null,
+        "key": "replacements",
+        "labelKey": "components.transforms.values.replace.replacements",
+        "options": null,
+        "required": true,
+        "secret": false,
+        "type": "json"
+      }
+    ],
+    "descriptionKey": "components.transforms.values.replace.description",
+    "displayNameKey": "components.transforms.values.replace.name",
+    "inputFamilies": [
+      "tabular"
+    ],
+    "kind": "transform",
+    "outputFamilies": [
+      "tabular"
+    ],
+    "type": "transform.values.replace",
+    "version": "v1"
+  }
+]
