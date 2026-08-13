@@ -1,105 +1,145 @@
 # PantaETL
 
-PantaETL is a self-hosted ETL platform built around a simple model:
-
-**Source → Transform → Export**
-
-A Trigger starts a pipeline. A Source acquires data. Zero or more Transform components manipulate it. An Export delivers the result.
-
-This starter repository intentionally contains **documentation only**. The codebase should be created from these specifications, roadmap tasks, workstream boundaries, and agent instructions. The roadmap deliberately scaffolds the complete application before shared contracts, then fans out into parallel frontend and backend implementation.
-
-## Project principles
-
-- Self-hosting is the primary deployment model.
-- Docker Compose is the baseline deployment experience.
-- PostgreSQL is the control-plane database and initial job queue.
-- Source, Transform, and Export have strict responsibility boundaries.
-- Temporary datasets are disposable execution state.
-- File artifacts may be retained according to policy.
-- Pipelines own their connections and schedules.
-- Different pipelines may run concurrently.
-- A single pipeline may have only one active run at a time.
-- Accessibility is mandatory.
-- Internationalization begins with the first implementation.
-- The design system is mandatory.
-- No emojis are used in the application UI.
-- Code is written for long-term human maintainability.
-- Architecture decisions are explicit and versioned.
-- Work is broken down so multiple contributors or agents can proceed concurrently.
-
-## Planned stack
-
-### TypeScript control plane
-
-- TypeScript
-- pnpm workspaces
-- TanStack Start
-- TanStack Router
-- TanStack Query
-- TanStack Form
-- TanStack Table
-- Zod
-- Drizzle ORM / Drizzle Kit
-- Better Auth
-- Tailwind CSS
-- Radix Primitives behind PantaETL's design system
-- Lucide
-- Vitest
-- Playwright
-
-### Python execution plane
-
-- Python 3.13
-- uv
-- Pydantic
-- Polars
-- PyArrow
-- Parquet
-- Ruff
-- mypy
-- pytest
-
-### Infrastructure
-
-- PostgreSQL
-- local filesystem by default
-- optional S3-compatible storage
-- Docker Compose
-- GitHub Actions
-- MIT License
-
-## Start here
-
-1. `AGENTS.md`
-2. `CLAUDE.md` if using Claude-based coding agents
-3. `ROADMAP.md`
-4. `docs/tasks/README.md`
-5. the assigned task file under `docs/tasks/`
-6. the relevant workstream under `docs/workstreams/`
-7. the relevant architecture docs under `docs/architecture/`
-8. applicable ADRs under `docs/adr/`
-
-## Documentation model
+PantaETL is a self-hosted ETL platform for analysts and data scientists. It is
+built around a deliberately small data model:
 
 ```text
-Architecture
-"What are we building and why?"
-        |
-        v
-Workstreams
-"Who owns each area?"
-        |
-        v
-Roadmap
-"What work exists and what is its state?"
-        |
-        v
-Task files
-"What exactly must be done?"
+Trigger → Source → Transform(s) → Export
 ```
 
-## Status
+A Trigger decides when a pipeline starts. Sources acquire data, Transforms
+operate on datasets without connection credentials, and Exports deliver the
+result. This separation keeps pipeline behavior understandable and gives each
+component a clear security boundary.
 
-Architecture baseline: **v0.1**
+## Project status
 
-Implementation status: **Not started**
+The repository has completed its foundation, service scaffolding, and shared
+contract milestones. The web app, scheduler, Python worker, garbage collector,
+Docker Compose topology, and shared packages are present as validated shells.
+
+The product is **not yet an end-to-end ETL application**: persistence,
+scheduling, component registries, pipeline UI, authentication, and ETL
+components remain on the roadmap. The currently runnable services are useful
+for development and health-check validation, not for processing data.
+
+## Architecture
+
+PantaETL is designed to be self-hosted with a small, understandable service
+set:
+
+```text
+Web control plane ─┐
+Scheduler ─────────┼── PostgreSQL ── Python worker ── Internal storage
+Garbage collector ─┘
+```
+
+- **Web control plane** — TypeScript/TanStack Start application for pipeline
+  configuration, operations, and administration.
+- **Scheduler** — TypeScript service that will claim due schedules, create
+  runs, and enqueue work.
+- **Python worker** — execution plane for Sources, Transforms, and Exports.
+- **Garbage collector** — retention cleanup for temporary datasets, artifacts,
+  and operational records.
+- **PostgreSQL** — planned control-plane data store and initial job queue.
+- **Internal storage** — local filesystem by default, with optional
+  S3-compatible storage.
+
+The default deployment remains Docker Compose-based. Infrastructure such as
+Redis, RabbitMQ, Kafka, MongoDB, and Elasticsearch is intentionally not part of
+the baseline.
+
+## Contracts
+
+Versioned cross-service contracts are defined once as JSON Schema in
+[`schemas/contracts`](schemas/contracts). Those schemas generate TypeScript
+declarations, TypeScript Zod-facing boundary validators, and worker-facing
+Pydantic models.
+
+Generated artifacts are committed and checked in CI. Edit the JSON Schema
+documents—not generated TypeScript or Python files—when changing a wire
+contract. The full rationale is in [ADR 0011](docs/adr/0011-json-schema-canonical-contracts.md).
+
+## Prerequisites
+
+- Node.js 24
+- pnpm 10.28.2
+- Python 3.13
+- [uv](https://docs.astral.sh/uv/)
+- Docker Desktop or another Docker Compose implementation (for the full local
+  service topology)
+
+## Getting started
+
+Install both language environments from the repository root:
+
+```bash
+pnpm install --frozen-lockfile
+uv sync --frozen
+```
+
+Start the current web shell:
+
+```bash
+pnpm web:dev
+```
+
+It listens on [http://localhost:3000](http://localhost:3000). To run the other
+service shells individually:
+
+```bash
+pnpm scheduler:dev
+pnpm garbage-collector:dev
+pnpm worker:dev
+```
+
+Or start the complete development topology, including PostgreSQL:
+
+```bash
+docker compose up --build
+```
+
+The Compose services expose web on port 3000, scheduler on 3010, garbage
+collector on 3011, and worker on 3020.
+
+## Quality checks
+
+Run the full TypeScript and application check suite:
+
+```bash
+pnpm check
+```
+
+Run the Python checks:
+
+```bash
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy .
+uv run pytest
+```
+
+After editing a contract, regenerate its language artifacts and run their
+staleness checks:
+
+```bash
+pnpm --filter @pantaetl/contracts generate:types
+uv run python scripts/generate_python_contract_models.py
+pnpm --filter @pantaetl/contracts check
+uv run python scripts/check_python_contract_models.py
+```
+
+## Roadmap and documentation
+
+[`ROADMAP.md`](ROADMAP.md) is the authoritative implementation dashboard. It
+tracks completed foundation work and the blocked/ready dependencies for the
+next domains.
+
+Architecture, security, data lifecycle, and workstream boundaries are described
+in [`docs/architecture`](docs/architecture), [`docs/adr`](docs/adr), and
+[`docs/workstreams`](docs/workstreams). Detailed implementation acceptance
+criteria live in [`docs/tasks`](docs/tasks).
+
+## License
+
+MIT. See [`LICENSE`](LICENSE).
