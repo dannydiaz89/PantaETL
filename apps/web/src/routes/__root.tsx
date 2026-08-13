@@ -3,6 +3,7 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import appCss from '../styles.css?url'
 import { LocaleProvider, useI18n } from '../locale-provider.js'
 import { defaultI18n } from '../locales/index.js'
+import { AppQueryProvider } from '../query-provider.js'
 import { ThemeProvider } from '../theme-provider.js'
 
 export const Route = createRootRoute({
@@ -46,7 +47,9 @@ function LocalizedDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AppQueryProvider>{children}</AppQueryProvider>
+        </ThemeProvider>
 
         <Scripts />
       </body>

@@ -23,6 +23,7 @@
     "@pantaetl/database": "workspace:*",
     "@pantaetl/pipeline": "workspace:*",
     "@pantaetl/ui": "workspace:*",
+    "@tanstack/react-query": "^5.101.4",
     "@tanstack/react-router": "latest",
     "@tanstack/react-start": "latest",
     "better-auth": "^1.6.27",
