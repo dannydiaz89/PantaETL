@@ -1,3 +1,5 @@
+"use client";
+
 import {
   flexRender,
   getCoreRowModel,
@@ -20,10 +22,13 @@ export interface DataTableSortLabels {
   readonly none: (column: string) => string;
 }
 
+/** Column definition accepted by the design-system data table. */
+export type DataTableColumn<TData extends RowData> = ColumnDef<TData, unknown>;
+
 /** Accessible, theme-aware table settings supplied by each localized screen. */
 export interface DataTableProps<TData extends RowData> {
   readonly caption: string;
-  readonly columns: readonly ColumnDef<TData, unknown>[];
+  readonly columns: readonly DataTableColumn<TData>[];
   readonly data: readonly TData[];
   readonly emptyState: ReactNode;
   readonly getColumnLabel: (columnId: string) => string;

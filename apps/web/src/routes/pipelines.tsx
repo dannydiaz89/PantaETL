@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { TopLevelPage } from "../components/top-level-page.js";
-import { t } from "../locales/index.js";
+import { AppShell } from "../components/app-shell.js";
+import { PipelineWorkspace } from "../components/pipeline-workspace.js";
 
-export const Route = createFileRoute("/pipelines")({ component: Pipelines });
+export const Route = createFileRoute("/pipelines")({
+  component: Pipelines,
+  ssr: false,
+});
 
 function Pipelines() {
-  return <TopLevelPage description={t("page.pipelines.description")} eyebrow={t("app.name")} title={t("page.pipelines.title")} />;
+  return <AppShell><PipelineWorkspace /></AppShell>;
 }

@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import {
   BarChart3,
@@ -44,9 +44,12 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   const location = useRouterState({ select: (state) => state.location.pathname });
   const { setTheme, theme } = useTheme();
   const nextTheme = theme === "light" ? "dark" : "light";
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => setHydrated(true), []);
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-hydrated={hydrated ? "true" : "false"}>
       <aside className="app-sidebar">
         <Link className="app-brand" to="/">
           <span aria-hidden="true" className="app-brand__mark">{t("shell.brandMark")}</span>

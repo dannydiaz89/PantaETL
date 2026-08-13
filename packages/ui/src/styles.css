@@ -40,8 +40,10 @@
   --panta-primary-hover: oklch(0.47 0.18 255);
   --panta-primary-text: oklch(1 0 0);
   --panta-success: oklch(0.58 0.15 150);
+  --panta-success-text: oklch(0.43 0.13 150);
   --panta-warning: oklch(0.69 0.15 78);
   --panta-danger: oklch(0.59 0.2 28);
+  --panta-danger-text: oklch(0.47 0.16 28);
   --panta-font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
   --panta-radius-sm: 0.375rem;
   --panta-radius-md: 0.625rem;
@@ -68,8 +70,10 @@
   --panta-primary-hover: oklch(0.74 0.16 255);
   --panta-primary-text: oklch(0.15 0.02 252);
   --panta-success: oklch(0.72 0.15 150);
+  --panta-success-text: oklch(0.72 0.15 150);
   --panta-warning: oklch(0.78 0.14 78);
   --panta-danger: oklch(0.69 0.19 28);
+  --panta-danger-text: oklch(0.69 0.19 28);
   --panta-focus-ring: oklch(0.68 0.18 255 / 0.5);
 }
 

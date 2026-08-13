@@ -18,8 +18,14 @@ async function expectNoAccessibilityViolations(page: Page) {
   }
 }
 
+/** Waits for client event handlers before exercising interactive controls. */
+async function waitForApplication(page: Page) {
+  await expect(page.locator(".app-shell")).toHaveAttribute("data-hydrated", "true");
+}
+
 test("navigation is keyboard reachable and has no WCAG A/AA violations", async ({ page }) => {
   await page.goto("/");
+  await waitForApplication(page);
   const navigation = page.getByRole("navigation", { name: en["navigation.menu"] });
   const expectedLinks = [
     [en["navigation.overview"], "/"],
@@ -48,9 +54,25 @@ test("login form and account dialog meet the accessibility baseline", async ({ p
   await expectNoAccessibilityViolations(page);
 
   await page.goto("/");
+  await waitForApplication(page);
   await page.getByRole("button", { name: en["account.menu"] }).click();
   await expect(page.getByRole("dialog", { name: en["account.title"] })).toBeVisible();
   await expectNoAccessibilityViolations(page);
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toBeHidden();
+});
+
+test("pipeline editor exposes the active-run edit lock", async ({ page }) => {
+  await page.goto("/pipelines");
+  await waitForApplication(page);
+  await expect(page.locator(".pipeline-workspace")).toHaveAttribute("data-hydrated", "true");
+  const nameInput = page.getByLabel(en["pipeline.name"]);
+
+  await expect(nameInput).toBeDisabled();
+  await expect(page.getByRole("status")).toContainText(en["pipeline.locked.title"]);
+  await page.getByRole("button", { exact: true, name: en["pipeline.open"] }).nth(1).click();
+  await expect(nameInput).toBeEnabled();
+  await page.getByRole("tab", { name: en["pipeline.tab.trigger"] }).click();
+  await expect(page.getByText(en["pipeline.trigger.description"])).toBeVisible();
+  await expectNoAccessibilityViolations(page);
 });
