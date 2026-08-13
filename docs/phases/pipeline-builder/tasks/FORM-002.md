@@ -1,7 +1,7 @@
 # FORM-002 — Write-Only Secret Field and Binding UX
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** Codex
 **Depends on:** FORM-001
 
 ## Scope
@@ -10,12 +10,12 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Acceptance criteria
 
-- [ ] Never request/display stored plaintext.
-- [ ] Indicate configured state safely.
-- [ ] Untouched secret preserves binding.
-- [ ] Replacement uses write-only secret mechanism.
-- [ ] Secret errors accessible.
-- [ ] Secret values never enter configuration.values.
+- [x] Never request/display stored plaintext.
+- [x] Indicate configured state safely.
+- [x] Untouched secret preserves binding.
+- [x] Replacement uses write-only secret mechanism.
+- [x] Secret errors accessible.
+- [x] Secret values never enter configuration.values.
 
 ## Required checks
 
@@ -30,4 +30,4 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Notes / blockers
 
-None.
+Secret replacement is an explicit write-only callback that receives the entered value only for immediate submission and returns an opaque binding reference. The generic configuration form continues to handle only non-secret values.
