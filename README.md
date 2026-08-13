@@ -74,8 +74,7 @@ contract. The full rationale is in [ADR 0011](docs/adr/0011-json-schema-canonica
 Install both language environments from the repository root:
 
 ```bash
-pnpm install --frozen-lockfile
-uv sync --frozen
+pnpm setup
 ```
 
 Create your ignored local environment file and replace the example authentication
@@ -85,7 +84,26 @@ secret before starting services:
 cp .env.example .env
 ```
 
-Start the web control plane directly, without Docker:
+Start the complete local stack with one command:
+
+```bash
+pnpm stack:up
+```
+
+It starts PostgreSQL in Docker, waits for it to become healthy, applies committed
+migrations, builds the shared packages, and then runs web, scheduler, garbage
+collector, and worker locally with labelled combined logs. PostgreSQL is exposed
+only on `127.0.0.1:5432`, matching the example `DATABASE_URL`. Press `Ctrl+C` to
+stop the local services while keeping PostgreSQL data available. Use these
+companion commands when needed:
+
+```bash
+pnpm stack:status
+pnpm stack:down # stops the local services and Docker PostgreSQL
+pnpm stack:reset # deletes local Docker volumes, including PostgreSQL data
+```
+
+Start only the web control plane directly, without Docker:
 
 ```bash
 pnpm dev
@@ -115,14 +133,15 @@ and `STORAGE_ROOT`. The current worker health process accepts optional `HOST`,
 `PORT`, `WORKER_ID`, and `LOG_LEVEL`; it will use `DATABASE_URL` once job
 execution is connected to its process entrypoint.
 
-Or start the complete development topology, including PostgreSQL:
+Use Docker Compose directly when you specifically want every service to run in
+containers:
 
 ```bash
 docker compose up --build
 ```
 
 The Compose services expose web on port 3000, scheduler on 3010, garbage
-collector on 3011, and worker on 3020.
+collector on 3011, worker on 3020, and PostgreSQL on loopback port 5432.
 
 Compose reads the same ignored `.env`, but derives each container's database URL
 using the internal PostgreSQL hostname. Production deployments must provide
@@ -146,14 +165,26 @@ uv run mypy .
 uv run pytest
 ```
 
-After editing a contract, regenerate its language artifacts and run their
-staleness checks:
+After editing a JSON Schema contract or route file, regenerate the committed
+artifacts across the stack:
 
 ```bash
-pnpm --filter @pantaetl/contracts generate:types
-uv run python scripts/generate_python_contract_models.py
-pnpm --filter @pantaetl/contracts check
-uv run python scripts/check_python_contract_models.py
+pnpm generate
+```
+
+Verify the generated TypeScript and Pydantic contract artifacts are current
+without rewriting repository files:
+
+```bash
+pnpm generate:check
+```
+
+Database migration generation remains deliberate rather than part of the generic
+artifact command:
+
+```bash
+pnpm db:migration:generate
+pnpm db:migrate
 ```
 
 ## Roadmap and documentation

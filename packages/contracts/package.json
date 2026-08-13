@@ -38,7 +38,7 @@
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "test": "vitest run tests",
     "generate:types": "node scripts/generate-types.mjs",
-    "check:types": "pnpm generate:types && node scripts/check-generated.mjs",
+    "check:types": "node scripts/generate-types.mjs --check && node scripts/check-generated.mjs",
     "check": "pnpm check:types && pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {

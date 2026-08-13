@@ -1,4 +1,5 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import process from "node:process";
 import { fileURLToPath, URL } from "node:url";
 
 import { compileFromFile } from "json-schema-to-typescript";
@@ -19,7 +20,12 @@ const schemas = [
   "source-execution-request",
 ];
 
-await mkdir(outputDirectory, { recursive: true });
+const checkOnly = process.argv.includes("--check");
+const staleFiles = [];
+
+if (!checkOnly) {
+  await mkdir(outputDirectory, { recursive: true });
+}
 
 for (const name of schemas) {
   const output = await compileFromFile(`${schemaDirectory}${name}.schema.json`, {
@@ -29,5 +35,29 @@ for (const name of schemas) {
     style: { singleQuote: true },
   });
 
-  await writeFile(`${outputDirectory}${name}.ts`, output);
+  const outputPath = `${outputDirectory}${name}.ts`;
+
+  if (checkOnly) {
+    try {
+      const currentOutput = await readFile(outputPath, "utf8");
+      if (currentOutput !== output) {
+        staleFiles.push(name);
+      }
+    } catch (error) {
+      if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+        staleFiles.push(name);
+        continue;
+      }
+
+      throw error;
+    }
+  } else {
+    await writeFile(outputPath, output);
+  }
+}
+
+if (staleFiles.length > 0) {
+  throw new Error(
+    `Generated TypeScript contract types are stale: ${staleFiles.join(", ")}. Run pnpm generate.`,
+  );
 }

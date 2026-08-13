@@ -5,6 +5,9 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+    "setup": "node scripts/development.mjs setup",
+    "generate": "node scripts/development.mjs generate",
+    "generate:check": "node scripts/development.mjs generate-check",
     "dev": "pnpm web:dev",
     "check": "pnpm lint && pnpm typecheck && pnpm packages:check && pnpm test && pnpm web:check && pnpm web:a11y && pnpm services:check",
     "lint": "eslint . --max-warnings 0",
@@ -27,7 +30,14 @@
     "garbage-collector:start": "pnpm --filter garbage-collector start",
     "worker:check": "uv run ruff check workers tests && uv run ruff format --check workers tests && uv run mypy workers && uv run pytest",
     "worker:dev": "uv run --env-file .env python -m workers.python",
-    "packages:check": "pnpm --filter @pantaetl/contracts check && pnpm --filter @pantaetl/database check && pnpm --filter @pantaetl/ui check && pnpm --filter @pantaetl/config check && pnpm --filter @pantaetl/logging check && pnpm --filter @pantaetl/pipeline check"
+    "packages:build": "pnpm --filter @pantaetl/contracts build && pnpm --filter @pantaetl/config build && pnpm --filter @pantaetl/logging build && pnpm --filter @pantaetl/pipeline build && pnpm --filter @pantaetl/database build && pnpm --filter @pantaetl/ui build",
+    "packages:check": "pnpm --filter @pantaetl/contracts check && pnpm --filter @pantaetl/database check && pnpm --filter @pantaetl/ui check && pnpm --filter @pantaetl/config check && pnpm --filter @pantaetl/logging check && pnpm --filter @pantaetl/pipeline check",
+    "db:migration:generate": "pnpm --filter @pantaetl/database migrate:generate",
+    "db:migrate": "node scripts/development.mjs migrate",
+    "stack:up": "node scripts/development.mjs stack-up",
+    "stack:status": "node scripts/development.mjs stack-status",
+    "stack:down": "node scripts/development.mjs stack-down",
+    "stack:reset": "node scripts/development.mjs stack-reset"
   },
   "packageManager": "pnpm@10.28.2",
   "pnpm": {

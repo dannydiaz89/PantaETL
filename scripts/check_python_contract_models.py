@@ -16,8 +16,8 @@ def run(command: list[str]) -> None:
 
 
 def main() -> None:
-    """Regenerate models and ensure the repository contains the resulting files."""
-    run([sys.executable, "scripts/generate_python_contract_models.py"])
+    """Ensure generated models match canonical schemas without rewriting them."""
+    run([sys.executable, "scripts/generate_python_contract_models.py", "--check"])
     run(["git", "diff", "--exit-code", "--", GENERATED_DIRECTORY])
 
     untracked = subprocess.run(
