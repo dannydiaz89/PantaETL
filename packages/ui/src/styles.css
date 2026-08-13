@@ -1,3 +1,90 @@
 @import "tailwindcss";
 
-/* Semantic tokens are introduced by the theme foundation. */
+@theme inline {
+  --color-app-canvas: var(--panta-canvas);
+  --color-app-surface: var(--panta-surface);
+  --color-app-surface-raised: var(--panta-surface-raised);
+  --color-app-sidebar: var(--panta-sidebar);
+  --color-app-border: var(--panta-border);
+  --color-app-text: var(--panta-text);
+  --color-app-muted: var(--panta-muted);
+  --color-app-subtle: var(--panta-subtle);
+  --color-app-primary: var(--panta-primary);
+  --color-app-primary-hover: var(--panta-primary-hover);
+  --color-app-primary-text: var(--panta-primary-text);
+  --color-app-success: var(--panta-success);
+  --color-app-warning: var(--panta-warning);
+  --color-app-danger: var(--panta-danger);
+  --font-sans: var(--panta-font-sans);
+  --radius-app-sm: var(--panta-radius-sm);
+  --radius-app-md: var(--panta-radius-md);
+  --radius-app-lg: var(--panta-radius-lg);
+}
+
+:root {
+  color-scheme: light;
+  --panta-canvas: oklch(0.985 0.004 250);
+  --panta-surface: oklch(1 0 0);
+  --panta-surface-raised: oklch(0.975 0.006 250);
+  --panta-sidebar: oklch(0.18 0.035 252);
+  --panta-border: oklch(0.89 0.012 250);
+  --panta-text: oklch(0.25 0.02 250);
+  --panta-muted: oklch(0.49 0.018 250);
+  --panta-subtle: oklch(0.94 0.009 250);
+  --panta-primary: oklch(0.54 0.19 255);
+  --panta-primary-hover: oklch(0.47 0.18 255);
+  --panta-primary-text: oklch(1 0 0);
+  --panta-success: oklch(0.58 0.15 150);
+  --panta-warning: oklch(0.69 0.15 78);
+  --panta-danger: oklch(0.59 0.2 28);
+  --panta-font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --panta-radius-sm: 0.375rem;
+  --panta-radius-md: 0.625rem;
+  --panta-radius-lg: 0.875rem;
+  --panta-focus-ring: oklch(0.54 0.19 255 / 0.42);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --panta-canvas: oklch(0.16 0.018 252);
+  --panta-surface: oklch(0.205 0.02 252);
+  --panta-surface-raised: oklch(0.245 0.022 252);
+  --panta-sidebar: oklch(0.13 0.024 252);
+  --panta-border: oklch(0.33 0.018 252);
+  --panta-text: oklch(0.94 0.01 250);
+  --panta-muted: oklch(0.7 0.02 250);
+  --panta-subtle: oklch(0.28 0.02 252);
+  --panta-primary: oklch(0.68 0.18 255);
+  --panta-primary-hover: oklch(0.74 0.16 255);
+  --panta-primary-text: oklch(0.15 0.02 252);
+  --panta-success: oklch(0.72 0.15 150);
+  --panta-warning: oklch(0.78 0.14 78);
+  --panta-danger: oklch(0.69 0.19 28);
+  --panta-focus-ring: oklch(0.68 0.18 255 / 0.5);
+}
+
+* {
+  border-color: var(--panta-border);
+}
+
+html {
+  background: var(--panta-canvas);
+  color: var(--panta-text);
+  font-family: var(--panta-font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--panta-focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

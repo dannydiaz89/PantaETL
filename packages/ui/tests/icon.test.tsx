@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { Icon, cx } from "../src/index.js";
+import { resolveTheme } from "../src/theme.js";
 
 describe("design-system foundation", () => {
   it("combines optional utility classes predictably", () => {
@@ -20,5 +21,11 @@ describe("design-system foundation", () => {
 
     expect(markup).toContain('role="img"');
     expect(markup).toContain('aria-label="Warning"');
+  });
+
+  it("limits token themes to the supported light and dark values", () => {
+    expect(resolveTheme("dark")).toBe("dark");
+    expect(resolveTheme("light")).toBe("light");
+    expect(resolveTheme("unexpected")).toBe("light");
   });
 });
