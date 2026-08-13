@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Install Chromium for accessibility checks
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter web exec playwright install --with-deps chromium
       - name: Run quality checks
         run: pnpm check
 
@@ -68,7 +68,7 @@ jobs:
         run: docker compose config --quiet
       - name: Apply committed database migrations
         run: |
-          docker compose up -d postgres
+          docker compose up -d --wait postgres
           for migration in packages/database/drizzle/[0-9][0-9][0-9][0-9]_*.sql; do
             cat "$migration" | docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U pantaetl -d pantaetl
           done
