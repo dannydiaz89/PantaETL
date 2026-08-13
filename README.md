@@ -78,7 +78,7 @@ pnpm setup
 ```
 
 Create your ignored local environment file and replace the example authentication
-secret before starting services:
+and scheduler-service secrets before starting services:
 
 ```bash
 cp .env.example .env
@@ -137,7 +137,10 @@ pnpm worker:dev
 ```
 
 All three direct commands read the same root `.env`. Scheduler and garbage
-collector require `DATABASE_URL`; their default ports are 3010 and 3011.
+collector require `DATABASE_URL`; scheduler also requires
+`SCHEDULER_INTERNAL_TOKEN`, a 32-character minimum secret shared only with the
+web control plane for authenticated manual-run requests. Their default ports
+are 3010 and 3011.
 Garbage collector additionally accepts `GC_INTERVAL_SECONDS`, `GC_BATCH_SIZE`,
 and `STORAGE_ROOT`. The current worker health process accepts optional `HOST`,
 `PORT`, `WORKER_ID`, and `LOG_LEVEL`; it will use `DATABASE_URL` once job

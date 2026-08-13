@@ -27,6 +27,10 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPipelinesPipelineIdRouteImport } from './routes/api/pipelines/$pipelineId'
 import { Route as ApiSystemHealthRouteImport } from './routes/api/system/health'
 import { Route as ApiTokensTokenIdRouteImport } from './routes/api/tokens/$tokenId'
+import { Route as ApiPipelinesPipelineIdDisableRouteImport } from './routes/api/pipelines/$pipelineId/disable'
+import { Route as ApiPipelinesPipelineIdDuplicateRouteImport } from './routes/api/pipelines/$pipelineId/duplicate'
+import { Route as ApiPipelinesPipelineIdEnableRouteImport } from './routes/api/pipelines/$pipelineId/enable'
+import { Route as ApiPipelinesPipelineIdRunRouteImport } from './routes/api/pipelines/$pipelineId/run'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -118,6 +122,30 @@ const ApiTokensTokenIdRoute = ApiTokensTokenIdRouteImport.update({
   path: '/$tokenId',
   getParentRoute: () => ApiTokensRoute,
 } as any)
+const ApiPipelinesPipelineIdDisableRoute =
+  ApiPipelinesPipelineIdDisableRouteImport.update({
+    id: '/disable',
+    path: '/disable',
+    getParentRoute: () => ApiPipelinesPipelineIdRoute,
+  } as any)
+const ApiPipelinesPipelineIdDuplicateRoute =
+  ApiPipelinesPipelineIdDuplicateRouteImport.update({
+    id: '/duplicate',
+    path: '/duplicate',
+    getParentRoute: () => ApiPipelinesPipelineIdRoute,
+  } as any)
+const ApiPipelinesPipelineIdEnableRoute =
+  ApiPipelinesPipelineIdEnableRouteImport.update({
+    id: '/enable',
+    path: '/enable',
+    getParentRoute: () => ApiPipelinesPipelineIdRoute,
+  } as any)
+const ApiPipelinesPipelineIdRunRoute =
+  ApiPipelinesPipelineIdRunRouteImport.update({
+    id: '/run',
+    path: '/run',
+    getParentRoute: () => ApiPipelinesPipelineIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -135,9 +163,13 @@ export interface FileRoutesByFullPath {
   '/api/pipelines': typeof ApiPipelinesRouteWithChildren
   '/api/tokens': typeof ApiTokensRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRoute
+  '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRouteWithChildren
   '/api/system/health': typeof ApiSystemHealthRoute
   '/api/tokens/$tokenId': typeof ApiTokensTokenIdRoute
+  '/api/pipelines/$pipelineId/disable': typeof ApiPipelinesPipelineIdDisableRoute
+  '/api/pipelines/$pipelineId/duplicate': typeof ApiPipelinesPipelineIdDuplicateRoute
+  '/api/pipelines/$pipelineId/enable': typeof ApiPipelinesPipelineIdEnableRoute
+  '/api/pipelines/$pipelineId/run': typeof ApiPipelinesPipelineIdRunRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -155,9 +187,13 @@ export interface FileRoutesByTo {
   '/api/pipelines': typeof ApiPipelinesRouteWithChildren
   '/api/tokens': typeof ApiTokensRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRoute
+  '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRouteWithChildren
   '/api/system/health': typeof ApiSystemHealthRoute
   '/api/tokens/$tokenId': typeof ApiTokensTokenIdRoute
+  '/api/pipelines/$pipelineId/disable': typeof ApiPipelinesPipelineIdDisableRoute
+  '/api/pipelines/$pipelineId/duplicate': typeof ApiPipelinesPipelineIdDuplicateRoute
+  '/api/pipelines/$pipelineId/enable': typeof ApiPipelinesPipelineIdEnableRoute
+  '/api/pipelines/$pipelineId/run': typeof ApiPipelinesPipelineIdRunRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -176,9 +212,13 @@ export interface FileRoutesById {
   '/api/pipelines': typeof ApiPipelinesRouteWithChildren
   '/api/tokens': typeof ApiTokensRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRoute
+  '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRouteWithChildren
   '/api/system/health': typeof ApiSystemHealthRoute
   '/api/tokens/$tokenId': typeof ApiTokensTokenIdRoute
+  '/api/pipelines/$pipelineId/disable': typeof ApiPipelinesPipelineIdDisableRoute
+  '/api/pipelines/$pipelineId/duplicate': typeof ApiPipelinesPipelineIdDuplicateRoute
+  '/api/pipelines/$pipelineId/enable': typeof ApiPipelinesPipelineIdEnableRoute
+  '/api/pipelines/$pipelineId/run': typeof ApiPipelinesPipelineIdRunRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -201,6 +241,10 @@ export interface FileRouteTypes {
     | '/api/pipelines/$pipelineId'
     | '/api/system/health'
     | '/api/tokens/$tokenId'
+    | '/api/pipelines/$pipelineId/disable'
+    | '/api/pipelines/$pipelineId/duplicate'
+    | '/api/pipelines/$pipelineId/enable'
+    | '/api/pipelines/$pipelineId/run'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -221,6 +265,10 @@ export interface FileRouteTypes {
     | '/api/pipelines/$pipelineId'
     | '/api/system/health'
     | '/api/tokens/$tokenId'
+    | '/api/pipelines/$pipelineId/disable'
+    | '/api/pipelines/$pipelineId/duplicate'
+    | '/api/pipelines/$pipelineId/enable'
+    | '/api/pipelines/$pipelineId/run'
   id:
     | '__root__'
     | '/'
@@ -241,6 +289,10 @@ export interface FileRouteTypes {
     | '/api/pipelines/$pipelineId'
     | '/api/system/health'
     | '/api/tokens/$tokenId'
+    | '/api/pipelines/$pipelineId/disable'
+    | '/api/pipelines/$pipelineId/duplicate'
+    | '/api/pipelines/$pipelineId/enable'
+    | '/api/pipelines/$pipelineId/run'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -390,15 +442,63 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTokensTokenIdRouteImport
       parentRoute: typeof ApiTokensRoute
     }
+    '/api/pipelines/$pipelineId/disable': {
+      id: '/api/pipelines/$pipelineId/disable'
+      path: '/disable'
+      fullPath: '/api/pipelines/$pipelineId/disable'
+      preLoaderRoute: typeof ApiPipelinesPipelineIdDisableRouteImport
+      parentRoute: typeof ApiPipelinesPipelineIdRoute
+    }
+    '/api/pipelines/$pipelineId/duplicate': {
+      id: '/api/pipelines/$pipelineId/duplicate'
+      path: '/duplicate'
+      fullPath: '/api/pipelines/$pipelineId/duplicate'
+      preLoaderRoute: typeof ApiPipelinesPipelineIdDuplicateRouteImport
+      parentRoute: typeof ApiPipelinesPipelineIdRoute
+    }
+    '/api/pipelines/$pipelineId/enable': {
+      id: '/api/pipelines/$pipelineId/enable'
+      path: '/enable'
+      fullPath: '/api/pipelines/$pipelineId/enable'
+      preLoaderRoute: typeof ApiPipelinesPipelineIdEnableRouteImport
+      parentRoute: typeof ApiPipelinesPipelineIdRoute
+    }
+    '/api/pipelines/$pipelineId/run': {
+      id: '/api/pipelines/$pipelineId/run'
+      path: '/run'
+      fullPath: '/api/pipelines/$pipelineId/run'
+      preLoaderRoute: typeof ApiPipelinesPipelineIdRunRouteImport
+      parentRoute: typeof ApiPipelinesPipelineIdRoute
+    }
   }
 }
 
+interface ApiPipelinesPipelineIdRouteChildren {
+  ApiPipelinesPipelineIdDisableRoute: typeof ApiPipelinesPipelineIdDisableRoute
+  ApiPipelinesPipelineIdDuplicateRoute: typeof ApiPipelinesPipelineIdDuplicateRoute
+  ApiPipelinesPipelineIdEnableRoute: typeof ApiPipelinesPipelineIdEnableRoute
+  ApiPipelinesPipelineIdRunRoute: typeof ApiPipelinesPipelineIdRunRoute
+}
+
+const ApiPipelinesPipelineIdRouteChildren: ApiPipelinesPipelineIdRouteChildren =
+  {
+    ApiPipelinesPipelineIdDisableRoute: ApiPipelinesPipelineIdDisableRoute,
+    ApiPipelinesPipelineIdDuplicateRoute: ApiPipelinesPipelineIdDuplicateRoute,
+    ApiPipelinesPipelineIdEnableRoute: ApiPipelinesPipelineIdEnableRoute,
+    ApiPipelinesPipelineIdRunRoute: ApiPipelinesPipelineIdRunRoute,
+  }
+
+const ApiPipelinesPipelineIdRouteWithChildren =
+  ApiPipelinesPipelineIdRoute._addFileChildren(
+    ApiPipelinesPipelineIdRouteChildren,
+  )
+
 interface ApiPipelinesRouteChildren {
-  ApiPipelinesPipelineIdRoute: typeof ApiPipelinesPipelineIdRoute
+  ApiPipelinesPipelineIdRoute: typeof ApiPipelinesPipelineIdRouteWithChildren
 }
 
 const ApiPipelinesRouteChildren: ApiPipelinesRouteChildren = {
-  ApiPipelinesPipelineIdRoute: ApiPipelinesPipelineIdRoute,
+  ApiPipelinesPipelineIdRoute: ApiPipelinesPipelineIdRouteWithChildren,
 }
 
 const ApiPipelinesRouteWithChildren = ApiPipelinesRoute._addFileChildren(

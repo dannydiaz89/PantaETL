@@ -2,6 +2,7 @@
 export interface ServiceConfig {
   readonly databaseUrl: string;
   readonly host: string;
+  readonly internalToken: string;
   readonly port: number;
   readonly serviceName: string;
 }
@@ -26,11 +27,23 @@ function readPort(value: string | undefined, fallback: number): number {
   return port;
 }
 
+/** Read the token that authenticates control-plane requests to scheduler internals. */
+function readInternalToken(value: string | undefined): string {
+  const token = value?.trim();
+
+  if (!token || token.length < 32) {
+    throw new Error("SCHEDULER_INTERNAL_TOKEN must contain at least 32 characters.");
+  }
+
+  return token;
+}
+
 /** Reads host and port settings without introducing service-specific behavior. */
 export function loadConfig(serviceName: string, defaultPort: number): ServiceConfig {
   return {
     databaseUrl: readDatabaseUrl(process.env.DATABASE_URL),
     host: process.env.HOST ?? '127.0.0.1',
+    internalToken: readInternalToken(process.env.SCHEDULER_INTERNAL_TOKEN),
     port: readPort(process.env.PORT, defaultPort),
     serviceName,
   };

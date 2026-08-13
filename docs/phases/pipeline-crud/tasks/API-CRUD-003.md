@@ -1,7 +1,7 @@
 # API-CRUD-003 — Pipeline Action Routes
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** api_pipeline_actions
 **Depends on:** CRUD-006, CRUD-007
 
 ## Scope
@@ -10,13 +10,13 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Add POST duplicate.
-- [ ] Add POST run.
-- [ ] Add POST enable.
-- [ ] Add POST disable.
-- [ ] Keep route domain logic thin.
-- [ ] Use structured conflict errors.
-- [ ] Add success/invalid-state tests.
+- [x] Add POST duplicate.
+- [x] Add POST run.
+- [x] Add POST enable.
+- [x] Add POST disable.
+- [x] Keep route domain logic thin.
+- [x] Use structured conflict errors.
+- [x] Add success/invalid-state tests.
 
 ## Required checks
 
@@ -31,3 +31,8 @@ Implement only the behavior described by this task and its acceptance criteria. 
 ## Notes / blockers
 
 None.
+
+## Implementation notes
+
+- The run route delegates through a token-authenticated scheduler endpoint, preserving the scheduler-owned durable queue transaction.
+- Route handlers retain only authentication, canonical validation, and safe conflict mapping.

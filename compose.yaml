@@ -32,6 +32,8 @@ services:
       BETTER_AUTH_TRUSTED_ORIGINS: ${BETTER_AUTH_TRUSTED_ORIGINS:?Copy .env.example to .env and set BETTER_AUTH_TRUSTED_ORIGINS.}
       GARBAGE_COLLECTOR_HEALTH_URL: http://garbage-collector:3011/health
       SCHEDULER_HEALTH_URL: http://scheduler:3010/health
+      SCHEDULER_INTERNAL_TOKEN: ${SCHEDULER_INTERNAL_TOKEN:?Copy .env.example to .env and set SCHEDULER_INTERNAL_TOKEN.}
+      SCHEDULER_RUN_URL: http://scheduler:3010/internal/pipeline-runs
       WORKER_HEALTH_URL: http://worker:3020/health
       STORAGE_ROOT: /var/lib/pantaetl/storage
     depends_on:
@@ -52,6 +54,7 @@ services:
       HOST: 0.0.0.0
       PORT: 3010
       DATABASE_URL: postgresql://${POSTGRES_USER:?Copy .env.example to .env and set POSTGRES_USER.}:${POSTGRES_PASSWORD:?Copy .env.example to .env and set POSTGRES_PASSWORD.}@postgres:5432/${POSTGRES_DB:?Copy .env.example to .env and set POSTGRES_DB.}
+      SCHEDULER_INTERNAL_TOKEN: ${SCHEDULER_INTERNAL_TOKEN:?Copy .env.example to .env and set SCHEDULER_INTERNAL_TOKEN.}
     depends_on:
       postgres:
         condition: service_healthy

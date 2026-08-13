@@ -19,6 +19,7 @@ export default defineConfig({
       BETTER_AUTH_TRUSTED_ORIGINS: "http://127.0.0.1:3000",
       BETTER_AUTH_URL: "http://127.0.0.1:3000",
       DATABASE_URL: "postgresql://pantaetl:pantaetl@127.0.0.1:5432/pantaetl",
+      SCHEDULER_INTERNAL_TOKEN: "scheduler-internal-token-for-a11y-tests",
     },
     reuseExistingServer: process.env.CI !== "true",
     url: "http://127.0.0.1:3000",
