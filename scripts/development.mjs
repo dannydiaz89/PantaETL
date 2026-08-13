@@ -3,6 +3,7 @@ import { execFileSync, spawn } from "node:child_process";
 import console from "node:console";
 import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
+import { createServer } from "node:net";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process, { loadEnvFile } from "node:process";
@@ -18,10 +19,10 @@ const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 const docker = process.platform === "win32" ? "docker.exe" : "docker";
 
 const services = [
-  { name: "web", arguments: ["web:dev"] },
-  { name: "scheduler", arguments: ["scheduler:dev"] },
-  { name: "garbage-collector", arguments: ["garbage-collector:dev"] },
-  { name: "worker", arguments: ["worker:dev"] },
+  { name: "web", arguments: ["web:dev"], port: 3000 },
+  { name: "scheduler", arguments: ["scheduler:dev"], port: 3010 },
+  { name: "garbage-collector", arguments: ["garbage-collector:dev"], port: 3011 },
+  { name: "worker", arguments: ["worker:dev"], port: 3020 },
 ];
 
 /** Run a command to completion while preserving its interactive output. */
@@ -159,6 +160,7 @@ function prefixOutput(serviceName, stream) {
 function startService(service) {
   const child = spawn(pnpm, service.arguments, {
     cwd: repositoryRoot,
+    detached: process.platform !== "win32",
     env: process.env,
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -172,27 +174,89 @@ function startService(service) {
   return child;
 }
 
-/** Stop a child process gracefully, escalating only if it does not exit promptly. */
-async function stopService(child) {
-  if (child.exitCode !== null || child.signalCode !== null) {
+/** Fail before startup when an external process already owns a local service port. */
+async function ensureServicePortAvailable(service) {
+  await new Promise((resolve, reject) => {
+    const server = createServer();
+
+    server.once("error", (error) => {
+      if ("code" in error && error.code === "EADDRINUSE") {
+        reject(
+          new Error(
+            `Port ${service.port} for ${service.name} is already in use. Stop the existing process before starting the local stack.`,
+          ),
+        );
+        return;
+      }
+
+      reject(error);
+    });
+    server.listen(service.port, "127.0.0.1", () => {
+      server.close((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve();
+      });
+    });
+  });
+}
+
+/** Send a signal to the detached process group that owns a local service. */
+function signalService(child, signal) {
+  if (process.platform === "win32" || child.pid === undefined) {
+    child.kill(signal);
     return;
   }
 
-  const exited = new Promise((resolve) => {
-    child.once("exit", resolve);
-  });
-  child.kill("SIGTERM");
+  try {
+    process.kill(-child.pid, signal);
+  } catch (error) {
+    if (!(error && typeof error === "object" && "code" in error && error.code === "ESRCH")) {
+      throw error;
+    }
+  }
+}
 
-  const stoppedGracefully = await Promise.race([
-    exited.then(() => true),
-    new Promise((resolve) => {
-      setTimeout(() => resolve(false), 10_000);
-    }),
-  ]);
+/** Return whether the detached process group for a local service is still alive. */
+function isServiceRunning(child) {
+  if (process.platform === "win32" || child.pid === undefined) {
+    return child.exitCode === null && child.signalCode === null;
+  }
 
-  if (!stoppedGracefully && child.exitCode === null && child.signalCode === null) {
-    child.kill("SIGKILL");
-    await exited;
+  try {
+    process.kill(-child.pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Wait for all processes in a local service group to exit. */
+async function waitForServiceExit(child, timeoutMilliseconds) {
+  const deadline = Date.now() + timeoutMilliseconds;
+
+  while (isServiceRunning(child) && Date.now() < deadline) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
+  }
+
+  return !isServiceRunning(child);
+}
+
+/** Stop a child process gracefully, escalating only if it does not exit promptly. */
+async function stopService(child) {
+  if (!isServiceRunning(child)) {
+    return;
+  }
+
+  signalService(child, "SIGTERM");
+  if (!(await waitForServiceExit(child, 10_000))) {
+    signalService(child, "SIGKILL");
+    await waitForServiceExit(child, 1_000);
   }
 }
 
@@ -226,6 +290,8 @@ async function startStack() {
   if (priorState) {
     await removeStackState();
   }
+
+  await Promise.all(services.map(ensureServicePortAvailable));
 
   await run(docker, ["compose", "up", "-d", "--wait", "postgres"]);
   await checkGeneratedArtifacts();
