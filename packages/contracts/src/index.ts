@@ -40,6 +40,7 @@ export {
   runStateSchema,
   runStepResultSchema,
   runStepStateSchema,
+  sourceExecutionRequestSchema,
   workerClaimSchema,
 } from "./execution/index.js";
 export type {
@@ -53,6 +54,7 @@ export type {
   RunState,
   RunStepResult,
   RunStepState,
+  SourceExecutionRequest,
   WorkerClaim,
 } from "./execution/index.js";
 

@@ -8,7 +8,11 @@ import {
   artifactDescriptorSchema,
   datasetDescriptorSchema,
 } from "../dist/dataset/index.js";
-import { jobSchema, runSchema } from "../dist/execution/index.js";
+import {
+  jobSchema,
+  runSchema,
+  sourceExecutionRequestSchema,
+} from "../dist/execution/index.js";
 import { pipelineSchema } from "../dist/pipeline/index.js";
 
 const outputDirectory = fileURLToPath(
@@ -22,6 +26,7 @@ const schemas = [
   ["job", jobSchema],
   ["pipeline", pipelineSchema],
   ["run", runSchema],
+  ["source-execution-request", sourceExecutionRequestSchema],
 ];
 
 await mkdir(outputDirectory, { recursive: true });

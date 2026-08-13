@@ -4,6 +4,7 @@ export {
   jobSchema,
   jobStateSchema,
   retryPolicySchema,
+  sourceExecutionRequestSchema,
   workerClaimSchema,
 } from "./jobs.js";
 export type {
@@ -11,6 +12,7 @@ export type {
   Job,
   JobState,
   RetryPolicy,
+  SourceExecutionRequest,
   WorkerClaim,
 } from "./jobs.js";
 

@@ -25,6 +25,15 @@ Representative contracts:
 
 If generated Pydantic ergonomics are poor, retain JSON Schema as the wire source and enforce compatibility tests against thin handwritten models.
 
+## Python interoperability strategy
+
+Zod definitions and the generated JSON Schema files remain the canonical contract
+source. The Python worker uses thin handwritten Pydantic models for representative
+worker-boundary payloads. Shared fixture tests require those models to accept and
+reject the same Dataset, Job, Source execution request, and Run result payloads as
+their Zod counterparts. This keeps the Python API ergonomic without creating a
+second canonical schema source.
+
 ## Package layout
 
 ```text

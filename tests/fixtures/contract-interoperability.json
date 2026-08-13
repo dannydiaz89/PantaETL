@@ -1,0 +1,89 @@
+{
+  "valid": {
+    "dataset": {
+      "contractVersion": "v1",
+      "id": "123e4567-e89b-12d3-a456-426614174100",
+      "family": "document",
+      "format": "json",
+      "storage": {
+        "kind": "local",
+        "location": "runs/100/source.json",
+        "encrypted": true
+      },
+      "pipelineId": "123e4567-e89b-12d3-a456-426614174101",
+      "runId": "123e4567-e89b-12d3-a456-426614174102",
+      "stepId": "123e4567-e89b-12d3-a456-426614174103",
+      "createdAt": "2026-08-13T01:00:00Z",
+      "expiresAt": "2026-08-14T01:00:00Z"
+    },
+    "job": {
+      "contractVersion": "v1",
+      "id": "123e4567-e89b-12d3-a456-426614174104",
+      "pipelineId": "123e4567-e89b-12d3-a456-426614174101",
+      "runId": "123e4567-e89b-12d3-a456-426614174102",
+      "stepId": "123e4567-e89b-12d3-a456-426614174103",
+      "componentId": "123e4567-e89b-12d3-a456-426614174105",
+      "state": "running",
+      "attempt": 1,
+      "retryPolicy": {
+        "maxAttempts": 3,
+        "retryDelaySeconds": 30
+      },
+      "availableAt": "2026-08-13T01:00:00Z",
+      "claim": {
+        "workerId": "123e4567-e89b-12d3-a456-426614174106",
+        "claimedAt": "2026-08-13T01:00:01Z",
+        "heartbeatAt": "2026-08-13T01:00:02Z"
+      }
+    },
+    "sourceExecutionRequest": {
+      "contractVersion": "v1",
+      "jobId": "123e4567-e89b-12d3-a456-426614174104",
+      "pipelineId": "123e4567-e89b-12d3-a456-426614174101",
+      "runId": "123e4567-e89b-12d3-a456-426614174102",
+      "stepId": "123e4567-e89b-12d3-a456-426614174103",
+      "componentId": "123e4567-e89b-12d3-a456-426614174105",
+      "componentType": "source.rest-api",
+      "componentVersion": "v1",
+      "configuration": {
+        "values": {
+          "endpoint": "https://example.test/data"
+        },
+        "secretBindings": [
+          {
+            "key": "apiToken",
+            "binding": "REST_API_TOKEN"
+          }
+        ]
+      }
+    },
+    "run": {
+      "contractVersion": "v1",
+      "id": "123e4567-e89b-12d3-a456-426614174102",
+      "pipelineId": "123e4567-e89b-12d3-a456-426614174101",
+      "state": "completed_with_warnings",
+      "createdAt": "2026-08-13T01:00:00Z",
+      "startedAt": "2026-08-13T01:00:01Z",
+      "completedAt": "2026-08-13T01:01:00Z",
+      "warningCount": 1,
+      "steps": [
+        {
+          "stepId": "123e4567-e89b-12d3-a456-426614174103",
+          "componentId": "123e4567-e89b-12d3-a456-426614174105",
+          "state": "completed_with_warnings",
+          "warningCount": 1,
+          "metrics": {
+            "recordsRead": 2,
+            "recordsWritten": 1
+          }
+        }
+      ]
+    }
+  },
+  "invalid": {
+    "dataset": { "contractVersion": "v2" },
+    "job": { "contractVersion": "v2" },
+    "sourceExecutionRequest": { "contractVersion": "v2" },
+    "run": { "contractVersion": "v2" }
+  }
+}
