@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Canonical control-plane API contract definitions.",
+  "$id": "https://pantaetl.dev/schemas/pipeline-api.schema.json",
+  "title": "PipelineApiContracts",
+  "type": "object",
+  "properties": {
+    "pipelineListRequest": { "$ref": "#/$defs/pipelineListRequest" },
+    "pipelineListResponse": { "$ref": "#/$defs/pipelineListResponse" },
+    "pipelineCreateRequest": { "$ref": "#/$defs/pipelineCreateRequest" },
+    "pipelineCreateResponse": { "$ref": "#/$defs/pipelineCreateResponse" },
+    "pipelineDetailRequest": { "$ref": "#/$defs/pipelineDetailRequest" },
+    "pipelineDetailResponse": { "$ref": "#/$defs/pipelineDetailResponse" },
+    "pipelineUpdateRequest": { "$ref": "#/$defs/pipelineUpdateRequest" },
+    "pipelineUpdateResponse": { "$ref": "#/$defs/pipelineUpdateResponse" },
+    "pipelineDeleteRequest": { "$ref": "#/$defs/pipelineDeleteRequest" },
+    "pipelineDuplicateRequest": { "$ref": "#/$defs/pipelineDuplicateRequest" },
+    "pipelineDuplicateResponse": { "$ref": "#/$defs/pipelineDuplicateResponse" },
+    "pipelineRunRequest": { "$ref": "#/$defs/pipelineRunRequest" },
+    "pipelineRunResponse": { "$ref": "#/$defs/pipelineRunResponse" },
+    "pipelineStateActionRequest": { "$ref": "#/$defs/pipelineStateActionRequest" },
+    "pipelineStateActionResponse": { "$ref": "#/$defs/pipelineStateActionResponse" }
+  },
+  "required": [
+    "pipelineListRequest",
+    "pipelineListResponse",
+    "pipelineCreateRequest",
+    "pipelineCreateResponse",
+    "pipelineDetailRequest",
+    "pipelineDetailResponse",
+    "pipelineUpdateRequest",
+    "pipelineUpdateResponse",
+    "pipelineDeleteRequest",
+    "pipelineDuplicateRequest",
+    "pipelineDuplicateResponse",
+    "pipelineRunRequest",
+    "pipelineRunResponse",
+    "pipelineStateActionRequest",
+    "pipelineStateActionResponse"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "emptyRequest": {
+      "type": "object",
+      "additionalProperties": false
+    },
+    "pipelineIdentifier": {
+      "$ref": "https://pantaetl.dev/schemas/common.schema.json#/properties/identifier"
+    },
+    "contractVersion": {
+      "$ref": "https://pantaetl.dev/schemas/pipeline.schema.json#/properties/contractVersion"
+    },
+    "pipelineName": {
+      "$ref": "https://pantaetl.dev/schemas/pipeline.schema.json#/properties/name"
+    },
+    "pipelineState": {
+      "$ref": "https://pantaetl.dev/schemas/pipeline.schema.json#/properties/state"
+    },
+    "pipelineSteps": {
+      "$ref": "https://pantaetl.dev/schemas/pipeline.schema.json#/properties/steps"
+    },
+    "pipelineEdges": {
+      "$ref": "https://pantaetl.dev/schemas/pipeline.schema.json#/properties/edges"
+    },
+    "pipelineTriggers": {
+      "$ref": "https://pantaetl.dev/schemas/pipeline.schema.json#/properties/triggers"
+    },
+    "writablePipelineTrigger": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "manual" },
+            "enabled": { "type": "boolean" }
+          },
+          "required": ["type", "enabled"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "schedule" },
+            "enabled": { "type": "boolean" },
+            "cron": { "type": "string", "minLength": 1 },
+            "timezone": { "type": "string", "minLength": 1 }
+          },
+          "required": ["type", "enabled", "cron", "timezone"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "writablePipelineTriggers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/writablePipelineTrigger" }
+    },
+    "pipeline": {
+      "$ref": "https://pantaetl.dev/schemas/pipeline.schema.json"
+    },
+    "pipelineListRequest": { "$ref": "#/$defs/emptyRequest" },
+    "pipelineListResponse": {
+      "type": "object",
+      "properties": {
+        "pipelines": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/pipeline" }
+        }
+      },
+      "required": ["pipelines"],
+      "additionalProperties": false
+    },
+    "pipelineCreateRequest": {
+      "type": "object",
+      "properties": {
+        "contractVersion": { "$ref": "#/$defs/contractVersion" },
+        "name": { "$ref": "#/$defs/pipelineName" },
+        "steps": { "$ref": "#/$defs/pipelineSteps" },
+        "edges": { "$ref": "#/$defs/pipelineEdges" },
+        "triggers": { "$ref": "#/$defs/writablePipelineTriggers" }
+      },
+      "required": ["contractVersion", "name", "steps", "edges", "triggers"],
+      "additionalProperties": false
+    },
+    "pipelineCreateResponse": { "$ref": "#/$defs/pipeline" },
+    "pipelineDetailRequest": {
+      "type": "object",
+      "properties": {
+        "pipelineId": { "$ref": "#/$defs/pipelineIdentifier" }
+      },
+      "required": ["pipelineId"],
+      "additionalProperties": false
+    },
+    "pipelineDetailResponse": { "$ref": "#/$defs/pipeline" },
+    "pipelineUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "name": { "$ref": "#/$defs/pipelineName" },
+        "state": { "$ref": "#/$defs/pipelineState" },
+        "steps": { "$ref": "#/$defs/pipelineSteps" },
+        "edges": { "$ref": "#/$defs/pipelineEdges" },
+        "triggers": { "$ref": "#/$defs/writablePipelineTriggers" }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "pipelineUpdateResponse": { "$ref": "#/$defs/pipeline" },
+    "pipelineDeleteRequest": { "$ref": "#/$defs/pipelineDetailRequest" },
+    "pipelineDuplicateRequest": {
+      "type": "object",
+      "properties": {
+        "pipelineId": { "$ref": "#/$defs/pipelineIdentifier" },
+        "name": { "$ref": "#/$defs/pipelineName" }
+      },
+      "required": ["pipelineId"],
+      "additionalProperties": false
+    },
+    "pipelineDuplicateResponse": { "$ref": "#/$defs/pipeline" },
+    "pipelineRunRequest": { "$ref": "#/$defs/pipelineDetailRequest" },
+    "pipelineRunResponse": {
+      "type": "object",
+      "properties": {
+        "pipelineId": { "$ref": "#/$defs/pipelineIdentifier" },
+        "runId": { "$ref": "#/$defs/pipelineIdentifier" },
+        "initialJobCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "queuedBehindActiveRun": { "type": "boolean" }
+      },
+      "required": ["pipelineId", "runId", "initialJobCount", "queuedBehindActiveRun"],
+      "additionalProperties": false
+    },
+    "pipelineStateActionRequest": { "$ref": "#/$defs/pipelineDetailRequest" },
+    "pipelineStateActionResponse": { "$ref": "#/$defs/pipeline" }
+  }
+}

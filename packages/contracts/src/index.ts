@@ -7,6 +7,42 @@ export * as execution from "./execution/index.js";
 export * as pipeline from "./pipeline/index.js";
 
 export {
+  pipelineCreateRequestSchema,
+  pipelineCreateResponseSchema,
+  pipelineDeleteRequestSchema,
+  pipelineDetailRequestSchema,
+  pipelineDetailResponseSchema,
+  pipelineDuplicateRequestSchema,
+  pipelineDuplicateResponseSchema,
+  pipelineListRequestSchema,
+  pipelineListResponseSchema,
+  pipelineRunRequestSchema,
+  pipelineRunResponseSchema,
+  pipelineStateActionRequestSchema,
+  pipelineStateActionResponseSchema,
+  pipelineUpdateRequestSchema,
+  pipelineUpdateResponseSchema,
+} from "./api/index.js";
+export type {
+  PipelineCreateRequest,
+  PipelineCreateResponse,
+  PipelineDeleteRequest,
+  PipelineDetailRequest,
+  PipelineDetailResponse,
+  PipelineDuplicateRequest,
+  PipelineDuplicateResponse,
+  PipelineListRequest,
+  PipelineListResponse,
+  PipelineRunRequest,
+  PipelineRunResponse,
+  PipelineStateActionRequest,
+  PipelineStateActionResponse,
+  PipelineUpdateRequest,
+  PipelineUpdateResponse,
+  WritablePipelineTrigger,
+} from "./api/index.js";
+
+export {
   componentConfigurationSchema,
   manualTriggerSchema,
   pipelineEdgeSchema,

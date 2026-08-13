@@ -7,6 +7,7 @@ import componentMetadata from "../../../schemas/contracts/component-metadata.sch
 import datasetDescriptor from "../../../schemas/contracts/dataset-descriptor.schema.json" with { type: "json" };
 import job from "../../../schemas/contracts/job.schema.json" with { type: "json" };
 import pipeline from "../../../schemas/contracts/pipeline.schema.json" with { type: "json" };
+import pipelineApi from "../../../schemas/contracts/pipeline-api.schema.json" with { type: "json" };
 import run from "../../../schemas/contracts/run.schema.json" with { type: "json" };
 import sourceExecutionRequest from "../../../schemas/contracts/source-execution-request.schema.json" with { type: "json" };
 
@@ -45,6 +46,7 @@ export const canonicalSchemas = {
   datasetDescriptor,
   job,
   pipeline,
+  pipelineApi,
   run,
   sourceExecutionRequest,
 } as const;
@@ -70,6 +72,22 @@ export function arrayItemSchema(schema: unknown): unknown {
   }
 
   return retainDefinitions(schema, items);
+}
+
+/** Return one named definition while retaining its source document's local definitions. */
+export function definitionSchema(schema: unknown, definitionName: string): unknown {
+  const definitions = (schema as { $defs?: Record<string, unknown>; definitions?: Record<string, unknown> }).$defs
+    ?? (schema as { definitions?: Record<string, unknown> }).definitions;
+  const definition = definitions?.[definitionName];
+
+  if (!definition) {
+    throw new Error(`Canonical JSON Schema is missing definition ${definitionName}.`);
+  }
+
+  return {
+    ...(definition as Record<string, unknown>),
+    $defs: definitions,
+  };
 }
 
 /** Retain local definitions when a referenced schema fragment is converted independently. */

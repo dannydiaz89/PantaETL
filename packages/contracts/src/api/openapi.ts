@@ -1,4 +1,18 @@
-import { canonicalSchemas } from "../json-schema.js";
+import { canonicalSchemas, definitionSchema, propertySchema } from "../json-schema.js";
+
+const pipelineSchemaIdentifier = "https://pantaetl.dev/schemas/pipeline.schema.json";
+const commonSchemaIdentifier = "https://pantaetl.dev/schemas/common.schema.json";
+
+const openApiReferences: Readonly<Record<string, string>> = {
+  [commonSchemaIdentifier + "#/properties/identifier"]: "#/components/schemas/PipelineIdentifier",
+  [pipelineSchemaIdentifier]: "#/components/schemas/Pipeline",
+  [pipelineSchemaIdentifier + "#/properties/contractVersion"]: "#/components/schemas/PipelineContractVersion",
+  [pipelineSchemaIdentifier + "#/properties/edges"]: "#/components/schemas/PipelineEdges",
+  [pipelineSchemaIdentifier + "#/properties/name"]: "#/components/schemas/PipelineName",
+  [pipelineSchemaIdentifier + "#/properties/state"]: "#/components/schemas/PipelineState",
+  [pipelineSchemaIdentifier + "#/properties/steps"]: "#/components/schemas/PipelineSteps",
+  [pipelineSchemaIdentifier + "#/properties/triggers"]: "#/components/schemas/PipelineTriggers",
+};
 
 /** OpenAPI document shape emitted by the control-plane contract baseline. */
 export interface OpenApiDocument {
@@ -22,9 +36,8 @@ export interface OpenApiDocument {
 /**
  * Creates the control-plane OpenAPI document from canonical contract schemas.
  *
- * The component entries deliberately retain the original JSON Schema objects:
- * API consumers, TypeScript validators, and Python models therefore share one
- * schema definition instead of maintaining endpoint-specific copies.
+ * The component entries retain canonical schemas or mechanically rewrite their
+ * references, so API consumers never depend on duplicate endpoint definitions.
  */
 export function createOpenApiDocument(): OpenApiDocument {
   return {
@@ -36,6 +49,28 @@ export function createOpenApiDocument(): OpenApiDocument {
         DatasetDescriptor: canonicalSchemas.datasetDescriptor,
         Job: canonicalSchemas.job,
         Pipeline: canonicalSchemas.pipeline,
+        PipelineContractVersion: propertySchema(canonicalSchemas.pipeline, "contractVersion"),
+        PipelineCreateRequest: pipelineApiComponent("pipelineCreateRequest"),
+        PipelineCreateResponse: pipelineApiComponent("pipelineCreateResponse"),
+        PipelineDeleteRequest: pipelineApiComponent("pipelineDeleteRequest"),
+        PipelineDetailRequest: pipelineApiComponent("pipelineDetailRequest"),
+        PipelineDetailResponse: pipelineApiComponent("pipelineDetailResponse"),
+        PipelineDuplicateRequest: pipelineApiComponent("pipelineDuplicateRequest"),
+        PipelineDuplicateResponse: pipelineApiComponent("pipelineDuplicateResponse"),
+        PipelineEdges: propertySchema(canonicalSchemas.pipeline, "edges"),
+        PipelineIdentifier: propertySchema(canonicalSchemas.common, "identifier"),
+        PipelineListRequest: pipelineApiComponent("pipelineListRequest"),
+        PipelineListResponse: pipelineApiComponent("pipelineListResponse"),
+        PipelineName: propertySchema(canonicalSchemas.pipeline, "name"),
+        PipelineRunRequest: pipelineApiComponent("pipelineRunRequest"),
+        PipelineRunResponse: pipelineApiComponent("pipelineRunResponse"),
+        PipelineState: propertySchema(canonicalSchemas.pipeline, "state"),
+        PipelineStateActionRequest: pipelineApiComponent("pipelineStateActionRequest"),
+        PipelineStateActionResponse: pipelineApiComponent("pipelineStateActionResponse"),
+        PipelineSteps: propertySchema(canonicalSchemas.pipeline, "steps"),
+        PipelineTriggers: propertySchema(canonicalSchemas.pipeline, "triggers"),
+        PipelineUpdateRequest: pipelineApiComponent("pipelineUpdateRequest"),
+        PipelineUpdateResponse: pipelineApiComponent("pipelineUpdateResponse"),
         Run: canonicalSchemas.run,
         SourceExecutionRequest: canonicalSchemas.sourceExecutionRequest,
       },
@@ -82,4 +117,27 @@ export function createOpenApiDocument(): OpenApiDocument {
     },
     servers: [{ url: "/" }],
   };
+}
+
+/** Convert canonical external references into OpenAPI component references without copying schemas. */
+function pipelineApiComponent(definitionName: string): unknown {
+  return replaceCanonicalReferences(
+    definitionSchema(canonicalSchemas.pipelineApi, definitionName),
+  );
+}
+
+/** Rewrite only known canonical document references for a self-contained OpenAPI document. */
+function replaceCanonicalReferences(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(replaceCanonicalReferences);
+  }
+  if (typeof value !== "object" || value === null) {
+    return value;
+  }
+
+  const record = value as Record<string, unknown>;
+  return Object.fromEntries(Object.entries(record).map(([key, child]) => [
+    key,
+    key === "$ref" && typeof child === "string" ? (openApiReferences[child] ?? child) : replaceCanonicalReferences(child),
+  ]));
 }
