@@ -1,65 +1,48 @@
-import { z } from "zod";
+import type { ComponentMetadata } from "../generated/component-metadata.js";
+import {
+  arrayItemSchema,
+  canonicalSchemas,
+  propertySchema,
+  zodFromJsonSchema,
+} from "../json-schema.js";
 
-import { dataFamilySchema, versionSchema } from "../common/primitives.js";
+const configFieldsSchema = propertySchema(canonicalSchemas.componentMetadata, "configFields");
+const configFieldJsonSchema = arrayItemSchema(configFieldsSchema);
+const configOptionsSchema = propertySchema(configFieldJsonSchema, "options");
 
-/** Component categories that participate in the Source → Transform → Export flow. */
-export const componentKindSchema = z.enum(["source", "transform", "export"]);
-export type ComponentKind = z.infer<typeof componentKindSchema>;
+/** Runtime validator derived from the canonical component metadata JSON Schema. */
+export const componentMetadataSchema = zodFromJsonSchema(canonicalSchemas.componentMetadata);
 
-/** Stable, human-readable component identifier such as `source.csv`. */
-export const componentTypeSchema = z
-  .string()
-  .regex(/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/);
-export type ComponentType = z.infer<typeof componentTypeSchema>;
+/** Runtime validator for component categories. */
+export const componentKindSchema = zodFromJsonSchema(
+  propertySchema(canonicalSchemas.componentMetadata, "kind"),
+);
+export type ComponentKind = ComponentMetadata["kind"];
 
-/** Translation key consumed by a caller-owned localization layer. */
-export const translationKeySchema = z.string().min(1);
-export type TranslationKey = z.infer<typeof translationKeySchema>;
+/** Runtime validator for stable component type names. */
+export const componentTypeSchema = zodFromJsonSchema(
+  propertySchema(canonicalSchemas.componentMetadata, "type"),
+);
+export type ComponentType = ComponentMetadata["type"];
 
-/** Supported field controls for generated component configuration forms. */
-export const configFieldTypeSchema = z.enum([
-  "text",
-  "textarea",
-  "number",
-  "boolean",
-  "select",
-  "json",
-]);
-export type ConfigFieldType = z.infer<typeof configFieldTypeSchema>;
+/** Runtime validator for localized display and description keys. */
+export const translationKeySchema = zodFromJsonSchema(
+  propertySchema(canonicalSchemas.componentMetadata, "displayNameKey"),
+);
+export type TranslationKey = ComponentMetadata["displayNameKey"];
 
-/** A selectable configuration value and its localized label. */
-export const configOptionSchema = z.object({
-  value: z.string().min(1),
-  labelKey: translationKeySchema,
-});
-export type ConfigOption = z.infer<typeof configOptionSchema>;
+/** Runtime validator for component configuration field metadata. */
+export const configFieldSchema = zodFromJsonSchema(configFieldJsonSchema);
+export type ConfigField = ComponentMetadata["configFields"][number];
 
-/** Metadata needed to render and validate one component configuration field. */
-export const configFieldSchema = z.object({
-  key: z.string().regex(/^[a-z][a-zA-Z0-9_]*$/),
-  type: configFieldTypeSchema,
-  labelKey: translationKeySchema,
-  descriptionKey: translationKeySchema.optional(),
-  required: z.boolean(),
-  secret: z.boolean(),
-  options: z.array(configOptionSchema).optional(),
-});
-export type ConfigField = z.infer<typeof configFieldSchema>;
+/** Runtime validator for configuration field control types. */
+export const configFieldTypeSchema = zodFromJsonSchema(
+  propertySchema(configFieldJsonSchema, "type"),
+);
+export type ConfigFieldType = ConfigField["type"];
 
-/**
- * Component metadata shared by registries and configuration UIs.
- *
- * This schema describes capabilities and presentation metadata only; it does
- * not contain an executor or any UI implementation.
- */
-export const componentMetadataSchema = z.object({
-  kind: componentKindSchema,
-  type: componentTypeSchema,
-  version: versionSchema,
-  displayNameKey: translationKeySchema,
-  descriptionKey: translationKeySchema,
-  configFields: z.array(configFieldSchema),
-  inputFamilies: z.array(dataFamilySchema),
-  outputFamilies: z.array(dataFamilySchema),
-});
-export type ComponentMetadata = z.infer<typeof componentMetadataSchema>;
+/** Runtime validator for selectable configuration options. */
+export const configOptionSchema = zodFromJsonSchema(arrayItemSchema(configOptionsSchema));
+export type ConfigOption = NonNullable<ConfigField["options"]>[number];
+
+export type { ComponentMetadata } from "../generated/component-metadata.js";

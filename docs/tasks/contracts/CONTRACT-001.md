@@ -35,7 +35,7 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-Added Zod-backed contract version primitives, explicit public subpath exports, and
-the common/pipeline/execution/dataset/components/api domain boundaries. The package
-includes focused runtime tests for version acceptance and rejection without adding
-database or UI implementation.
+Added the common/pipeline/execution/dataset/components/api domain boundaries and
+focused runtime tests for version acceptance and rejection without adding database
+or UI implementation. Contract version primitives are now derived from the
+canonical JSON Schema documents established by the cross-language contract work.

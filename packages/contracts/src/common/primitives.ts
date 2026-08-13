@@ -1,13 +1,20 @@
-import { z } from "zod";
+import type { CommonPrimitives } from "../generated/common.js";
+import { canonicalSchemas, propertySchema, zodFromJsonSchema } from "../json-schema.js";
 
 /** Runtime validator for ISO 8601 timestamps with an explicit offset. */
-export const timestampSchema = z.iso.datetime({ offset: true });
-export type Timestamp = z.infer<typeof timestampSchema>;
+export const timestampSchema = zodFromJsonSchema(
+  propertySchema(canonicalSchemas.common, "timestamp"),
+);
+export type Timestamp = CommonPrimitives["timestamp"];
 
 /** Runtime validator for major wire-version identifiers such as `v1`. */
-export const versionSchema = z.string().regex(/^v\d+$/);
-export type Version = z.infer<typeof versionSchema>;
+export const versionSchema = zodFromJsonSchema(
+  propertySchema(canonicalSchemas.common, "version"),
+);
+export type Version = CommonPrimitives["version"];
 
 /** Broad dataset families shared by component input/output metadata. */
-export const dataFamilySchema = z.enum(["any", "document", "tabular", "file"]);
-export type DataFamily = z.infer<typeof dataFamilySchema>;
+export const dataFamilySchema = zodFromJsonSchema(
+  propertySchema(canonicalSchemas.common, "dataFamily"),
+);
+export type DataFamily = CommonPrimitives["dataFamily"];

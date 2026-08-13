@@ -6,4 +6,5 @@
 - API token behavior
 - API authentication integration
 
-API contracts stay aligned with Zod definitions.
+API contracts stay aligned with the canonical JSON Schema documents and their
+derived TypeScript validators.

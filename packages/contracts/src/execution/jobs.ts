@@ -1,85 +1,37 @@
-import { z } from "zod";
-
+import type { Job } from "../generated/job.js";
 import {
-  componentIdSchema,
-  identifierSchema,
-  jobIdSchema,
-  pipelineIdSchema,
-  runIdSchema,
-} from "../common/identifiers.js";
-import { timestampSchema } from "../common/primitives.js";
-import { versionedContractSchema } from "../common/version.js";
-import { componentConfigurationSchema } from "../pipeline/definition.js";
-import { componentTypeSchema } from "../components/metadata.js";
+  canonicalSchemas,
+  propertySchema,
+  zodFromJsonSchema,
+} from "../json-schema.js";
 
-/** Queue lifecycle states for individual execution jobs. */
-export const jobStateSchema = z.enum([
-  "queued",
-  "running",
-  "succeeded",
-  "failed",
-  "cancelled",
-]);
-export type JobState = z.infer<typeof jobStateSchema>;
+const jobClaimSchema = propertySchema(canonicalSchemas.job, "claim");
+const jobCancellationSchema = propertySchema(canonicalSchemas.job, "cancellation");
 
-/** Retry behavior that accompanies a queued job without coupling it to storage. */
-export const retryPolicySchema = z.object({
-  maxAttempts: z.number().int().positive(),
-  retryDelaySeconds: z.number().int().nonnegative(),
-});
-export type RetryPolicy = z.infer<typeof retryPolicySchema>;
+/** Runtime validator derived from the canonical queue job JSON Schema. */
+export const jobSchema = zodFromJsonSchema(canonicalSchemas.job);
+export type { Job } from "../generated/job.js";
 
-/** Wire-visible worker claim and heartbeat metadata. */
-export const workerClaimSchema = z.object({
-  workerId: identifierSchema,
-  claimedAt: timestampSchema,
-  heartbeatAt: timestampSchema,
-});
-export type WorkerClaim = z.infer<typeof workerClaimSchema>;
+/** Runtime validator for queue lifecycle states. */
+export const jobStateSchema = zodFromJsonSchema(propertySchema(canonicalSchemas.job, "state"));
+export type JobState = Job["state"];
 
-/** Cancellation request metadata propagated to queued or running work. */
-export const cancellationRequestSchema = z.object({
-  requestedAt: timestampSchema,
-  requestedByUserId: identifierSchema.optional(),
-});
-export type CancellationRequest = z.infer<typeof cancellationRequestSchema>;
+/** Runtime validator for queue retry policy metadata. */
+export const retryPolicySchema = zodFromJsonSchema(
+  propertySchema(canonicalSchemas.job, "retryPolicy"),
+);
+export type RetryPolicy = Job["retryPolicy"];
 
-/** A queue job for one component step within a pipeline run. */
-export const jobSchema = versionedContractSchema.extend({
-  id: jobIdSchema,
-  pipelineId: pipelineIdSchema,
-  runId: runIdSchema,
-  stepId: identifierSchema,
-  componentId: componentIdSchema,
-  state: jobStateSchema,
-  attempt: z.number().int().nonnegative(),
-  retryPolicy: retryPolicySchema,
-  availableAt: timestampSchema,
-  claim: workerClaimSchema.optional(),
-  cancellation: cancellationRequestSchema.optional(),
-  completedAt: timestampSchema.optional(),
-});
-export type Job = z.infer<typeof jobSchema>;
+/** Runtime validator for worker claim and heartbeat metadata. */
+export const workerClaimSchema = zodFromJsonSchema(jobClaimSchema);
+export type WorkerClaim = NonNullable<Job["claim"]>;
 
-/**
- * Request sent to the worker for a Source step.
- *
- * Configuration carries portable values and secret binding references, never
- * usable secret values.
- */
-export const sourceExecutionRequestSchema = versionedContractSchema
-  .extend({
-    jobId: jobIdSchema,
-    pipelineId: pipelineIdSchema,
-    runId: runIdSchema,
-    stepId: identifierSchema,
-    componentId: componentIdSchema,
-    componentType: componentTypeSchema,
-    componentVersion: z.string().regex(/^v\d+$/),
-    configuration: componentConfigurationSchema,
-  })
-  .refine((request) => request.componentType.startsWith("source."), {
-    message: "Source execution requests must reference a Source component type.",
-    path: ["componentType"],
-  });
-export type SourceExecutionRequest = z.infer<typeof sourceExecutionRequestSchema>;
+/** Runtime validator for job cancellation metadata. */
+export const cancellationRequestSchema = zodFromJsonSchema(jobCancellationSchema);
+export type CancellationRequest = NonNullable<Job["cancellation"]>;
+
+/** Runtime validator derived from the canonical Source execution request JSON Schema. */
+export const sourceExecutionRequestSchema = zodFromJsonSchema(
+  canonicalSchemas.sourceExecutionRequest,
+);
+export type { SourceExecutionRequest } from "../generated/source-execution-request.js";

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Canonical contract definition. Generated language artifacts must not be edited manually.",
+  "title": "CommonPrimitives",
+  "type": "object",
+  "properties": {
+    "identifier": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v\\d+$"
+    },
+    "contractVersion": {
+      "type": "string",
+      "const": "v1"
+    },
+    "dataFamily": {
+      "type": "string",
+      "enum": [
+        "any",
+        "document",
+        "tabular",
+        "file"
+      ]
+    }
+  },
+  "required": [
+    "identifier",
+    "timestamp",
+    "version",
+    "contractVersion",
+    "dataFamily"
+  ],
+  "additionalProperties": false
+}

@@ -15,7 +15,8 @@ Expected areas:
 
 ## OpenAPI
 
-Zod is the TypeScript validation source.
+Canonical JSON Schema is the cross-service validation source; TypeScript exposes
+derived Zod validators.
 
 Generate or mechanically align OpenAPI from the same contracts.
 

@@ -37,7 +37,7 @@ PantaETL/
     pipeline/
 
   schemas/
-    generated/
+    contracts/
 
   locales/
     en/
@@ -70,8 +70,9 @@ With real consumers present, establish:
 - Dataset/Artifact;
 - Job/Run;
 - Pipeline/Trigger;
-- JSON Schema generation;
-- Pydantic interoperability.
+- canonical JSON Schema contracts;
+- generated TypeScript and Pydantic contract artifacts;
+- cross-language interoperability.
 
 After contracts and basic pipeline-domain rules stabilize, frontend and backend workstreams deliberately fan out in parallel.
 

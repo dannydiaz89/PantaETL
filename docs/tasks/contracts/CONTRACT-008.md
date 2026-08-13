@@ -37,8 +37,7 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-Added a Source execution request contract and generated schema, thin handwritten
-Pydantic models for the representative worker boundary, and a shared fixture tested
-by both TypeScript and Python. Zod and generated JSON Schema remain canonical; thin
-Pydantic models are guarded by shared acceptance/rejection fixtures for worker-side
-ergonomics without a duplicate canonical schema.
+Added a Source execution request contract, generated Pydantic models for the
+representative worker boundary, and a shared fixture tested by both TypeScript and
+Python. Canonical JSON Schema generates both language artifacts, and CI rejects
+stale generated Pydantic models.

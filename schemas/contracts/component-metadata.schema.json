@@ -1,5 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Canonical contract definition. Generated language artifacts must not be edited manually.",
+  "title": "ComponentMetadata",
   "type": "object",
   "properties": {
     "kind": {

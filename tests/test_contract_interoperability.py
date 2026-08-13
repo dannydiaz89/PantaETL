@@ -1,18 +1,14 @@
 """Verify Python accepts and rejects the same representative wire payloads as Zod."""
 
 import json
+from copy import deepcopy
 from pathlib import Path
 from typing import cast
 
 import pytest
 from pydantic import BaseModel, ValidationError
 
-from workers.python.contract_models import (
-    DatasetContract,
-    JobContract,
-    RunResult,
-    SourceExecutionRequest,
-)
+from workers.python.generated import DatasetDescriptor, Job, Run, SourceExecutionRequest
 
 FixtureSections = dict[str, dict[str, dict[str, object]]]
 
@@ -24,10 +20,10 @@ def load_fixtures() -> FixtureSections:
 
 
 MODELS: dict[str, type[BaseModel]] = {
-    "dataset": DatasetContract,
-    "job": JobContract,
+    "dataset": DatasetDescriptor,
+    "job": Job,
     "sourceExecutionRequest": SourceExecutionRequest,
-    "run": RunResult,
+    "run": Run,
 }
 
 
@@ -46,3 +42,16 @@ def test_unsupported_contract_versions_fail_in_python() -> None:
     for name, model in MODELS.items():
         with pytest.raises(ValidationError):
             model.model_validate(invalid_payloads[name])
+
+
+def test_inline_secret_configuration_is_rejected_in_python() -> None:
+    """Require secret bindings instead of credential-shaped configuration keys."""
+    source_request = deepcopy(load_fixtures()["valid"]["sourceExecutionRequest"])
+    configuration = source_request["configuration"]
+    assert isinstance(configuration, dict)
+    values = configuration["values"]
+    assert isinstance(values, dict)
+    values["API_TOKEN"] = "usable-secret"
+
+    with pytest.raises(ValidationError):
+        SourceExecutionRequest.model_validate(source_request)

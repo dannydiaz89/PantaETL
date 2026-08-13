@@ -1,5 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Canonical contract definition. Generated language artifacts must not be edited manually.",
+  "title": "Pipeline",
   "type": "object",
   "properties": {
     "contractVersion": {
@@ -8,13 +10,11 @@
     },
     "id": {
       "type": "string",
-      "format": "uuid",
-      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      "format": "uuid"
     },
     "ownerUserId": {
       "type": "string",
-      "format": "uuid",
-      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      "format": "uuid"
     },
     "name": {
       "type": "string",
@@ -30,13 +30,11 @@
     },
     "createdAt": {
       "type": "string",
-      "format": "date-time",
-      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+      "format": "date-time"
     },
     "updatedAt": {
       "type": "string",
-      "format": "date-time",
-      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+      "format": "date-time"
     },
     "steps": {
       "minItems": 1,
@@ -46,8 +44,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            "format": "uuid"
           },
           "kind": {
             "type": "string",
@@ -70,12 +67,12 @@
             "properties": {
               "values": {
                 "type": "object",
-                "propertyNames": {
-                  "type": "string"
+                "patternProperties": {
+                  "^(?!(?:.*(?:[Aa][Pp][Ii][_\\-]?[Kk][Ee][Yy]|[Aa][Uu][Tt][Hh][Oo][Rr][Ii][Zz][Aa][Tt][Ii][Oo][Nn]|[Cc][Rr][Ee][Dd][Ee][Nn][Tt][Ii][Aa][Ll]|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Tt][Oo][Kk][Ee][Nn]))).+$": {
+                    "$ref": "#/$defs/nonSecretJsonValue"
+                  }
                 },
-                "additionalProperties": {
-                  "$ref": "#/$defs/__schema0"
-                }
+                "additionalProperties": false
               },
               "secretBindings": {
                 "type": "array",
@@ -123,13 +120,11 @@
         "properties": {
           "fromStepId": {
             "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            "format": "uuid"
           },
           "toStepId": {
             "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            "format": "uuid"
           }
         },
         "required": [
@@ -148,13 +143,11 @@
             "properties": {
               "id": {
                 "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                "format": "uuid"
               },
               "pipelineId": {
                 "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                "format": "uuid"
               },
               "type": {
                 "type": "string",
@@ -177,13 +170,11 @@
             "properties": {
               "id": {
                 "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                "format": "uuid"
               },
               "pipelineId": {
                 "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                "format": "uuid"
               },
               "type": {
                 "type": "string",
@@ -229,7 +220,7 @@
   ],
   "additionalProperties": false,
   "$defs": {
-    "__schema0": {
+    "nonSecretJsonValue": {
       "anyOf": [
         {
           "type": "string"
@@ -246,17 +237,17 @@
         {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/__schema0"
+            "$ref": "#/$defs/nonSecretJsonValue"
           }
         },
         {
           "type": "object",
-          "propertyNames": {
-            "type": "string"
+          "patternProperties": {
+            "^(?!(?:.*(?:[Aa][Pp][Ii][_\\-]?[Kk][Ee][Yy]|[Aa][Uu][Tt][Hh][Oo][Rr][Ii][Zz][Aa][Tt][Ii][Oo][Nn]|[Cc][Rr][Ee][Dd][Ee][Nn][Tt][Ii][Aa][Ll]|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Tt][Oo][Kk][Ee][Nn]))).+$": {
+              "$ref": "#/$defs/nonSecretJsonValue"
+            }
           },
-          "additionalProperties": {
-            "$ref": "#/$defs/__schema0"
-          }
+          "additionalProperties": false
         }
       ]
     }

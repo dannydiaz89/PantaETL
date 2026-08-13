@@ -7,10 +7,11 @@
 
 ## Scope
 
-Generate deterministic JSON Schema from cross-service Zod contracts.
+Establish deterministic, canonical JSON Schema documents for cross-service
+contracts and generate TypeScript artifacts from them.
 
-- Generation script.
-- Generated schema directory.
+- Canonical schema directory.
+- TypeScript declaration generation script.
 - Staleness/consistency check.
 
 ## Out of scope
@@ -28,14 +29,15 @@ Generate deterministic JSON Schema from cross-service Zod contracts.
 
 Run all checks relevant to the packages/services introduced or changed by this task.
 
-- `pnpm --filter @pantaetl/contracts generate:schemas`
+- `pnpm --filter @pantaetl/contracts generate:types`
 - `pnpm --filter @pantaetl/contracts check`
 - `pnpm check`
 - Frozen lockfile installation
 
 ## Notes / blockers
 
-Added deterministic JSON Schema generation for component metadata, Dataset, Artifact,
-job, run, and pipeline contracts. Contract checks regenerate schemas and fail when
-generated files are changed or missing from version control. Two consecutive generation
-runs produced identical SHA-256 checksums for every generated schema.
+Canonical JSON Schema documents now define component metadata, Dataset, Artifact,
+job, run, pipeline, and Source execution request contracts. TypeScript declarations
+and Zod boundary validators are derived from those documents. Contract checks
+regenerate declarations and fail when generated files are changed or missing from
+version control.

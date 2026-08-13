@@ -4,17 +4,19 @@
 
 TypeScript and Python communicate with versioned validated contracts.
 
-## Planned canonical flow
+## Canonical flow
 
 ```text
-Zod
-  |
 JSON Schema
   |
-Pydantic interoperability/generation
+  +-- TypeScript declarations and Zod boundary validators
+  |
+  +-- Python Pydantic models
 ```
 
-Prove with representative contracts before scaling.
+The hand-maintained JSON Schema documents in `schemas/contracts` are the
+language-neutral source of truth. Generated TypeScript and Python artifacts are
+committed for review and checked for staleness in CI.
 
 Representative contracts:
 
@@ -23,16 +25,16 @@ Representative contracts:
 - Source execution request;
 - Run result.
 
-If generated Pydantic ergonomics are poor, retain JSON Schema as the wire source and enforce compatibility tests against thin handwritten models.
-
 ## Python interoperability strategy
 
-Zod definitions and the generated JSON Schema files remain the canonical contract
-source. The Python worker uses thin handwritten Pydantic models for representative
-worker-boundary payloads. Shared fixture tests require those models to accept and
-reject the same Dataset, Job, Source execution request, and Run result payloads as
-their Zod counterparts. This keeps the Python API ergonomic without creating a
-second canonical schema source.
+Pydantic models for worker-boundary payloads are generated from the same JSON
+Schema documents. Shared fixtures require the TypeScript and Python validators to
+accept and reject the same Dataset, Job, Source execution request, and Run result
+payloads.
+
+Zod remains the TypeScript-facing validation API. Its validators are derived from
+the canonical schemas and checked with JSON Schema validation so unsupported or
+implementation-specific converter behavior cannot weaken the wire contract.
 
 ## Package layout
 

@@ -6,6 +6,7 @@
     "moduleResolution": "NodeNext",
     "noEmit": false,
     "outDir": "dist",
+    "resolveJsonModule": true,
     "rootDir": "src"
   },
   "include": ["src/**/*.ts"],
