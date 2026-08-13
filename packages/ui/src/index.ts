@@ -8,3 +8,4 @@ export { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, Dia
 export { Field, Input, type FieldControlProps, type FieldProps, type InputProps } from "./field.js";
 export { Select, type SelectOption, type SelectProps } from "./select.js";
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs.js";
+export { DataTable, type DataTableProps, type DataTableSortLabels } from "./data-table.js";
