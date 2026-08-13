@@ -151,7 +151,7 @@ An agent can work on the frontend while separate agents work on database, schedu
 | DB-001 | Database implementation foundation | Database | COMPLETE | APP-005, CONTRACT-002 | Codex |
 | DB-002 | Core control-plane schema | Database | COMPLETE | DB-001, CONTRACT-004, CONTRACT-005, CONTRACT-006 | Codex |
 | DB-003 | Job queue schema and indexes | Database | COMPLETE | DB-002 | Codex |
-| DB-004 | Checkpoint and retention schema | Database | IN PROGRESS | DB-002 | Codex |
+| DB-004 | Checkpoint and retention schema | Database | COMPLETE | DB-002 | Codex |
 | DB-005 | Secret storage model | Database | IN PROGRESS | DB-002, CONTRACT-003 | Codex |
 | DB-006 | Migration validation baseline | Database | IN PROGRESS | DB-002, APP-007 | Codex |
 | SCHED-001 | Scheduler runtime foundation | Scheduler | BLOCKED | APP-003, DB-003, PIPELINE-002 | Unassigned |

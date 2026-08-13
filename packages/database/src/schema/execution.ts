@@ -16,6 +16,9 @@ export const runs = pgTable(
     contractVersion: text("contract_version").default("v1").notNull(),
     state: runState("state").default("queued").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true })
+      .default(sql`now() + interval '1 year'`)
+      .notNull(),
     startedAt: timestamp("started_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
     cancellationRequestedAt: timestamp("cancellation_requested_at", { withTimezone: true }),
@@ -25,6 +28,25 @@ export const runs = pgTable(
     warningCount: integer("warning_count").default(0).notNull(),
   },
   (table) => [index("runs_pipeline_id_created_at_index").on(table.pipelineId, table.createdAt)],
+);
+
+/** Safe operational log entries retained separately from the run result. */
+export const runLogs = pgTable(
+  "run_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    runId: uuid("run_id")
+      .notNull()
+      .references(() => runs.id, { onDelete: "restrict" }),
+    level: text("level").notNull(),
+    event: text("event").notNull(),
+    context: jsonb("context").$type<Record<string, unknown>>().default({}).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true })
+      .default(sql`now() + interval '1 year'`)
+      .notNull(),
+  },
+  (table) => [index("run_logs_expiry_index").on(table.expiresAt), index("run_logs_run_id_index").on(table.runId)],
 );
 
 /** Per-component execution state and safe operational result metadata. */

@@ -1,10 +1,11 @@
+import { sql } from "drizzle-orm";
 import { bigint, boolean, index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { artifactStorageKind } from "./enums.js";
 import { pipelines } from "./pipelines.js";
 import { runs } from "./execution.js";
 
-/** Metadata for retained output artifacts; expiration data is added separately. */
+/** Metadata for retained output artifacts and their explicit cleanup eligibility. */
 export const artifacts = pgTable(
   "artifacts",
   {
@@ -23,6 +24,9 @@ export const artifacts = pgTable(
     storageLocation: text("storage_location").notNull(),
     encrypted: boolean("encrypted").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true })
+      .default(sql`now() + interval '30 days'`)
+      .notNull(),
   },
-  (table) => [index("artifacts_run_id_index").on(table.runId)],
+  (table) => [index("artifacts_expiry_index").on(table.expiresAt), index("artifacts_run_id_index").on(table.runId)],
 );
