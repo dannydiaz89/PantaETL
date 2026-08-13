@@ -7,6 +7,24 @@ export * as execution from "./execution/index.js";
 export * as pipeline from "./pipeline/index.js";
 
 export {
+  artifactDescriptorSchema,
+  artifactRetentionSchema,
+  dataStructureSchema,
+  datasetDescriptorSchema,
+  DEFAULT_ARTIFACT_RETENTION_DAYS,
+  storageDescriptorSchema,
+  storageKindSchema,
+} from "./dataset/index.js";
+export type {
+  ArtifactDescriptor,
+  ArtifactRetention,
+  DataStructure,
+  DatasetDescriptor,
+  StorageDescriptor,
+  StorageKind,
+} from "./dataset/index.js";
+
+export {
   componentKindSchema,
   componentMetadataSchema,
   componentTypeSchema,

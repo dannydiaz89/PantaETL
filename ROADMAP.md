@@ -103,7 +103,7 @@ Contracts are established only after all runtime/package boundaries exist.
 | CONTRACT-001 | Contracts package foundation | Contracts | COMPLETE | APP-005 | Codex |
 | CONTRACT-002 | Core identifier contracts | Contracts | COMPLETE | CONTRACT-001 | Codex |
 | CONTRACT-003 | Component configuration contracts | Contracts | COMPLETE | CONTRACT-002 | Codex |
-| CONTRACT-004 | Dataset and artifact contracts | Contracts | BLOCKED | CONTRACT-002 | Unassigned |
+| CONTRACT-004 | Dataset and artifact contracts | Contracts | COMPLETE | CONTRACT-002 | Codex |
 | CONTRACT-005 | Job and run contracts | Contracts | BLOCKED | CONTRACT-002 | Unassigned |
 | CONTRACT-006 | Pipeline and trigger contracts | Contracts | BLOCKED | CONTRACT-002, CONTRACT-003 | Unassigned |
 | CONTRACT-007 | JSON Schema generation | Contracts | BLOCKED | CONTRACT-003, CONTRACT-004, CONTRACT-005, CONTRACT-006 | Unassigned |
