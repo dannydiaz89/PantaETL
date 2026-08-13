@@ -1,7 +1,7 @@
 # CONTRACT-002 — Core Identifier Contracts
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Contracts  
 **Depends on:** CONTRACT-001
 
@@ -20,13 +20,20 @@ Define stable identifiers/shared primitives.
 
 ## Acceptance criteria
 
-- [ ] Runtime validation tests exist.
-- [ ] Consumers can import canonical IDs.
+- [x] Runtime validation tests exist.
+- [x] Consumers can import canonical IDs.
 
 ## Validation
 
 Run all checks relevant to the packages/services introduced or changed by this task.
 
+- `pnpm --filter @pantaetl/contracts check`
+- `pnpm check`
+- Frozen lockfile installation
+
 ## Notes / blockers
 
-None.
+Added branded UUID schemas for pipeline, run, job, dataset, artifact, user,
+component, and checkpoint identifiers, plus shared timestamp and major-version
+primitives. Canonical schemas and types are exported from the package root and
+common subpath.

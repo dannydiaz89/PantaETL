@@ -7,8 +7,33 @@ export * as execution from "./execution/index.js";
 export * as pipeline from "./pipeline/index.js";
 
 export {
+  artifactIdSchema,
+  checkpointIdSchema,
+  componentIdSchema,
   CONTRACT_VERSION,
   contractVersionSchema,
+  datasetIdSchema,
+  identifierSchema,
+  jobIdSchema,
+  pipelineIdSchema,
+  runIdSchema,
+  timestampSchema,
+  userIdSchema,
+  versionSchema,
   versionedContractSchema,
-} from "./common/version.js";
-export type { ContractVersion, VersionedContract } from "./common/version.js";
+} from "./common/index.js";
+export type {
+  ArtifactId,
+  CheckpointId,
+  ComponentId,
+  ContractVersion,
+  DatasetId,
+  Identifier,
+  JobId,
+  PipelineId,
+  RunId,
+  Timestamp,
+  UserId,
+  Version,
+  VersionedContract,
+} from "./common/index.js";

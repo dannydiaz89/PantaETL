@@ -101,7 +101,7 @@ Contracts are established only after all runtime/package boundaries exist.
 | ID | Work Item | Workstream | Status | Depends On | Owner |
 |---|---|---|---|---|---|
 | CONTRACT-001 | Contracts package foundation | Contracts | COMPLETE | APP-005 | Codex |
-| CONTRACT-002 | Core identifier contracts | Contracts | BLOCKED | CONTRACT-001 | Unassigned |
+| CONTRACT-002 | Core identifier contracts | Contracts | COMPLETE | CONTRACT-001 | Codex |
 | CONTRACT-003 | Component configuration contracts | Contracts | BLOCKED | CONTRACT-002 | Unassigned |
 | CONTRACT-004 | Dataset and artifact contracts | Contracts | BLOCKED | CONTRACT-002 | Unassigned |
 | CONTRACT-005 | Job and run contracts | Contracts | BLOCKED | CONTRACT-002 | Unassigned |
