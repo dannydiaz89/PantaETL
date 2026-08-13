@@ -1,0 +1,56 @@
+import { AxeBuilder } from "@axe-core/playwright";
+import { expect, test, type Page } from "@playwright/test";
+
+import { en } from "../src/locales/en.js";
+
+/** Fails with the selector, rule, and remediation URL for each detected violation. */
+async function expectNoAccessibilityViolations(page: Page) {
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+    .analyze();
+
+  if (results.violations.length > 0) {
+    throw new Error(results.violations.map((violation) => [
+      `${violation.id}: ${violation.help}`,
+      violation.helpUrl,
+      ...violation.nodes.map((node) => `  ${node.target.join(", ")}: ${node.failureSummary ?? "inspect this element"}`),
+    ].join("\n")).join("\n\n"));
+  }
+}
+
+test("navigation is keyboard reachable and has no WCAG A/AA violations", async ({ page }) => {
+  await page.goto("/");
+  const navigation = page.getByRole("navigation", { name: en["navigation.menu"] });
+  const expectedLinks = [
+    [en["navigation.overview"], "/"],
+    [en["navigation.pipelines"], "/pipelines"],
+    [en["navigation.runs"], "/runs"],
+    [en["navigation.plugins"], "/plugins"],
+    [en["navigation.system"], "/system"],
+    [en["navigation.users"], "/users"],
+  ] as const;
+
+  for (const [label, href] of expectedLinks) {
+    await expect(navigation.getByRole("link", { name: label })).toHaveAttribute("href", href);
+  }
+
+  const firstLink = navigation.getByRole("link", { name: en["navigation.overview"] });
+  await firstLink.focus();
+  await page.keyboard.press("Tab");
+  await expect(navigation.getByRole("link", { name: en["navigation.pipelines"] })).toBeFocused();
+  await expectNoAccessibilityViolations(page);
+});
+
+test("login form and account dialog meet the accessibility baseline", async ({ page }) => {
+  await page.goto("/login");
+  await expect(page.getByLabel(en["login.email"])).toBeVisible();
+  await expect(page.getByLabel(en["login.password"])).toBeVisible();
+  await expectNoAccessibilityViolations(page);
+
+  await page.goto("/");
+  await page.getByRole("button", { name: en["account.menu"] }).click();
+  await expect(page.getByRole("dialog", { name: en["account.title"] })).toBeVisible();
+  await expectNoAccessibilityViolations(page);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toBeHidden();
+});

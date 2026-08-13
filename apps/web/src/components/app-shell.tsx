@@ -1,7 +1,24 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { BarChart3, Boxes, Button, Icon, Moon, Network, Settings, ShieldCheck, Sun, Users, type IconProps } from "@pantaetl/ui";
+import {
+  BarChart3,
+  Boxes,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+  Icon,
+  Moon,
+  Network,
+  Settings,
+  ShieldCheck,
+  Sun,
+  Users,
+  type IconProps,
+} from "@pantaetl/ui";
 
 import { t } from "../locales/index.js";
 import { useTheme } from "../theme-provider.js";
@@ -51,7 +68,22 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
           <Button aria-label={t("navigation.theme")} className="app-theme-button" onClick={() => setTheme(nextTheme)} variant="ghost">
             <Icon icon={nextTheme === "dark" ? Moon : Sun} size={16} />
           </Button>
-          <div className="app-user"><span className="app-user__avatar" aria-hidden="true">{t("shell.userInitial")}</span><span><strong>{t("shell.user")}</strong><small>{t("shell.product")}</small></span></div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <button aria-label={t("account.menu")} className="app-user" type="button">
+                <span className="app-user__avatar" aria-hidden="true">{t("shell.userInitial")}</span>
+                <span><strong>{t("shell.user")}</strong><small>{t("shell.product")}</small></span>
+              </button>
+            </DialogTrigger>
+            <DialogContent aria-describedby="account-menu-description" closeLabel={t("account.menu")}>
+              <DialogTitle>{t("account.title")}</DialogTitle>
+              <DialogDescription id="account-menu-description">{t("account.description")}</DialogDescription>
+              <div className="app-account-menu">
+                <Link to="/users">{t("account.users")}</Link>
+                <Link to="/settings">{t("account.settings")}</Link>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </aside>
       <main className="app-content">{children}</main>

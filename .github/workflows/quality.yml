@@ -25,6 +25,8 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Install Chromium for accessibility checks
+        run: pnpm exec playwright install --with-deps chromium
       - name: Run quality checks
         run: pnpm check
 

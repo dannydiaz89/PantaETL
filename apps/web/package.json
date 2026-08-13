@@ -11,6 +11,7 @@
     "typecheck": "pnpm generate-routes && tsc --noEmit",
     "build": "pnpm generate-routes && vite build && tsc --noEmit",
     "test": "vitest run",
+    "test:a11y": "playwright test",
     "preview": "vite preview",
     "admin:bootstrap": "tsx scripts/bootstrap-admin.ts",
     "admin:reset-password": "tsx scripts/reset-admin-password.ts",
@@ -30,15 +31,17 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/vite": "^4.1.13",
     "@tanstack/router-cli": "^1.132.0",
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "tsx": "^4.23.12",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
-    "tsx": "^4.23.12",
     "vitest": "^4.1.10"
   }
 }
