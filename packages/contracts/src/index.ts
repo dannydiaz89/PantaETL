@@ -7,6 +7,29 @@ export * as execution from "./execution/index.js";
 export * as pipeline from "./pipeline/index.js";
 
 export {
+  componentConfigurationSchema,
+  manualTriggerSchema,
+  pipelineEdgeSchema,
+  pipelineSchema,
+  pipelineStateSchema,
+  pipelineStepSchema,
+  scheduleTriggerSchema,
+  secretBindingSchema,
+  triggerSchema,
+} from "./pipeline/index.js";
+export type {
+  ComponentConfiguration,
+  ManualTrigger,
+  Pipeline,
+  PipelineEdge,
+  PipelineState,
+  PipelineStep,
+  ScheduleTrigger,
+  SecretBinding,
+  Trigger,
+} from "./pipeline/index.js";
+
+export {
   cancellationRequestSchema,
   executionErrorSchema,
   executionMetricsSchema,
