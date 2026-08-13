@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "test": "vitest run tests",
     "migrate:generate": "drizzle-kit generate --config drizzle.config.ts",
-    "migrate:apply": "drizzle-kit migrate --config drizzle.config.ts",
+    "migrate:apply": "node scripts/adopt-migration-history.mjs && drizzle-kit migrate --config drizzle.config.ts",
     "migrate:studio": "drizzle-kit studio --config drizzle.config.ts",
     "check": "pnpm typecheck && pnpm test && pnpm build"
   },

@@ -103,6 +103,11 @@ pnpm stack:down # stops the local services and Docker PostgreSQL
 pnpm stack:reset # deletes local Docker volumes, including PostgreSQL data
 ```
 
+For development databases created before migration history was tracked, the
+migration command verifies the known schema fingerprints, adopts only complete
+historical migrations, and applies any missing ones. It refuses incomplete or
+unrecognized schema states rather than guessing or deleting data.
+
 Start only the web control plane directly, without Docker:
 
 ```bash
