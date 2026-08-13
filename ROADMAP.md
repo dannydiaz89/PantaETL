@@ -184,7 +184,7 @@ These can also proceed concurrently once the worker runtime and registries are c
 | SOURCE-004 | REST API Source | Sources | BLOCKED | WORKER-004, WORKER-006 | Unassigned |
 | SOURCE-005 | PostgreSQL Source | Sources | BLOCKED | WORKER-004, WORKER-006 | Unassigned |
 | TRANSFORM-001 | Column transform set | Transforms | COMPLETE | WORKER-003, WORKER-004 | Codex |
-| TRANSFORM-002 | Row transform set | Transforms | BLOCKED | WORKER-003, WORKER-004 | Unassigned |
+| TRANSFORM-002 | Row transform set | Transforms | COMPLETE | WORKER-003, WORKER-004 | Codex |
 | TRANSFORM-003 | Value/type transform set | Transforms | BLOCKED | WORKER-003, WORKER-004 | Unassigned |
 | TRANSFORM-004 | Document-to-tabular flatten transform | Transforms | BLOCKED | WORKER-003, WORKER-004 | Unassigned |
 | EXPORT-001 | CSV artifact Export | Exports | BLOCKED | WORKER-003, WORKER-004, DB-004 | Unassigned |

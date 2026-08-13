@@ -1,7 +1,7 @@
 # TRANSFORM-002 — Row Transform Set
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Transforms  
 **Depends on:** WORKER-003, WORKER-004
 
@@ -21,7 +21,7 @@ Implement row transforms.
 
 ## Acceptance criteria
 
-- [ ] Execution characteristics declared where needed.
+- [x] Execution characteristics declared where needed.
 
 ## Validation
 
@@ -29,4 +29,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Declarative filter, deduplicate, stable sort, and limit transforms are persisted
+through Dataset storage. Operations that require full materialization expose
+their execution characteristics.
