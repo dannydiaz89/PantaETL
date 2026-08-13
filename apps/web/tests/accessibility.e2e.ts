@@ -47,6 +47,24 @@ test("navigation is keyboard reachable and has no WCAG A/AA violations", async (
   await expectNoAccessibilityViolations(page);
 });
 
+test("sidebar stays viewport-bound and collapses without removing navigation semantics", async ({ page }) => {
+  await page.goto("/runs");
+  await waitForApplication(page);
+  const sidebar = page.locator(".app-sidebar");
+
+  const dimensions = await sidebar.evaluate((element) => ({
+    height: element.getBoundingClientRect().height,
+    viewportHeight: window.innerHeight,
+  }));
+  expect(dimensions.height).toBe(dimensions.viewportHeight);
+
+  await page.getByRole("button", { name: en["navigation.collapse"] }).click();
+  await expect(sidebar).toHaveAttribute("data-collapsed", "true");
+  await expect(page.getByRole("button", { name: en["navigation.expand"] })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: en["navigation.menu"] }).getByRole("link", { name: en["navigation.pipelines"] })).toBeVisible();
+  await expectNoAccessibilityViolations(page);
+});
+
 test("login form and account dialog meet the accessibility baseline", async ({ page }) => {
   await page.goto("/login");
   await expect(page.getByLabel(en["login.email"])).toBeVisible();

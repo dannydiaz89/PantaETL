@@ -9,6 +9,8 @@ export const en = {
   "navigation.users": "Users",
   "navigation.settings": "Settings",
   "navigation.theme": "Change theme",
+  "navigation.collapse": "Collapse navigation",
+  "navigation.expand": "Expand navigation",
   "navigation.menu": "Main navigation",
   "shell.product": "Data pipeline control plane",
   "shell.user": "Administrator",
