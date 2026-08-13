@@ -16,6 +16,7 @@ export {
 export type {
   AvailablePipelineCapability,
   ImportedPipelineDefinition,
+  MissingPipelineCapability,
   PortablePipelineDefinition,
   RequiredPipelineCapability,
 } from "./portability.js";

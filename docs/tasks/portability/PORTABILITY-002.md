@@ -1,7 +1,7 @@
 # PORTABILITY-002 — Pipeline Definition Import
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Portability  
 **Depends on:** PORTABILITY-001
 
@@ -22,8 +22,8 @@ Implement pipeline import.
 
 ## Acceptance criteria
 
-- [ ] Clear missing-component errors.
-- [ ] Cannot run until reviewed.
+- [x] Clear missing-component errors.
+- [x] Cannot run until reviewed.
 
 ## Validation
 
@@ -31,4 +31,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Imports are validated against the canonical pipeline contract, return every
+missing capability in stable order, and remain draft. Both the pipeline domain
+and locked scheduler transaction reject draft or disabled execution.

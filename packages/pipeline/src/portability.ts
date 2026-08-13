@@ -42,12 +42,21 @@ export interface ImportedPipelineDefinition extends PortablePipelineDefinition {
   readonly state: Extract<PipelineState, "draft" | "disabled">;
 }
 
+/** One component capability unavailable in the deployment receiving an import. */
+export type MissingPipelineCapability = RequiredPipelineCapability;
+
 /** Error raised when a portable definition references a component absent from the target deployment. */
 export class UnavailablePipelineCapabilityError extends Error {
-  /** Explain which required component capability is unavailable. */
-  constructor(message: string) {
-    super(message);
+  /** All capabilities that must be installed before the definition can be imported. */
+  readonly missingCapabilities: readonly MissingPipelineCapability[];
+
+  /** Explain every required component capability that is unavailable. */
+  constructor(missingCapabilities: readonly MissingPipelineCapability[]) {
+    super(
+      `Cannot import pipeline because these required components are unavailable: ${formatCapabilities(missingCapabilities)}.`,
+    );
     this.name = "UnavailablePipelineCapabilityError";
+    this.missingCapabilities = missingCapabilities;
   }
 }
 
@@ -92,23 +101,51 @@ export function importPortablePipelineDefinition(
   definition: PortablePipelineDefinition,
   availableCapabilities: Iterable<AvailablePipelineCapability>,
 ): ImportedPipelineDefinition {
+  const validatedDefinition = validatePortablePipelineDefinition(definition);
   const availableKeys = new Set(
     [...availableCapabilities].map((capability) => capabilityKey(capability.type, capability.version)),
   );
+  const required = requiredCapabilities(validatedDefinition.steps);
+  const missingCapabilities = required.filter(
+    (capability) => !availableKeys.has(capabilityKey(capability.type, capability.version)),
+  );
 
-  for (const step of definition.steps) {
-    if (!availableKeys.has(capabilityKey(step.componentType, step.componentVersion))) {
-      throw new UnavailablePipelineCapabilityError(
-        `Required component ${step.componentType}@${step.componentVersion} is unavailable.`,
-      );
-    }
+  if (missingCapabilities.length > 0) {
+    throw new UnavailablePipelineCapabilityError(missingCapabilities);
   }
 
   return {
-    ...definition,
-    steps: copyPortableSteps(definition.steps),
-    edges: definition.edges.map((edge) => ({ ...edge })),
+    contractVersion: validatedDefinition.contractVersion,
+    name: validatedDefinition.name,
+    requiredCapabilities: required,
+    steps: copyPortableSteps(validatedDefinition.steps),
+    edges: validatedDefinition.edges.map((edge) => ({ ...edge })),
     state: "draft",
+  };
+}
+
+/** Validate untrusted import content through the canonical pipeline contract. */
+function validatePortablePipelineDefinition(
+  definition: PortablePipelineDefinition,
+): Pick<Pipeline, "contractVersion" | "name" | "steps" | "edges"> {
+  const pipeline = pipelineSchema.parse({
+    contractVersion: definition.contractVersion,
+    createdAt: "1970-01-01T00:00:00.000Z",
+    edges: definition.edges,
+    id: "00000000-0000-4000-8000-000000000001",
+    name: definition.name,
+    ownerUserId: "00000000-0000-4000-8000-000000000002",
+    state: "draft",
+    steps: definition.steps,
+    triggers: [],
+    updatedAt: "1970-01-01T00:00:00.000Z",
+  }) as Pipeline;
+
+  return {
+    contractVersion: pipeline.contractVersion,
+    name: pipeline.name,
+    steps: pipeline.steps,
+    edges: pipeline.edges,
   };
 }
 
@@ -156,4 +193,9 @@ function requiredCapabilities(
 /** Build an unambiguous component type-and-version lookup key. */
 function capabilityKey(type: string, version: string): string {
   return `${type}@${version}`;
+}
+
+/** Render capability requirements in the same stable order returned to callers. */
+function formatCapabilities(capabilities: readonly RequiredPipelineCapability[]): string {
+  return capabilities.map((capability) => capabilityKey(capability.type, capability.version)).join(", ");
 }

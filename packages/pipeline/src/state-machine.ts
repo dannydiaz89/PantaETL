@@ -68,6 +68,8 @@ export function enqueuePipelineRun(
   state: PipelineExecutionState,
   runId: string,
 ): PipelineExecutionState {
+  assertPipelineCanRun(state);
+
   if (runId.length === 0) {
     throw new PipelineStateTransitionError("A pipeline run requires an identifier.");
   }
@@ -84,6 +86,15 @@ export function enqueuePipelineRun(
   }
 
   return { ...state, queuedRunIds: [...state.queuedRunIds, runId] };
+}
+
+/** Reject run creation until a reviewed pipeline has explicitly been enabled. */
+function assertPipelineCanRun(state: PipelineExecutionState): void {
+  if (state.pipelineState !== "enabled") {
+    throw new PipelineStateTransitionError(
+      "Only an enabled pipeline can be queued for execution. Review and enable this pipeline first.",
+    );
+  }
 }
 
 /** Move the queued active run into execution. */

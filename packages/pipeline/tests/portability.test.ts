@@ -3,9 +3,13 @@ import { describe, expect, it } from "vitest";
 import type { Pipeline } from "@pantaetl/contracts";
 
 import {
+  createPipelineExecutionState,
   duplicatePipelineDefinition,
+  enqueuePipelineRun,
   exportPortablePipelineDefinition,
   importPortablePipelineDefinition,
+  PipelineStateTransitionError,
+  type PortablePipelineDefinition,
   UnavailablePipelineCapabilityError,
 } from "../src/index.js";
 
@@ -87,13 +91,63 @@ describe("pipeline portability", () => {
 
     expect(imported.state).toBe("draft");
     expect(imported.steps[0]?.configuration.secretBindings).toEqual([]);
+    expect(() => enqueuePipelineRun(createPipelineExecutionState(imported.state), "run-1")).toThrow(
+      PipelineStateTransitionError,
+    );
   });
 
   it("rejects imports that require an unavailable component capability", () => {
-    expect(() =>
+    const importDefinition = () =>
       importPortablePipelineDefinition(exportPortablePipelineDefinition(pipeline), [
-        { type: "source.rest-api", version: "v1" },
-      ]),
-    ).toThrow(UnavailablePipelineCapabilityError);
+      { type: "source.rest-api", version: "v1" },
+    ]);
+
+    expect(importDefinition).toThrow(UnavailablePipelineCapabilityError);
+    expect(importDefinition).toThrow(
+      "Cannot import pipeline because these required components are unavailable: export.json@v1.",
+    );
+  });
+
+  it("reports every unavailable component once in graph order", () => {
+    const definition = exportPortablePipelineDefinition({
+      ...pipeline,
+      steps: [
+        ...pipeline.steps,
+        {
+          id: "123e4567-e89b-12d3-a456-426614174024",
+          kind: "transform",
+          componentType: "transform.normalize",
+          componentVersion: "v2",
+          configuration: { values: {}, secretBindings: [] },
+        },
+        {
+          id: "123e4567-e89b-12d3-a456-426614174025",
+          kind: "export",
+          componentType: "export.json",
+          componentVersion: "v1",
+          configuration: { values: {}, secretBindings: [] },
+        },
+      ],
+    });
+
+    try {
+      importPortablePipelineDefinition(definition, [{ type: "source.rest-api", version: "v1" }]);
+      throw new Error("Expected unavailable component capabilities to reject the import.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(UnavailablePipelineCapabilityError);
+      expect((error as UnavailablePipelineCapabilityError).missingCapabilities).toEqual([
+        { type: "export.json", version: "v1" },
+        { type: "transform.normalize", version: "v2" },
+      ]);
+    }
+  });
+
+  it("validates imported definitions instead of trusting typed caller input", () => {
+    const malformedDefinition = {
+      ...exportPortablePipelineDefinition(pipeline),
+      steps: [],
+    } as PortablePipelineDefinition;
+
+    expect(() => importPortablePipelineDefinition(malformedDefinition, [])).toThrow();
   });
 });

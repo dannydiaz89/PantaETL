@@ -38,7 +38,7 @@ describe("pipeline execution state", () => {
   });
 
   it("rejects invalid execution transitions", () => {
-    const idle = createPipelineExecutionState();
+    const idle = createPipelineExecutionState("enabled");
     const running = startActiveRun(enqueuePipelineRun(idle, "run-1"));
 
     expect(() => startActiveRun(running)).toThrow(PipelineStateTransitionError);

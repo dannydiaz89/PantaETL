@@ -1,7 +1,13 @@
 import { and, asc, eq, inArray } from "drizzle-orm";
 
-import { pipelineIdSchema, type PipelineId } from "@pantaetl/contracts";
+import {
+  pipelineIdSchema,
+  pipelineStateSchema,
+  type PipelineId,
+  type PipelineState,
+} from "@pantaetl/contracts";
 import type { DatabaseClient } from "@pantaetl/database";
+import { PipelineStateTransitionError, createPipelineExecutionState, enqueuePipelineRun } from "@pantaetl/pipeline";
 import {
   calculateRunLogExpiry,
   getRunLogRetentionDays,
@@ -74,7 +80,7 @@ export async function createPipelineRunInTransaction(
 ): Promise<CreatedPipelineRun> {
   const pipelineId = pipelineIdSchema.parse(request.pipelineId) as PipelineId;
   const [pipeline] = await transaction
-    .select({ id: pipelines.id })
+    .select({ id: pipelines.id, state: pipelines.state })
     .from(pipelines)
     .where(eq(pipelines.id, pipelineId))
     .for("update")
@@ -83,6 +89,8 @@ export async function createPipelineRunInTransaction(
   if (!pipeline) {
     throw new Error("Cannot create a run for a pipeline that does not exist.");
   }
+
+  assertPipelineCanCreateRun(pipeline.state);
 
   const retentionDays = await getRunLogRetentionDays(transaction);
 
@@ -136,6 +144,28 @@ export async function createPipelineRunInTransaction(
     queuedBehindActiveRun: activeRun !== undefined,
     runId: run.id,
   };
+}
+
+/** Enforce the reviewed-and-enabled gate inside the transaction that creates a persisted run. */
+function assertPipelineCanCreateRun(state: unknown): void {
+  const parsedState = pipelineStateSchema.safeParse(state);
+
+  if (!parsedState.success) {
+    throw new Error("Cannot create a run because the pipeline state is invalid.");
+  }
+
+  try {
+    enqueuePipelineRun(createPipelineExecutionState(parsedState.data as PipelineState), "pending-run");
+  } catch (error) {
+    if (error instanceof PipelineStateTransitionError) {
+      throw new Error(
+        "Cannot create a run until the pipeline has been reviewed and enabled.",
+        { cause: error },
+      );
+    }
+
+    throw error;
+  }
 }
 
 /**
