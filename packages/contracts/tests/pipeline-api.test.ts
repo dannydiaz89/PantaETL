@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   pipelineCreateRequestSchema,
   pipelineDetailRequestSchema,
+  pipelineDuplicateBodyRequestSchema,
   pipelineDuplicateRequestSchema,
   pipelineListRequestSchema,
   pipelineListResponseSchema,
@@ -33,6 +34,7 @@ describe("pipeline API contracts", () => {
     expect(pipelineDetailRequestSchema.safeParse({ pipelineId: identifiers.pipeline }).success).toBe(true);
     expect(pipelineUpdateRequestSchema.safeParse({ name: "Renamed export" }).success).toBe(true);
     expect(pipelineDuplicateRequestSchema.safeParse({ pipelineId: identifiers.pipeline }).success).toBe(true);
+    expect(pipelineDuplicateBodyRequestSchema.safeParse({ name: "Daily orders copy" }).success).toBe(true);
     expect(pipelineRunRequestSchema.safeParse({ pipelineId: identifiers.pipeline }).success).toBe(true);
     expect(pipelineRunResponseSchema.safeParse({
       initialJobCount: 1,
@@ -53,6 +55,11 @@ describe("pipeline API contracts", () => {
     expect(pipelineUpdateRequestSchema.safeParse({ id: identifiers.pipeline, name: "Unsafe" }).success).toBe(false);
     expect(pipelineUpdateRequestSchema.safeParse({ ownerUserId: identifiers.user, name: "Unsafe" }).success).toBe(false);
     expect(pipelineUpdateRequestSchema.safeParse({ createdAt: "2026-08-13T00:00:00.000Z" }).success).toBe(false);
+  });
+
+  it("validates the duplicate body without accepting a path-controlled pipeline identifier", () => {
+    expect(pipelineDuplicateBodyRequestSchema.safeParse({}).success).toBe(true);
+    expect(pipelineDuplicateBodyRequestSchema.safeParse({ pipelineId: identifiers.pipeline }).success).toBe(false);
   });
 
   it("accepts only secret binding references and rejects usable secret values in requests and responses", () => {

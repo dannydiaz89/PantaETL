@@ -1,5 +1,6 @@
 import {
   pipelineDuplicateRequestSchema,
+  pipelineDuplicateBodyRequestSchema,
   pipelineDuplicateResponseSchema,
   pipelineRunRequestSchema,
   pipelineRunResponseSchema,
@@ -130,9 +131,11 @@ async function stateActionResponse(
 async function parseDuplicateRequest(input: PipelineActionRouteInput): Promise<PipelineDuplicateRequest | undefined> {
   const body = await readOptionalJsonObject(input.request);
   if (!body) return undefined;
-  if (Object.keys(body).some((key) => key !== "name")) return undefined;
 
-  const parsed = pipelineDuplicateRequestSchema.safeParse({ ...body, pipelineId: input.params.pipelineId });
+  const parsedBody = pipelineDuplicateBodyRequestSchema.safeParse(body);
+  if (!parsedBody.success) return undefined;
+
+  const parsed = pipelineDuplicateRequestSchema.safeParse({ ...parsedBody.data, pipelineId: input.params.pipelineId });
   return parsed.success ? parsed.data : undefined;
 }
 

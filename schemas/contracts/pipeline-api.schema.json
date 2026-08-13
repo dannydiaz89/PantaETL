@@ -15,6 +15,7 @@
     "pipelineUpdateResponse": { "$ref": "#/$defs/pipelineUpdateResponse" },
     "pipelineDeleteRequest": { "$ref": "#/$defs/pipelineDeleteRequest" },
     "pipelineDuplicateRequest": { "$ref": "#/$defs/pipelineDuplicateRequest" },
+    "pipelineDuplicateBodyRequest": { "$ref": "#/$defs/pipelineDuplicateBodyRequest" },
     "pipelineDuplicateResponse": { "$ref": "#/$defs/pipelineDuplicateResponse" },
     "pipelineRunRequest": { "$ref": "#/$defs/pipelineRunRequest" },
     "pipelineRunResponse": { "$ref": "#/$defs/pipelineRunResponse" },
@@ -32,6 +33,7 @@
     "pipelineUpdateResponse",
     "pipelineDeleteRequest",
     "pipelineDuplicateRequest",
+    "pipelineDuplicateBodyRequest",
     "pipelineDuplicateResponse",
     "pipelineRunRequest",
     "pipelineRunResponse",
@@ -144,11 +146,21 @@
     },
     "pipelineUpdateResponse": { "$ref": "#/$defs/pipeline" },
     "pipelineDeleteRequest": { "$ref": "#/$defs/pipelineDetailRequest" },
+    "pipelineDuplicateName": {
+      "$ref": "https://pantaetl.dev/schemas/pipeline.schema.json#/properties/name"
+    },
+    "pipelineDuplicateBodyRequest": {
+      "type": "object",
+      "properties": {
+        "name": { "$ref": "#/$defs/pipelineDuplicateName" }
+      },
+      "additionalProperties": false
+    },
     "pipelineDuplicateRequest": {
       "type": "object",
       "properties": {
         "pipelineId": { "$ref": "#/$defs/pipelineIdentifier" },
-        "name": { "$ref": "#/$defs/pipelineName" }
+        "name": { "$ref": "#/$defs/pipelineDuplicateName" }
       },
       "required": ["pipelineId"],
       "additionalProperties": false

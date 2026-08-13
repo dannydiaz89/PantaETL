@@ -7,7 +7,11 @@ import {
   type PipelineId,
   type RunId,
 } from "../common/index.js";
-import { canonicalSchemas, propertySchema, zodFromJsonSchema } from "../json-schema.js";
+import {
+  canonicalSchemas,
+  propertySchema,
+  zodFromJsonSchema,
+} from "../json-schema.js";
 import {
   pipelineEdgeSchema,
   pipelineSchema,
@@ -88,6 +92,11 @@ export interface PipelineDuplicateRequest extends PipelineDetailRequest {
   readonly name?: Pipeline["name"];
 }
 
+/** Optional JSON body accepted when duplicating the path-targeted pipeline. */
+export interface PipelineDuplicateBodyRequest {
+  readonly name?: Pipeline["name"];
+}
+
 /** Canonical draft pipeline returned after duplication clears usable credentials. */
 export type PipelineDuplicateResponse = Pipeline;
 
@@ -151,11 +160,18 @@ export const pipelineUpdateResponseSchema = pipelineSchema as z.ZodType<Pipeline
 /** Validate an owner-scoped pipeline deletion request. */
 export const pipelineDeleteRequestSchema = pipelineDetailRequestSchema;
 
-/** Validate a pipeline duplication request without allowing caller-controlled ownership. */
-export const pipelineDuplicateRequestSchema = z.strictObject({
+const pipelineDuplicateRequestObjectSchema = z.strictObject({
   name: pipelineNameSchema.optional(),
   pipelineId: pipelineIdSchema,
-}) as z.ZodType<PipelineDuplicateRequest>;
+});
+
+/** Validate a pipeline duplication request without allowing caller-controlled ownership. */
+export const pipelineDuplicateRequestSchema = pipelineDuplicateRequestObjectSchema as z.ZodType<PipelineDuplicateRequest>;
+
+/** Validate the duplicate request body independently from its path-supplied identity. */
+export const pipelineDuplicateBodyRequestSchema = (
+  pipelineDuplicateRequestObjectSchema.pick({ name: true })
+) as z.ZodType<PipelineDuplicateBodyRequest>;
 
 /** Validate the canonical draft pipeline returned after duplication. */
 export const pipelineDuplicateResponseSchema = pipelineSchema as z.ZodType<PipelineDuplicateResponse>;

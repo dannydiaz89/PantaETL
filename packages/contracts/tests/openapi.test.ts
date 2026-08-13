@@ -41,4 +41,92 @@ describe("OpenAPI contract baseline", () => {
     });
     expect(endpoint.get?.security).toEqual([{ bearerAuth: [] }]);
   });
+
+  it("documents every pipeline route with canonical request and response components", () => {
+    const document = createOpenApiDocument();
+
+    expect(document.components.parameters.PipelineIdentifier).toEqual({
+      in: "path",
+      name: "pipelineId",
+      required: true,
+      schema: { $ref: "#/components/schemas/PipelineIdentifier" },
+    });
+    expect(document.components.securitySchemes.sessionAuth).toMatchObject({
+      in: "cookie",
+      name: "better-auth.session_token",
+      type: "apiKey",
+    });
+
+    expectPipelineOperation(document, "/api/pipelines", "get", "PipelineListResponse", ["200", "401"]);
+    expectPipelineOperation(document, "/api/pipelines", "post", "PipelineCreateResponse", ["201", "400", "401"]);
+    expectPipelineOperation(document, "/api/pipelines/{pipelineId}", "get", "PipelineDetailResponse", ["200", "400", "401", "404"]);
+    expectPipelineOperation(document, "/api/pipelines/{pipelineId}", "patch", "PipelineUpdateResponse", ["200", "400", "401", "404", "409"]);
+    expectPipelineOperation(document, "/api/pipelines/{pipelineId}", "delete", undefined, ["204", "400", "401", "404", "409"]);
+    expectPipelineOperation(document, "/api/pipelines/{pipelineId}/duplicate", "post", "PipelineDuplicateResponse", ["201", "400", "401", "404"]);
+    expectPipelineOperation(document, "/api/pipelines/{pipelineId}/run", "post", "PipelineRunResponse", ["200", "400", "401", "404", "409"]);
+    expectPipelineOperation(document, "/api/pipelines/{pipelineId}/enable", "post", "PipelineStateActionResponse", ["200", "400", "401", "404", "409"]);
+    expectPipelineOperation(document, "/api/pipelines/{pipelineId}/disable", "post", "PipelineStateActionResponse", ["200", "400", "401", "404", "409"]);
+
+    expectPipelineRequestBody(document, "/api/pipelines", "post", "PipelineCreateRequest", true);
+    expectPipelineRequestBody(document, "/api/pipelines/{pipelineId}", "patch", "PipelineUpdateRequest", true);
+    expectPipelineRequestBody(document, "/api/pipelines/{pipelineId}/duplicate", "post", "PipelineDuplicateBodyRequest", false);
+  });
 });
+
+interface OpenApiOperation {
+  readonly parameters?: readonly { readonly $ref?: string }[];
+  readonly requestBody?: {
+    readonly content?: {
+      readonly "application/json"?: { readonly schema?: { readonly $ref?: string } };
+    };
+    readonly required?: boolean;
+  };
+  readonly responses?: Record<string, {
+    readonly content?: {
+      readonly "application/json"?: { readonly schema?: { readonly $ref?: string } };
+    };
+  }>;
+  readonly security?: readonly { readonly sessionAuth?: readonly unknown[] }[];
+}
+
+/** Assert the stable security, path-parameter, response, and status behavior for one pipeline operation. */
+function expectPipelineOperation(
+  document: ReturnType<typeof createOpenApiDocument>,
+  path: string,
+  method: "delete" | "get" | "patch" | "post",
+  responseComponent: string | undefined,
+  statusCodes: readonly string[],
+) {
+  const operation = (document.paths[path] as Record<string, OpenApiOperation> | undefined)?.[method];
+
+  expect(operation?.security).toEqual([{ sessionAuth: [] }]);
+  expect(operation?.responses).toEqual(expect.objectContaining(
+    Object.fromEntries(statusCodes.map((status) => [status, expect.any(Object)])),
+  ));
+
+  if (path !== "/api/pipelines") {
+    expect(operation?.parameters).toEqual([{ $ref: "#/components/parameters/PipelineIdentifier" }]);
+  }
+
+  if (responseComponent) {
+    expect(operation?.responses?.[statusCodes[0]]?.content?.["application/json"]?.schema).toEqual({
+      $ref: `#/components/schemas/${responseComponent}`,
+    });
+  }
+}
+
+/** Assert a JSON body uses the exact canonical component used by its runtime validator. */
+function expectPipelineRequestBody(
+  document: ReturnType<typeof createOpenApiDocument>,
+  path: string,
+  method: "patch" | "post",
+  componentName: string,
+  required: boolean,
+) {
+  const operation = (document.paths[path] as Record<string, OpenApiOperation> | undefined)?.[method];
+
+  expect(operation?.requestBody?.content?.["application/json"]?.schema).toEqual({
+    $ref: `#/components/schemas/${componentName}`,
+  });
+  expect(operation?.requestBody?.required).toBe(required);
+}

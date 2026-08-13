@@ -1,7 +1,7 @@
 # API-CRUD-004 — Pipeline OpenAPI Coverage
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** api_pipeline_openapi
 **Depends on:** API-CRUD-001, API-CRUD-002, API-CRUD-003
 
 ## Scope
@@ -10,10 +10,10 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Add all pipeline endpoints to OpenAPI.
-- [ ] Keep schemas aligned with runtime contracts.
-- [ ] Document auth and 400/401/404/409 behavior.
-- [ ] Do not maintain duplicate handwritten schemas.
+- [x] Add all pipeline endpoints to OpenAPI.
+- [x] Keep schemas aligned with runtime contracts.
+- [x] Document auth and 400/401/404/409 behavior.
+- [x] Do not maintain duplicate handwritten schemas.
 
 ## Required checks
 
@@ -27,4 +27,4 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Notes / blockers
 
-None.
+All pipeline routes now use canonical contract components in the generated OpenAPI document.
