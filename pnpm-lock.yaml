@@ -179,6 +179,12 @@ importers:
 
   packages/database:
     dependencies:
+      '@pantaetl/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@pantaetl/pipeline':
+        specifier: workspace:*
+        version: link:../pipeline
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.2(kysely@0.29.5)(postgres@3.4.9)

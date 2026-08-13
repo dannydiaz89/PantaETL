@@ -20,6 +20,10 @@ export {
   setRunLogRetentionDays,
 } from "./run-log-retention.js";
 export { pipelineComponents, pipelines, pipelineTriggers } from "./schema/pipelines.js";
+export { hydratePipeline } from "./pipelines/hydration.js";
+export type { PersistedPipelineGraph } from "./pipelines/hydration.js";
+export { getPipeline, listPipelinesByOwner } from "./pipelines/read.js";
+export type { GetPipelineInput } from "./pipelines/read.js";
 export {
   DEFAULT_RETENTION_BATCH_SIZE,
   listExpiredArtifacts,

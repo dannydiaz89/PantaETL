@@ -1,7 +1,7 @@
 # CRUD-002 — Pipeline Repository Read Operations
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** pipeline_reads
 **Depends on:** CRUD-001
 
 ## Scope
@@ -10,12 +10,12 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] List pipelines by owner.
-- [ ] Fetch one pipeline by owner + ID.
-- [ ] Hydrate components, edges, and triggers into canonical Pipeline.
-- [ ] Validate hydrated object with canonical Pipeline schema.
-- [ ] Never return plaintext secrets.
-- [ ] Centralize hydration/mapping logic.
+- [x] List pipelines by owner.
+- [x] Fetch one pipeline by owner + ID.
+- [x] Hydrate components, edges, and triggers into canonical Pipeline.
+- [x] Validate hydrated object with canonical Pipeline schema.
+- [x] Never return plaintext secrets.
+- [x] Centralize hydration/mapping logic.
 
 ## Required checks
 
@@ -30,3 +30,8 @@ Implement only the behavior described by this task and its acceptance criteria. 
 ## Notes / blockers
 
 None.
+
+## Implementation notes
+
+- Added a single canonical-contract hydration boundary for owner-scoped pipeline graphs.
+- Added repository reads and focused tests for empty, detail, list, and secret-safe responses.
