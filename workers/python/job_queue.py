@@ -47,20 +47,20 @@ ConnectionFactory = Callable[[str], JobQueueConnection]
 
 _RETURNING_JOB = """
 RETURNING
-  id,
-  pipeline_id AS "pipelineId",
-  run_id AS "runId",
-  run_step_id AS "stepId",
-  component_id AS "componentId",
-  state::text AS state,
-  attempt,
-  retry_max_attempts AS "retryMaxAttempts",
-  retry_delay_seconds AS "retryDelaySeconds",
-  available_at AS "availableAt",
-  worker_id AS "workerId",
-  claimed_at AS "claimedAt",
-  heartbeat_at AS "heartbeatAt",
-  completed_at AS "completedAt"
+  job.id,
+  job.pipeline_id AS "pipelineId",
+  job.run_id AS "runId",
+  job.run_step_id AS "stepId",
+  job.component_id AS "componentId",
+  job.state::text AS state,
+  job.attempt,
+  job.retry_max_attempts AS "retryMaxAttempts",
+  job.retry_delay_seconds AS "retryDelaySeconds",
+  job.available_at AS "availableAt",
+  job.worker_id AS "workerId",
+  job.claimed_at AS "claimedAt",
+  job.heartbeat_at AS "heartbeatAt",
+  job.completed_at AS "completedAt"
 """
 
 _CLAIM_NEXT = f"""
@@ -85,14 +85,14 @@ WHERE job.id = candidate.id AND job.state = 'queued'
 """
 
 _HEARTBEAT = f"""
-UPDATE jobs
+UPDATE jobs AS job
 SET heartbeat_at = %(now)s
 WHERE id = %(job_id)s AND state = 'running' AND worker_id = %(worker_id)s
 {_RETURNING_JOB}
 """
 
 _RELEASE = f"""
-UPDATE jobs
+UPDATE jobs AS job
 SET
   state = 'queued',
   available_at = %(now)s,
@@ -104,7 +104,7 @@ WHERE id = %(job_id)s AND state = 'running' AND worker_id = %(worker_id)s
 """
 
 _FAIL_OR_REQUEUE = f"""
-UPDATE jobs
+UPDATE jobs AS job
 SET
   state = CASE
     WHEN attempt < retry_max_attempts THEN 'queued'::job_state

@@ -84,6 +84,9 @@ class DatasetStorage(Protocol):
     def delete(self, descriptor: DatasetDescriptor) -> bool:
         """Delete a temporary Dataset, returning whether storage was removed."""
 
+    def size_bytes(self, descriptor: DatasetDescriptor) -> int:
+        """Return the stored byte count for a temporary Dataset descriptor."""
+
 
 class LocalDatasetStorage:
     """Store temporary tabular and document Datasets beneath one local root.
@@ -237,6 +240,16 @@ class LocalDatasetStorage:
         except FileNotFoundError:
             return False
         return True
+
+    def size_bytes(self, descriptor: DatasetDescriptor) -> int:
+        """Read one stored Dataset's byte count before terminal cleanup removes it."""
+        if descriptor.storage.kind != Kind.local:
+            raise UnsupportedDatasetError("Local storage cannot resolve a non-local Dataset.")
+        path = self._path_for_location(PurePosixPath(descriptor.storage.location))
+        try:
+            return path.stat().st_size
+        except OSError as error:
+            raise DatasetStorageError("Temporary dataset storage is unavailable.") from error
 
     def delete_expired(
         self, descriptors: Iterable[DatasetDescriptor], *, now: datetime | None = None

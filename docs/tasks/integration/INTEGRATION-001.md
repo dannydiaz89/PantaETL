@@ -1,7 +1,7 @@
 # INTEGRATION-001 — End-to-End File Pipeline
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Integration  
 **Depends on:** WEB-006, SCHED-003, SOURCE-001, TRANSFORM-001, EXPORT-001, GC-002
 
@@ -24,9 +24,9 @@ Prove a complete manually triggered file pipeline through the real application b
 
 ## Acceptance criteria
 
-- [ ] End-to-end flow passes.
-- [ ] Temporary dataset is cleaned.
-- [ ] Artifact remains per policy.
+- [x] End-to-end flow passes.
+- [x] Temporary dataset is cleaned.
+- [x] Artifact remains per policy.
 
 ## Validation
 
@@ -34,4 +34,4 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+The worker now executes a persisted linear CSV Source → column Transform → CSV Artifact pipeline after claiming the scheduler-created Source job. A real PostgreSQL validation confirmed succeeded run, job, and three steps; temporary Datasets were marked cleanup-eligible and removed, while the CSV artifact remained retained for the default 30-day policy.

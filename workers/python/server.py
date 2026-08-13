@@ -4,11 +4,12 @@ import json
 import signal
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from threading import Thread
+from threading import Event, Thread
 from types import FrameType
 from typing import cast
 
 from .config import WorkerConfig
+from .execution import WorkerExecutionService
 from .service_logging import write_log
 
 
@@ -59,13 +60,24 @@ def create_server(config: WorkerConfig) -> WorkerHTTPServer:
     return WorkerHTTPServer(config)
 
 
-def run_server(config: WorkerConfig) -> None:
-    """Run the worker health server and close it cleanly on process signals."""
+def run_server(config: WorkerConfig, execution: WorkerExecutionService | None = None) -> None:
+    """Run health reporting and optional queue execution until a shutdown signal arrives."""
     server = create_server(config)
+    stopped = Event()
+    executor_thread = (
+        Thread(
+            target=execution.run_until_stopped,
+            args=(stopped, config.poll_interval_seconds),
+            daemon=True,
+        )
+        if execution is not None
+        else None
+    )
 
     def stop(signum: int, _frame: FrameType | None) -> None:
         signal_name = signal.Signals(signum).name
         write_log("info", "service_stopping", service=config.service_name, signal=signal_name)
+        stopped.set()
         Thread(target=server.shutdown, daemon=True).start()
 
     signal.signal(signal.SIGINT, cast(signal.Handlers, stop))
@@ -77,9 +89,14 @@ def run_server(config: WorkerConfig) -> None:
         port=config.port,
         service=config.service_name,
     )
+    if executor_thread is not None:
+        executor_thread.start()
 
     try:
         server.serve_forever()
     finally:
+        stopped.set()
         server.server_close()
+        if executor_thread is not None:
+            executor_thread.join(timeout=config.poll_interval_seconds + 1)
         write_log("info", "service_stopped", service=config.service_name)

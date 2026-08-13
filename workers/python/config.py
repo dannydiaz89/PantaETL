@@ -17,6 +17,10 @@ class WorkerConfig:
     service_name: str
     worker_id: UUID
     log_level: LogLevel
+    database_url: str = ""
+    storage_root: str = "/var/lib/pantaetl/storage"
+    source_input_root: str = "/var/lib/pantaetl/storage/imports"
+    poll_interval_seconds: float = 1.0
 
 
 def _read_port(value: str | None, fallback: int) -> int:
@@ -51,6 +55,18 @@ def _read_worker_id(value: str | None) -> UUID:
         raise ValueError("WORKER_ID must be a UUID.") from error
 
 
+def _read_positive_seconds(value: str | None, fallback: float) -> float:
+    """Read a bounded positive worker polling interval."""
+    try:
+        seconds = float(value or fallback)
+    except ValueError as error:
+        raise ValueError("WORKER_POLL_INTERVAL_SECONDS must be positive.") from error
+
+    if seconds <= 0:
+        raise ValueError("WORKER_POLL_INTERVAL_SECONDS must be positive.")
+    return seconds
+
+
 def load_config(service_name: str, default_port: int) -> WorkerConfig:
     """Read worker settings from the environment and validate their safe bounds."""
     return WorkerConfig(
@@ -59,4 +75,10 @@ def load_config(service_name: str, default_port: int) -> WorkerConfig:
         service_name=service_name,
         worker_id=_read_worker_id(os.environ.get("WORKER_ID")),
         log_level=_read_log_level(os.environ.get("LOG_LEVEL")),
+        database_url=os.environ.get("DATABASE_URL", "").strip(),
+        storage_root=os.environ.get("STORAGE_ROOT", "/var/lib/pantaetl/storage"),
+        source_input_root=os.environ.get("SOURCE_INPUT_ROOT", "/var/lib/pantaetl/storage/imports"),
+        poll_interval_seconds=_read_positive_seconds(
+            os.environ.get("WORKER_POLL_INTERVAL_SECONDS"), 1.0
+        ),
     )

@@ -137,6 +137,7 @@ def test_workers_claim_distinct_due_jobs_with_short_skip_locked_transactions() -
     claim_query = connections.connections[0].queries[0][0]
     assert "FOR UPDATE SKIP LOCKED" in claim_query
     assert "attempt = job.attempt + 1" in claim_query
+    assert "RETURNING\n  job.id" in claim_query
 
 
 def test_claim_returns_no_job_when_nothing_is_eligible() -> None:
