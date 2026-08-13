@@ -8,6 +8,8 @@ import {
   jobs,
   pipelineComponents,
   pipelines,
+  recordOperationalEvent,
+  recordOperationalEvents,
   runs,
   runSteps,
 } from "@pantaetl/database";
@@ -116,6 +118,13 @@ export async function createPipelineRunInTransaction(
   if (!run) {
     throw new Error("Pipeline run creation did not return a persisted run.");
   }
+
+  await recordOperationalEvent(transaction, {
+    event: "run_queued",
+    occurredAt: now,
+    pipelineId,
+    runId: run.id,
+  });
 
   const initialJobCount = activeRun
     ? 0
@@ -244,6 +253,17 @@ async function createInitialSourceJobs(
     .values(components.map((component) => ({ componentId: component.id, runId })))
     .returning({ componentId: runSteps.componentId, id: runSteps.id });
   const stepByComponentId = new Map(steps.map((step) => [step.componentId, step.id]));
+
+  await recordOperationalEvents(
+    transaction,
+    steps.map((step) => ({
+      event: "step_queued" as const,
+      occurredAt: now,
+      pipelineId,
+      runId,
+      runStepId: step.id,
+    })),
+  );
 
   await transaction.insert(jobs).values(
     sourceComponents.map((component) => {

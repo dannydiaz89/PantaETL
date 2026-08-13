@@ -8,6 +8,7 @@ import {
   pipelineComponents,
   pipelines,
   pipelineTriggers,
+  operationalEvents,
   runSteps,
   sessions,
   runs,
@@ -28,7 +29,8 @@ describe("core control-plane schema", () => {
       jobs,
       artifacts,
       settings,
-    ]).toHaveLength(9);
+      operationalEvents,
+    ]).toHaveLength(10);
   });
 
   it("stores password credentials and revocable sessions outside browser-visible data", () => {
@@ -76,5 +78,14 @@ describe("core control-plane schema", () => {
 
     expect(runs.isActive.notNull).toBe(true);
     expect(activeRunIndex?.config.where?.queryChunks).toBeDefined();
+  });
+
+  it("stores only correlated lifecycle fields and numeric aggregate metrics", () => {
+    expect(operationalEvents.pipelineId.notNull).toBe(true);
+    expect(operationalEvents.runId.notNull).toBe(true);
+    expect(operationalEvents.recordsRead.getSQLType()).toBe("integer");
+    expect(operationalEvents.durationMs.getSQLType()).toBe("integer");
+    expect(Object.keys(operationalEvents)).not.toContain("context");
+    expect(Object.keys(operationalEvents)).not.toContain("payload");
   });
 });

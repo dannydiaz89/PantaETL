@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { boolean, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
-import { jobState, runState, runStepState } from "./enums.js";
+import { jobState, operationalEventKind, runState, runStepState } from "./enums.js";
 import { pipelineComponents, pipelines, pipelineTriggers } from "./pipelines.js";
 import { users } from "./users.js";
 
@@ -111,5 +111,38 @@ export const jobs = pgTable(
     index("jobs_eligible_work_index")
       .on(table.availableAt, table.createdAt)
       .where(sql`${table.state} = 'queued'`),
+  ],
+);
+
+/**
+ * Immutable, payload-free operational events used to correlate run lifecycle and
+ * aggregate execution metrics without retaining processed records or secrets.
+ */
+export const operationalEvents = pgTable(
+  "operational_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    pipelineId: uuid("pipeline_id")
+      .notNull()
+      .references(() => pipelines.id, { onDelete: "restrict" }),
+    runId: uuid("run_id")
+      .notNull()
+      .references(() => runs.id, { onDelete: "restrict" }),
+    runStepId: uuid("run_step_id").references(() => runSteps.id, { onDelete: "restrict" }),
+    jobId: uuid("job_id").references(() => jobs.id, { onDelete: "restrict" }),
+    workerId: uuid("worker_id"),
+    event: operationalEventKind("event").notNull(),
+    recordsRead: integer("records_read"),
+    recordsWritten: integer("records_written"),
+    bytesRead: integer("bytes_read"),
+    bytesWritten: integer("bytes_written"),
+    durationMs: integer("duration_ms"),
+    retryAttempt: integer("retry_attempt"),
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("operational_events_run_occurred_at_index").on(table.runId, table.occurredAt),
+    index("operational_events_step_occurred_at_index").on(table.runStepId, table.occurredAt),
+    index("operational_events_job_occurred_at_index").on(table.jobId, table.occurredAt),
   ],
 );

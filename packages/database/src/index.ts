@@ -2,7 +2,15 @@ export { createDatabaseConnection, type DatabaseClient, type DatabaseConnection 
 export { claimNextJob, type ClaimedJob } from "./queue.js";
 export { accounts, sessions, users, verifications } from "./schema/users.js";
 export { settings } from "./schema/settings.js";
-export { jobs, runs, runSteps } from "./schema/execution.js";
+export { jobs, operationalEvents, runs, runSteps } from "./schema/execution.js";
+export {
+  recordOperationalEvent,
+  recordOperationalEvents,
+  validateOperationalEvent,
+  type OperationalEventInput,
+  type OperationalEventKind,
+  type OperationalMetrics,
+} from "./observability.js";
 export {
   calculateRunLogExpiry,
   DEFAULT_RUN_LOG_RETENTION_DAYS,
