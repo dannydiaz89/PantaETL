@@ -128,6 +128,7 @@ REST_SOURCE_METADATA = ComponentMetadata.model_validate(
 
 type SecretResolver = Callable[[str], str]
 type RESTTransport = Callable[[str, Mapping[str, str]], bytes]
+type CheckpointLifecycleFactory = Callable[[SourceExecutionRequest], SourceCheckpointLifecycle]
 
 
 class RESTSourceError(RuntimeError):
@@ -143,22 +144,27 @@ class RESTSource:
         *,
         secret_resolver: SecretResolver | None = None,
         checkpoint_lifecycle: SourceCheckpointLifecycle | None = None,
+        checkpoint_lifecycle_factory: CheckpointLifecycleFactory | None = None,
         transport: RESTTransport | None = None,
         dataset_retention: timedelta = timedelta(days=1),
     ) -> None:
         """Bind storage and safe dependencies without retaining resolved secrets."""
         if dataset_retention <= timedelta():
             raise ValueError("Dataset retention must be positive.")
+        if checkpoint_lifecycle is not None and checkpoint_lifecycle_factory is not None:
+            raise ValueError("REST source accepts one checkpoint lifecycle strategy.")
         self._storage = storage
         self._secret_resolver = secret_resolver
         self._checkpoint_lifecycle = checkpoint_lifecycle
+        self._checkpoint_lifecycle_factory = checkpoint_lifecycle_factory
         self._transport = transport or _default_transport
         self._dataset_retention = dataset_retention
 
     def __call__(self, request: SourceExecutionRequest) -> DatasetDescriptor:
         """Fetch configured pages, preserve them as a JSON document, and propose a checkpoint."""
         configuration = _RESTConfiguration.from_request(request)
-        checkpoint = self._load_checkpoint()
+        checkpoint_lifecycle = self._lifecycle_for(request)
+        checkpoint = self._load_checkpoint(checkpoint_lifecycle)
         query_parameters = dict(configuration.query_parameters)
         _apply_checkpoint_query_parameters(query_parameters, configuration, checkpoint)
         headers = self._build_headers(request, configuration)
@@ -180,7 +186,12 @@ class RESTSource:
         else:
             raise RESTSourceError("REST pagination exceeded the configured page limit.")
 
-        self._propose_checkpoint(configuration, page_token, checkpoint_value)
+        self._propose_checkpoint(
+            checkpoint_lifecycle,
+            configuration,
+            page_token,
+            checkpoint_value,
+        )
         return self._storage.persist_document(
             {"pages": pages},
             DatasetLifecycle(
@@ -191,10 +202,18 @@ class RESTSource:
             ),
         )
 
-    def _load_checkpoint(self) -> dict[str, CheckpointValue]:
-        if self._checkpoint_lifecycle is None:
+    def _lifecycle_for(self, request: SourceExecutionRequest) -> SourceCheckpointLifecycle | None:
+        """Resolve the request-specific lifecycle while preserving standalone use."""
+        if self._checkpoint_lifecycle_factory is not None:
+            return self._checkpoint_lifecycle_factory(request)
+        return self._checkpoint_lifecycle
+
+    def _load_checkpoint(
+        self, checkpoint_lifecycle: SourceCheckpointLifecycle | None
+    ) -> dict[str, CheckpointValue]:
+        if checkpoint_lifecycle is None:
             return {}
-        checkpoint = self._checkpoint_lifecycle.load()
+        checkpoint = checkpoint_lifecycle.load()
         if checkpoint is None:
             return {}
         if not isinstance(checkpoint, dict):
@@ -232,15 +251,16 @@ class RESTSource:
 
     def _propose_checkpoint(
         self,
+        checkpoint_lifecycle: SourceCheckpointLifecycle | None,
         configuration: "_RESTConfiguration",
         page_token: str | None,
         checkpoint_value: CheckpointValue | None,
     ) -> None:
-        if self._checkpoint_lifecycle is None:
+        if checkpoint_lifecycle is None:
             return
         if configuration.next_page_token_path is None and configuration.checkpoint_path is None:
             return
-        self._checkpoint_lifecycle.propose({"pageToken": page_token, "value": checkpoint_value})
+        checkpoint_lifecycle.propose({"pageToken": page_token, "value": checkpoint_value})
 
 
 class _RESTConfiguration:

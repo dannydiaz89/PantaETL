@@ -12,9 +12,13 @@ import psycopg
 from psycopg.rows import dict_row
 
 from .artifacts import ArtifactPublisher, LocalArtifactStorage, PostgresArtifactMetadataStore
+from .checkpoints import PostgresCheckpointStore, RunCheckpointCoordinator
 from .components.exports.csv_artifact import CSVArtifactExport, register_csv_artifact_export
+from .components.exports.postgres_export import PostgresExport, register_postgres_export
 from .components.sources.csv_source import CSVSource, register_csv_source
+from .components.sources.rest_source import RESTSource, register_rest_source
 from .components.transforms.columns import register_column_transforms
+from .components.transforms.document import register_document_transforms
 from .config import WorkerConfig
 from .generated.artifact_descriptor import ArtifactDescriptor
 from .generated.dataset_descriptor import DatasetDescriptor
@@ -43,6 +47,7 @@ class PersistedPipelineComponent:
     configuration: ComponentConfiguration
     kind: ComponentKind
     step_id: UUID
+    secret_bindings: tuple[dict[str, str], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -314,6 +319,7 @@ class WorkerExecutionService:
         sources: SourceRegistry,
         transforms: TransformRegistry,
         worker_id: UUID,
+        checkpoints: RunCheckpointCoordinator | None = None,
         queue: JobExecutionQueue | None = None,
     ) -> None:
         """Bind only explicit worker execution dependencies and one worker identity."""
@@ -324,6 +330,7 @@ class WorkerExecutionService:
         self._sources = sources
         self._transforms = transforms
         self._worker_id = worker_id
+        self._checkpoints = checkpoints
 
     def run_once(self) -> bool:
         """Claim and execute one due source job, returning false when the queue is idle."""
@@ -400,6 +407,8 @@ class WorkerExecutionService:
                 )
 
             self._repository.finish_success(job.pipelineId, job.runId, job.id, self._worker_id)
+            if self._checkpoints is not None:
+                self._checkpoints.commit_after_run_success(job.runId)
             self._cleanup_datasets(job.runId, datasets)
             return True
         except Exception as error:
@@ -413,7 +422,7 @@ class WorkerExecutionService:
                 stopped.wait(poll_interval_seconds)
 
     def _execute_source(self, component: PersistedPipelineComponent, job: Job) -> DatasetDescriptor:
-        """Validate and execute the persisted CSV Source request through its registry."""
+        """Validate and execute one persisted Source without resolving secrets in the worker flow."""
         request = SourceExecutionRequest.model_validate(
             {
                 "contractVersion": "v1",
@@ -424,7 +433,10 @@ class WorkerExecutionService:
                 "componentId": component.component_id,
                 "componentType": component.component_type,
                 "componentVersion": component.component_version,
-                "configuration": {"values": component.configuration, "secretBindings": []},
+                "configuration": {
+                    "values": component.configuration,
+                    "secretBindings": list(component.secret_bindings),
+                },
             }
         )
         registered = self._sources.resolve(component.component_type, component.component_version)
@@ -468,6 +480,8 @@ class WorkerExecutionService:
         error: Exception,
     ) -> None:
         """Release retryable work or terminally clean files without leaking data to logs."""
+        if self._checkpoints is not None:
+            self._checkpoints.discard_run(job.runId)
         failed_job = self._queue.fail(job.id, self._worker_id)
         if failed_job is not None and failed_job.state.value == "failed" and current is not None:
             self._repository.finish_failure(job.pipelineId, job.runId, current)
@@ -490,13 +504,20 @@ def create_execution_service(config: WorkerConfig) -> WorkerExecutionService:
     sources = SourceRegistry()
     transforms = TransformRegistry()
     exports = ExportRegistry()
+    checkpoints = RunCheckpointCoordinator(PostgresCheckpointStore(config.database_url))
     register_csv_source(sources, CSVSource(datasets, config.source_input_root))
+    register_rest_source(
+        sources,
+        RESTSource(datasets, checkpoint_lifecycle_factory=checkpoints.create_lifecycle),
+    )
     register_column_transforms(transforms, datasets)
+    register_document_transforms(transforms, datasets)
     publisher = ArtifactPublisher(
         LocalArtifactStorage(config.storage_root),
         PostgresArtifactMetadataStore(config.database_url),
     )
     register_csv_artifact_export(exports, CSVArtifactExport(datasets, publisher))
+    register_postgres_export(exports, PostgresExport(datasets, config.database_url))
     return WorkerExecutionService(
         database_url=config.database_url,
         datasets=datasets,
@@ -505,6 +526,7 @@ def create_execution_service(config: WorkerConfig) -> WorkerExecutionService:
         sources=sources,
         transforms=transforms,
         worker_id=config.worker_id,
+        checkpoints=checkpoints,
     )
 
 
@@ -523,7 +545,24 @@ def _component_from_row(row: Mapping[str, object]) -> PersistedPipelineComponent
         configuration=cast(ComponentConfiguration, dict(configuration)),
         kind=kind,
         step_id=cast(UUID, row["stepId"]),
+        secret_bindings=_secret_bindings_from_row(row["secretBindings"]),
     )
+
+
+def _secret_bindings_from_row(value: object) -> tuple[dict[str, str], ...]:
+    """Validate persisted binding references without loading any secret values."""
+    if not isinstance(value, list):
+        raise PipelineExecutionError("Pipeline component secret bindings are invalid.")
+    bindings: list[dict[str, str]] = []
+    for binding in value:
+        if not isinstance(binding, Mapping):
+            raise PipelineExecutionError("Pipeline component secret bindings are invalid.")
+        key = binding.get("key")
+        reference = binding.get("binding")
+        if not isinstance(key, str) or not key or not isinstance(reference, str) or not reference:
+            raise PipelineExecutionError("Pipeline component secret bindings are invalid.")
+        bindings.append({"key": key, "binding": reference})
+    return tuple(bindings)
 
 
 def _linear_plan(
@@ -579,6 +618,7 @@ SELECT
   pipeline_components.component_type AS "componentType",
   pipeline_components.component_version AS "componentVersion",
   pipeline_components.configuration_values AS "configurationValues",
+  pipeline_components.secret_bindings AS "secretBindings",
   run_steps.id AS "stepId"
 FROM pipeline_components
 INNER JOIN run_steps ON run_steps.component_id = pipeline_components.id

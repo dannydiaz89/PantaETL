@@ -203,7 +203,7 @@ These can also proceed concurrently once the worker runtime and registries are c
 | PORTABILITY-001 | Pipeline definition export | Portability | COMPLETE | PIPELINE-004, WEB-006 | Codex |
 | PORTABILITY-002 | Pipeline definition import | Portability | COMPLETE | PORTABILITY-001 | Codex |
 | INTEGRATION-001 | End-to-end file pipeline | Integration | COMPLETE | WEB-006, SCHED-003, SOURCE-001, TRANSFORM-001, EXPORT-001, GC-002 | Codex |
-| INTEGRATION-002 | End-to-end scheduled API pipeline | Integration | IN PROGRESS | WEB-006, SCHED-003, SOURCE-004, EXPORT-004, WORKER-006 | Codex |
+| INTEGRATION-002 | End-to-end scheduled API pipeline | Integration | COMPLETE | WEB-006, SCHED-003, SOURCE-004, EXPORT-004, WORKER-006 | Codex |
 
 ## Deferred areas
 

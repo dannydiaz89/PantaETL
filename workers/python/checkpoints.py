@@ -10,6 +10,7 @@ import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
+from .generated.source_execution_request import SourceExecutionRequest
 from .job_queue import ConnectionFactory, JobQueueConnection, validate_database_url
 
 type CheckpointValue = (
@@ -170,6 +171,43 @@ class SourceCheckpointLifecycle:
     def discard(self) -> None:
         """Discard an uncommitted candidate after failure or cancellation."""
         self._candidate = None
+
+
+class RunCheckpointCoordinator:
+    """Bind Source checkpoint candidates to one run until terminal execution succeeds.
+
+    Sources create their lifecycle through this coordinator before acquisition. The
+    worker commits candidates only after it has recorded full run success, while a
+    failed run discards every candidate without touching durable checkpoints.
+    """
+
+    def __init__(self, store: CheckpointStore) -> None:
+        """Configure durable checkpoint storage without retaining run-specific state."""
+        self._store = store
+        self._lifecycles: dict[UUID, list[SourceCheckpointLifecycle]] = {}
+
+    def create_lifecycle(self, request: SourceExecutionRequest) -> SourceCheckpointLifecycle:
+        """Create and retain one Source lifecycle for the request's owning run."""
+        lifecycle = SourceCheckpointLifecycle(
+            self._store,
+            request.pipelineId,
+            request.componentId,
+        )
+        self._lifecycles.setdefault(request.runId, []).append(lifecycle)
+        return lifecycle
+
+    def commit_after_run_success(self, run_id: UUID) -> bool:
+        """Commit all deferred candidates after the worker records run success."""
+        lifecycles = self._lifecycles.pop(run_id, [])
+        committed = False
+        for lifecycle in lifecycles:
+            committed = lifecycle.commit_after_run_success(run_id) or committed
+        return committed
+
+    def discard_run(self, run_id: UUID) -> None:
+        """Forget every pending candidate when any component in the run fails."""
+        for lifecycle in self._lifecycles.pop(run_id, []):
+            lifecycle.discard()
 
 
 def _connect(database_url: str) -> JobQueueConnection:
