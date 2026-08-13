@@ -1,7 +1,7 @@
 # SCHED-002 — Due-Schedule Claiming
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Scheduler  
 **Depends on:** SCHED-001
 
@@ -22,7 +22,7 @@ Implement safe concurrent due-schedule claiming.
 
 ## Acceptance criteria
 
-- [ ] Multiple instances do not duplicate scheduled runs.
+- [x] Multiple instances do not duplicate scheduled runs.
 
 ## Validation
 
@@ -30,4 +30,4 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Due schedule occurrences are claimed with short PostgreSQL row locks, advance from their prior occurrence to preserve missed runs, and exclude disabled pipelines.

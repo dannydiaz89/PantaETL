@@ -1,0 +1,4 @@
+ALTER TABLE "pipeline_triggers" ADD COLUMN "next_run_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "pipeline_triggers" ADD COLUMN "last_claimed_at" timestamp with time zone;--> statement-breakpoint
+CREATE INDEX "pipeline_triggers_due_schedule_index" ON "pipeline_triggers" USING btree ("next_run_at","id") WHERE "pipeline_triggers"."type" = 'schedule' AND "pipeline_triggers"."enabled" = true AND "pipeline_triggers"."next_run_at" IS NOT NULL;--> statement-breakpoint
+ALTER TABLE "pipeline_triggers" ADD CONSTRAINT "pipeline_triggers_schedule_fields_check" CHECK (("pipeline_triggers"."type" = 'manual' AND "pipeline_triggers"."cron" IS NULL AND "pipeline_triggers"."timezone" IS NULL AND "pipeline_triggers"."next_run_at" IS NULL) OR ("pipeline_triggers"."type" = 'schedule' AND "pipeline_triggers"."cron" IS NOT NULL AND "pipeline_triggers"."timezone" IS NOT NULL));

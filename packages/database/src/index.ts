@@ -1,6 +1,6 @@
 export { createDatabaseConnection, type DatabaseClient, type DatabaseConnection } from "./client.js";
 export { claimNextJob, type ClaimedJob } from "./queue.js";
-export { pipelines } from "./schema/pipelines.js";
+export { pipelines, pipelineTriggers } from "./schema/pipelines.js";
 export {
   DEFAULT_RETENTION_BATCH_SIZE,
   listExpiredArtifacts,

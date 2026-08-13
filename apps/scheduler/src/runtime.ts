@@ -8,6 +8,10 @@ import {
   DatabasePipelineStateReader,
   type PipelineStateReader,
 } from "./pipeline-state-reader.js";
+import {
+  claimDueSchedules as claimDueScheduleRecords,
+  type ClaimedSchedule,
+} from "./schedule-claims.js";
 
 /** Health status exposed by the scheduler's lightweight service endpoint. */
 export interface SchedulerHealth {
@@ -21,7 +25,7 @@ export interface PipelineSchedulingStatus {
 }
 
 /**
- * Owns the scheduler's database lifecycle and read-only pre-scheduling checks.
+ * Owns the scheduler's database lifecycle and pre-scheduling checks.
  *
  * Schedule claiming, run creation, job enqueueing, and ETL execution deliberately
  * remain outside this foundation.
@@ -53,6 +57,11 @@ export class SchedulerRuntime {
     }
 
     return { pipelineId, eligibility: getPipelineSchedulingEligibility(state) };
+  }
+
+  /** Reserve overdue schedule occurrences without creating runs or executing pipeline work. */
+  async claimDueSchedules(now: Date = new Date(), limit?: number): Promise<readonly ClaimedSchedule[]> {
+    return claimDueScheduleRecords(this.database.db, now, limit);
   }
 
   /** Release scheduler-owned database connections during service shutdown. */

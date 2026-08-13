@@ -20,6 +20,7 @@
     "@pantaetl/contracts": "workspace:*",
     "@pantaetl/database": "workspace:*",
     "@pantaetl/pipeline": "workspace:*",
+    "cron-parser": "^5.8.1",
     "drizzle-orm": "^0.45.2"
   }
 }

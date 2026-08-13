@@ -4,6 +4,7 @@ import {
   index,
   jsonb,
   boolean,
+  check,
   pgTable,
   primaryKey,
   text,
@@ -95,8 +96,19 @@ export const pipelineTriggers = pgTable(
     enabled: boolean("enabled").default(true).notNull(),
     cron: text("cron"),
     timezone: text("timezone"),
+    nextRunAt: timestamp("next_run_at", { withTimezone: true }),
+    lastClaimedAt: timestamp("last_claimed_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index("pipeline_triggers_pipeline_id_index").on(table.pipelineId)],
+  (table) => [
+    index("pipeline_triggers_pipeline_id_index").on(table.pipelineId),
+    index("pipeline_triggers_due_schedule_index")
+      .on(table.nextRunAt, table.id)
+      .where(sql`${table.type} = 'schedule' AND ${table.enabled} = true AND ${table.nextRunAt} IS NOT NULL`),
+    check(
+      "pipeline_triggers_schedule_fields_check",
+      sql`(${table.type} = 'manual' AND ${table.cron} IS NULL AND ${table.timezone} IS NULL AND ${table.nextRunAt} IS NULL) OR (${table.type} = 'schedule' AND ${table.cron} IS NOT NULL AND ${table.timezone} IS NOT NULL)`,
+    ),
+  ],
 );

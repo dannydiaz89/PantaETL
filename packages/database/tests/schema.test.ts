@@ -43,4 +43,19 @@ describe("core control-plane schema", () => {
     expect(pipelineComponents.secretBindings.getSQLType()).toBe("jsonb");
     expect(Object.keys(pipelineComponents)).not.toContain("secretValue");
   });
+
+  it("indexes and constrains schedule triggers for safe due-work claims", () => {
+    const configuration = getTableConfig(pipelineTriggers);
+    const dueScheduleIndex = configuration.indexes.find(
+      (index) => index.config.name === "pipeline_triggers_due_schedule_index",
+    );
+    const scheduleFieldsCheck = configuration.checks.find(
+      (constraint) => constraint.name === "pipeline_triggers_schedule_fields_check",
+    );
+
+    expect(pipelineTriggers.nextRunAt.notNull).toBe(false);
+    expect(pipelineTriggers.lastClaimedAt.notNull).toBe(false);
+    expect(dueScheduleIndex?.config.where?.queryChunks).toBeDefined();
+    expect(scheduleFieldsCheck).toBeDefined();
+  });
 });
