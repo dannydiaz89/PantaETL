@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   accounts,
+  apiTokens,
   artifacts,
   jobs,
   pipelineComponents,
@@ -30,7 +31,8 @@ describe("core control-plane schema", () => {
       artifacts,
       settings,
       operationalEvents,
-    ]).toHaveLength(10);
+      apiTokens,
+    ]).toHaveLength(11);
   });
 
   it("stores password credentials and revocable sessions outside browser-visible data", () => {
@@ -38,6 +40,21 @@ describe("core control-plane schema", () => {
     expect(getTableConfig(sessions).name).toBe("sessions");
     expect(getTableConfig(verifications).name).toBe("verifications");
     expect(users.emailVerified.notNull).toBe(true);
+  });
+
+  it("stores only revocable API-token digests scoped to an owning user", () => {
+    const configuration = getTableConfig(apiTokens);
+    const ownerForeignKey = configuration.foreignKeys.find(
+      (foreignKey) => foreignKey.getName() === "api_tokens_owner_user_id_users_id_fk",
+    );
+
+    expect(apiTokens.tokenHash.getSQLType()).toBe("text");
+    expect(apiTokens.revokedAt.notNull).toBe(false);
+    expect(ownerForeignKey?.reference().foreignTable).toBe(users);
+    expect(ownerForeignKey?.onDelete).toBe("restrict");
+    expect(Object.keys(apiTokens)).not.toContain("token");
+    expect(Object.keys(apiTokens)).not.toContain("isAdmin");
+    expect(Object.keys(apiTokens)).not.toContain("permissions");
   });
 
   it("requires every pipeline to have an explicitly owned user", () => {

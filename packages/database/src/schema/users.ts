@@ -75,3 +75,31 @@ export const verifications = pgTable(
   },
   (table) => [index("verifications_identifier_index").on(table.identifier)],
 );
+
+/**
+ * Revocable bearer credentials owned by a control-plane user.
+ *
+ * The plaintext token is returned only when it is created. Authentication uses
+ * its SHA-256 digest, while the owning user row remains the source of current
+ * permissions.
+ */
+export const apiTokens = pgTable(
+  "api_tokens",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ownerUserId: uuid("owner_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    name: text("name").notNull(),
+    tokenHash: text("token_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("api_tokens_owner_user_id_index").on(table.ownerUserId),
+    uniqueIndex("api_tokens_token_hash_unique").on(table.tokenHash),
+  ],
+);
+
+/** Database record containing token metadata and a non-reversible token digest. */
+export type ApiToken = typeof apiTokens.$inferSelect;

@@ -4,6 +4,7 @@ import { canonicalSchemas } from "../json-schema.js";
 export interface OpenApiDocument {
   readonly components: {
     readonly schemas: Record<string, unknown>;
+    readonly securitySchemes: Record<string, unknown>;
   };
   readonly info: {
     readonly description: string;
@@ -38,6 +39,13 @@ export function createOpenApiDocument(): OpenApiDocument {
         Run: canonicalSchemas.run,
         SourceExecutionRequest: canonicalSchemas.sourceExecutionRequest,
       },
+      securitySchemes: {
+        bearerAuth: {
+          bearerFormat: "PantaETL API token",
+          scheme: "bearer",
+          type: "http",
+        },
+      },
     },
     info: {
       description: "PantaETL control-plane contract schemas.",
@@ -47,6 +55,18 @@ export function createOpenApiDocument(): OpenApiDocument {
     jsonSchemaDialect: "https://spec.openapis.org/oas/3.1/dialect/base",
     openapi: "3.1.1",
     paths: {
+      "/api/authentication": {
+        get: {
+          operationId: "getAuthenticatedIdentity",
+          responses: {
+            200: { description: "The authenticated API-token owner." },
+            401: { description: "A valid API token is required." },
+          },
+          security: [{ bearerAuth: [] }],
+          summary: "Authenticate an API token",
+          tags: ["authentication"],
+        },
+      },
       "/api/openapi.json": {
         get: {
           operationId: "getOpenApiDocument",

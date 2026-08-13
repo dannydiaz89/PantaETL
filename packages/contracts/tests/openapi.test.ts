@@ -27,4 +27,18 @@ describe("OpenAPI contract baseline", () => {
     expect(endpoint.get?.responses).toHaveProperty("200");
     expect(endpoint.get).not.toHaveProperty("requestBody");
   });
+
+  it("documents the API-token Bearer security scheme", () => {
+    const document = createOpenApiDocument();
+    const endpoint = document.paths["/api/authentication"] as {
+      get?: { security?: readonly { bearerAuth?: readonly unknown[] }[] };
+    };
+
+    expect(document.components.securitySchemes.bearerAuth).toEqual({
+      bearerFormat: "PantaETL API token",
+      scheme: "bearer",
+      type: "http",
+    });
+    expect(endpoint.get?.security).toEqual([{ bearerAuth: [] }]);
+  });
 });

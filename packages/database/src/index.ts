@@ -1,6 +1,6 @@
 export { createDatabaseConnection, type DatabaseClient, type DatabaseConnection } from "./client.js";
 export { claimNextJob, type ClaimedJob } from "./queue.js";
-export { accounts, sessions, users, verifications } from "./schema/users.js";
+export { accounts, apiTokens, sessions, users, verifications, type ApiToken } from "./schema/users.js";
 export { settings } from "./schema/settings.js";
 export { jobs, operationalEvents, runs, runSteps } from "./schema/execution.js";
 export {

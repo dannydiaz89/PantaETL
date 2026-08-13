@@ -9,10 +9,13 @@ import { loadAuthConfig } from "./config.js";
 const config = loadAuthConfig();
 const database = createDatabaseConnection(config.databaseUrl);
 
+/** Shared database client for authenticated control-plane request handlers. */
+export const controlPlaneDatabase = database.db;
+
 /** Local password authentication and server-managed sessions for the control plane. */
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
-  database: drizzleAdapter(database.db, {
+  database: drizzleAdapter(controlPlaneDatabase, {
     provider: "pg",
     schema: {
       account: accounts,

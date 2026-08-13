@@ -199,10 +199,10 @@ These can also proceed concurrently once the worker runtime and registries are c
 | OBS-001 | Structured run events and metrics | Observability | COMPLETE | DB-002, CONTRACT-005 | Codex |
 | OBS-002 | System health aggregation | Observability | IN PROGRESS | OBS-001, SCHED-003, WORKER-002, GC-001 | Codex |
 | API-001 | OpenAPI generation baseline | API | COMPLETE | CONTRACT-007, WEB-001 | Codex |
-| API-002 | API token model and authentication | API | IN PROGRESS | API-001, WEB-003, DB-002 | Codex |
+| API-002 | API token model and authentication | API | COMPLETE | API-001, WEB-003, DB-002 | Codex |
 | PORTABILITY-001 | Pipeline definition export | Portability | COMPLETE | PIPELINE-004, WEB-006 | Codex |
 | PORTABILITY-002 | Pipeline definition import | Portability | COMPLETE | PORTABILITY-001 | Codex |
-| INTEGRATION-001 | End-to-end file pipeline | Integration | BLOCKED | WEB-006, SCHED-003, SOURCE-001, TRANSFORM-001, EXPORT-001, GC-002 | Unassigned |
+| INTEGRATION-001 | End-to-end file pipeline | Integration | IN PROGRESS | WEB-006, SCHED-003, SOURCE-001, TRANSFORM-001, EXPORT-001, GC-002 | Codex |
 | INTEGRATION-002 | End-to-end scheduled API pipeline | Integration | BLOCKED | WEB-006, SCHED-003, SOURCE-004, EXPORT-004, WORKER-006 | Unassigned |
 
 ## Deferred areas
