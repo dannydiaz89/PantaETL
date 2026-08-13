@@ -111,7 +111,7 @@ Contracts are established only after all runtime/package boundaries exist.
 | PIPELINE-001 | Pipeline domain foundation | Pipeline Domain | COMPLETE | CONTRACT-006, APP-005 | Codex |
 | PIPELINE-002 | Pipeline state machine | Pipeline Domain | COMPLETE | PIPELINE-001 | Codex |
 | PIPELINE-003 | Component compatibility rules | Pipeline Domain | COMPLETE | PIPELINE-001, CONTRACT-004 | Codex |
-| PIPELINE-004 | Duplication and import/export rules | Pipeline Domain | BLOCKED | PIPELINE-002, PIPELINE-003 | Unassigned |
+| PIPELINE-004 | Duplication and import/export rules | Pipeline Domain | COMPLETE | PIPELINE-002, PIPELINE-003 | Codex |
 
 ## Parallelization Gate
 

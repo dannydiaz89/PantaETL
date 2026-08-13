@@ -8,6 +8,17 @@ export {
 } from "./compatibility.js";
 export type { ComponentCompatibilityResult } from "./compatibility.js";
 export {
+  duplicatePipelineDefinition,
+  exportPortablePipelineDefinition,
+  importPortablePipelineDefinition,
+  UnavailablePipelineCapabilityError,
+} from "./portability.js";
+export type {
+  AvailablePipelineCapability,
+  ImportedPipelineDefinition,
+  PortablePipelineDefinition,
+} from "./portability.js";
+export {
   completeActiveRun,
   createPipelineExecutionState,
   enqueuePipelineRun,

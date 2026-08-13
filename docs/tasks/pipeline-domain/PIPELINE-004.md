@@ -1,7 +1,8 @@
 # PIPELINE-004 — Duplication and Import/Export Rules
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
+**Workstream:** Pipeline Domain
 **Workstream:** Pipeline Domain  
 **Depends on:** PIPELINE-002, PIPELINE-003
 
@@ -22,7 +23,7 @@ Implement portable pipeline definition rules.
 
 ## Acceptance criteria
 
-- [ ] Rules are testable without web UI.
+- [x] Rules are testable without web UI.
 
 ## Validation
 
@@ -30,4 +31,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Added pure portable-definition helpers. Exports and duplicates retain graph
+structure and non-secret configuration while clearing credential bindings;
+imports require available component capabilities and always enter draft state.
