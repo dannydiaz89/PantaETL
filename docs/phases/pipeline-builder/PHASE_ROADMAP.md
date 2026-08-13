@@ -10,8 +10,8 @@ Before work: read `AGENTS.md`, phase docs, verify dependencies, mark task/row IN
 | CAP-002 | Add component capability API contracts | COMPLETE | CAP-001 | Codex |
 | CAP-003 | Expose component capability API | COMPLETE | CAP-002 | Codex |
 | CAP-004 | Add frontend component capability query layer | COMPLETE | CAP-003 | Codex |
-| FORM-001 | Generic component configuration renderer | READY | CAP-002 | Unassigned |
-| FORM-002 | Write-only secret field and binding UX | BLOCKED | FORM-001 | Unassigned |
+| FORM-001 | Generic component configuration renderer | COMPLETE | CAP-002 | Codex |
+| FORM-002 | Write-only secret field and binding UX | READY | FORM-001 | Unassigned |
 | FORM-003 | Component picker foundation | BLOCKED | CAP-004, FORM-001 | Unassigned |
 | BUILDER-001 | Three-step wizard shell and local draft model | BLOCKED | FORM-003 | Unassigned |
 | BUILDER-002 | Source selection and configuration step | BLOCKED | BUILDER-001 | Unassigned |

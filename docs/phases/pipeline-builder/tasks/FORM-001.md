@@ -1,7 +1,7 @@
 # FORM-001 — Generic Component Configuration Renderer
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** Codex
 **Depends on:** CAP-002
 
 ## Scope
@@ -10,13 +10,13 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Acceptance criteria
 
-- [ ] Support all current metadata field types.
-- [ ] Accessible required labels/errors.
-- [ ] Use translation keys.
-- [ ] Use metadata select options.
-- [ ] Safe JSON validation.
-- [ ] Output non-secret values only.
-- [ ] No component-type-specific if-chain.
+- [x] Support all current metadata field types.
+- [x] Accessible required labels/errors.
+- [x] Use translation keys.
+- [x] Use metadata select options.
+- [x] Safe JSON validation.
+- [x] Output non-secret values only.
+- [x] No component-type-specific if-chain.
 
 ## Required checks
 
@@ -31,4 +31,4 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Notes / blockers
 
-None.
+The renderer uses `ComponentMetadata.configFields` and shared design-system controls. It drops secret and undeclared values before notifying consumers; secret-binding controls are intentionally added separately.

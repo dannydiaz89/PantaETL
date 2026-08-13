@@ -131,8 +131,9 @@ html {
 .ui-field__label, .ui-checkbox-field__label { color: var(--panta-text); font-size: 0.875rem; font-weight: 600; }
 .ui-field__description, .ui-checkbox-field__description { color: var(--panta-muted); font-size: 0.8125rem; margin: 0; }
 .ui-field__error { color: var(--panta-danger); font-size: 0.8125rem; margin: 0; }
-.ui-input, .ui-select { background: var(--panta-surface); border: 1px solid var(--panta-border); border-radius: var(--panta-radius-sm); color: var(--panta-text); font: inherit; min-height: 2.5rem; padding: 0.5rem 0.75rem; width: 100%; }
-.ui-input[aria-invalid="true"], .ui-select[aria-invalid="true"] { border-color: var(--panta-danger); }
+.ui-input, .ui-select, .ui-textarea { background: var(--panta-surface); border: 1px solid var(--panta-border); border-radius: var(--panta-radius-sm); color: var(--panta-text); font: inherit; min-height: 2.5rem; padding: 0.5rem 0.75rem; width: 100%; }
+.ui-textarea { min-height: 6rem; resize: vertical; }
+.ui-input[aria-invalid="true"], .ui-select[aria-invalid="true"], .ui-textarea[aria-invalid="true"] { border-color: var(--panta-danger); }
 .ui-select { align-items: center; display: inline-flex; justify-content: space-between; text-align: start; }
 .ui-select__content { background: var(--panta-surface); border: 1px solid var(--panta-border); border-radius: var(--panta-radius-sm); box-shadow: 0 0.75rem 2rem oklch(0.1 0.02 252 / 0.18); min-width: var(--radix-select-trigger-width); padding: 0.25rem; }
 .ui-select__item { align-items: center; border-radius: calc(var(--panta-radius-sm) - 0.125rem); color: var(--panta-text); cursor: default; display: flex; font-size: 0.875rem; justify-content: space-between; outline: none; padding: 0.5rem 0.625rem; }
