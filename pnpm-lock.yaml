@@ -88,6 +88,18 @@ importers:
         specifier: ^8.0.0
         version: 8.2.1(@types/node@22.20.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12)
 
+  packages/config: {}
+
+  packages/contracts: {}
+
+  packages/database: {}
+
+  packages/logging: {}
+
+  packages/pipeline: {}
+
+  packages/ui: {}
+
 packages:
 
   '@babel/code-frame@7.27.1':
