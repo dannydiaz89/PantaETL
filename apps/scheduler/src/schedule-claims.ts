@@ -4,12 +4,15 @@ import { and, asc, eq, isNotNull, lte } from "drizzle-orm";
 import type { DatabaseClient } from "@pantaetl/database";
 import { pipelineTriggers, pipelines } from "@pantaetl/database";
 
+import { createPipelineRunInTransaction, type CreatedPipelineRun } from "./run-queue.js";
+
 /** A due schedule occurrence reserved by one scheduler instance. */
 export interface ClaimedSchedule {
   readonly cron: string;
   readonly nextRunAt: Date;
   readonly pipelineId: string;
   readonly scheduledFor: Date;
+  readonly run: CreatedPipelineRun;
   readonly timezone: string;
   readonly triggerId: string;
 }
@@ -88,11 +91,17 @@ export async function claimDueSchedules(
         .update(pipelineTriggers)
         .set({ lastClaimedAt: now, nextRunAt })
         .where(eq(pipelineTriggers.id, dueSchedule.triggerId));
+      const run = await createPipelineRunInTransaction(
+        transaction,
+        { pipelineId: dueSchedule.pipelineId, scheduledFor, triggerId: dueSchedule.triggerId },
+        now,
+      );
 
       claimedSchedules.push({
         cron,
         nextRunAt,
         pipelineId: dueSchedule.pipelineId,
+        run,
         scheduledFor,
         timezone,
         triggerId: dueSchedule.triggerId,

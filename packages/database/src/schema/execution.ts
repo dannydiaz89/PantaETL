@@ -1,8 +1,8 @@
 import { sql } from "drizzle-orm";
-import { index, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 import { jobState, runState, runStepState } from "./enums.js";
-import { pipelineComponents, pipelines } from "./pipelines.js";
+import { pipelineComponents, pipelines, pipelineTriggers } from "./pipelines.js";
 import { users } from "./users.js";
 
 /** Durable execution records for a pipeline invocation. */
@@ -13,8 +13,11 @@ export const runs = pgTable(
     pipelineId: uuid("pipeline_id")
       .notNull()
       .references(() => pipelines.id, { onDelete: "restrict" }),
+    triggerId: uuid("trigger_id").references(() => pipelineTriggers.id, { onDelete: "set null" }),
     contractVersion: text("contract_version").default("v1").notNull(),
     state: runState("state").default("queued").notNull(),
+    isActive: boolean("is_active").default(false).notNull(),
+    scheduledFor: timestamp("scheduled_for", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true })
       .default(sql`now() + interval '1 year'`)
@@ -27,7 +30,12 @@ export const runs = pgTable(
     }),
     warningCount: integer("warning_count").default(0).notNull(),
   },
-  (table) => [index("runs_pipeline_id_created_at_index").on(table.pipelineId, table.createdAt)],
+  (table) => [
+    index("runs_pipeline_id_created_at_index").on(table.pipelineId, table.createdAt),
+    uniqueIndex("runs_one_active_pipeline_index")
+      .on(table.pipelineId)
+      .where(sql`${table.isActive} = true AND ${table.state} IN ('queued', 'running')`),
+  ],
 );
 
 /** Safe operational log entries retained separately from the run result. */

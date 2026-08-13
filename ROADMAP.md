@@ -156,7 +156,7 @@ An agent can work on the frontend while separate agents work on database, schedu
 | DB-006 | Migration validation baseline | Database | COMPLETE | DB-002, APP-007 | Codex |
 | SCHED-001 | Scheduler runtime foundation | Scheduler | COMPLETE | APP-003, DB-003, PIPELINE-002 | Codex |
 | SCHED-002 | Due-schedule claiming | Scheduler | COMPLETE | SCHED-001 | Codex |
-| SCHED-003 | Run/job creation and same-pipeline queueing | Scheduler | IN PROGRESS | SCHED-002, CONTRACT-005 | Codex |
+| SCHED-003 | Run/job creation and same-pipeline queueing | Scheduler | COMPLETE | SCHED-002, CONTRACT-005 | Codex |
 | GC-001 | Garbage-collector runtime foundation | Garbage Collector | COMPLETE | APP-003, DB-004 | Codex |
 | GC-002 | Dataset/artifact cleanup | Garbage Collector | COMPLETE | GC-001, WORKER-003 | Codex |
 | GC-003 | Run/log retention cleanup | Garbage Collector | COMPLETE | GC-001 | Codex |

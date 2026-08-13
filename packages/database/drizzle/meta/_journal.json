@@ -43,6 +43,13 @@
       "when": 1786614124737,
       "tag": "0005_odd_mentor",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786614653994,
+      "tag": "0006_uneven_tyger_tiger",
+      "breakpoints": true
     }
   ]
 }

@@ -58,4 +58,13 @@ describe("core control-plane schema", () => {
     expect(dueScheduleIndex?.config.where?.queryChunks).toBeDefined();
     expect(scheduleFieldsCheck).toBeDefined();
   });
+
+  it("allows one active queued or running run per pipeline", () => {
+    const activeRunIndex = getTableConfig(runs).indexes.find(
+      (index) => index.config.name === "runs_one_active_pipeline_index",
+    );
+
+    expect(runs.isActive.notNull).toBe(true);
+    expect(activeRunIndex?.config.where?.queryChunks).toBeDefined();
+  });
 });

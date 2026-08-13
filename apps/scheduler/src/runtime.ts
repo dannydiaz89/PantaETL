@@ -12,6 +12,13 @@ import {
   claimDueSchedules as claimDueScheduleRecords,
   type ClaimedSchedule,
 } from "./schedule-claims.js";
+import {
+  createPipelineRun as createPersistedPipelineRun,
+  type CreatedPipelineRun,
+  type PipelineRunRequest,
+  promoteQueuedPipelineRuns as promotePersistedQueuedPipelineRuns,
+  type PromotedPipelineRun,
+} from "./run-queue.js";
 
 /** Health status exposed by the scheduler's lightweight service endpoint. */
 export interface SchedulerHealth {
@@ -27,8 +34,7 @@ export interface PipelineSchedulingStatus {
 /**
  * Owns the scheduler's database lifecycle and pre-scheduling checks.
  *
- * Schedule claiming, run creation, job enqueueing, and ETL execution deliberately
- * remain outside this foundation.
+ * ETL execution remains outside the scheduler boundary.
  */
 export class SchedulerRuntime {
   private readonly pipelineStateReader: PipelineStateReader;
@@ -62,6 +68,19 @@ export class SchedulerRuntime {
   /** Reserve overdue schedule occurrences without creating runs or executing pipeline work. */
   async claimDueSchedules(now: Date = new Date(), limit?: number): Promise<readonly ClaimedSchedule[]> {
     return claimDueScheduleRecords(this.database.db, now, limit);
+  }
+
+  /** Persist one trigger occurrence and its initial Source work atomically. */
+  async createPipelineRun(
+    request: PipelineRunRequest,
+    now: Date = new Date(),
+  ): Promise<CreatedPipelineRun> {
+    return createPersistedPipelineRun(this.database.db, request, now);
+  }
+
+  /** Advance completed pipelines to their next queued run without executing it. */
+  async promoteQueuedPipelineRuns(now: Date = new Date(), limit?: number): Promise<readonly PromotedPipelineRun[]> {
+    return promotePersistedQueuedPipelineRuns(this.database.db, now, limit);
   }
 
   /** Release scheduler-owned database connections during service shutdown. */

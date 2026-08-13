@@ -1,7 +1,7 @@
 # SCHED-003 — Run and Job Creation
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Scheduler  
 **Depends on:** SCHED-002, CONTRACT-005
 
@@ -21,8 +21,8 @@ Create runs/jobs and queue same-pipeline overlap.
 
 ## Acceptance criteria
 
-- [ ] Same pipeline serializes.
-- [ ] Different pipelines can run concurrently.
+- [x] Same pipeline serializes.
+- [x] Different pipelines can run concurrently.
 
 ## Validation
 
@@ -30,4 +30,4 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Run creation locks the owning pipeline, persists later same-pipeline triggers as FIFO queued runs, and promotes them after terminal completion while independent pipelines proceed concurrently.
