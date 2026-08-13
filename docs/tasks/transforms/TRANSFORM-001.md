@@ -1,7 +1,7 @@
 # TRANSFORM-001 — Column Transform Set
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Transforms  
 **Depends on:** WORKER-003, WORKER-004
 
@@ -22,8 +22,8 @@ Implement initial column transforms.
 
 ## Acceptance criteria
 
-- [ ] Focused modules.
-- [ ] Documented config models.
+- [x] Focused modules.
+- [x] Documented config models.
 
 ## Validation
 
@@ -31,4 +31,5 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Focused select, rename, drop, and reorder Transform modules use validated
+configuration models and persist each tabular result through Dataset storage.
