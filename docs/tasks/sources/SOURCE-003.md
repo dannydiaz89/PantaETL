@@ -1,7 +1,7 @@
 # SOURCE-003 — JSON Source
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Sources  
 **Depends on:** WORKER-003, WORKER-004
 
@@ -21,7 +21,7 @@ Implement JSON/document Source.
 
 ## Acceptance criteria
 
-- [ ] Supports document datasets.
+- [x] Supports document datasets.
 
 ## Validation
 
@@ -29,4 +29,5 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+The JSON Source reads validated local documents into encrypted-capable temporary
+document Datasets and returns safe errors for unavailable or malformed input.

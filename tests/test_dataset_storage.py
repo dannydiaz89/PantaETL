@@ -14,6 +14,7 @@ from workers.python.storage import (
     DatasetLifecycle,
     DatasetStorage,
     DatasetStorageError,
+    JsonDocument,
     LocalDatasetStorage,
 )
 
@@ -75,6 +76,25 @@ def test_local_storage_encrypts_temporary_parquet_when_given_a_key(tmp_path: Pat
     assert encrypted_storage.read_tabular(descriptor).equals(frame)
     with pytest.raises(DatasetEncryptionError, match="encryption key"):
         LocalDatasetStorage(tmp_path).read_tabular(descriptor)
+
+
+def test_local_storage_persists_reads_and_encrypts_document_datasets(tmp_path: Path) -> None:
+    """JSON documents retain their contract family and stay encrypted when configured."""
+    key = Fernet.generate_key()
+    storage = LocalDatasetStorage(tmp_path, encryption_key=key)
+    document: JsonDocument = {"orders": [{"id": 1, "total": 12.5}], "source": "fixture"}
+
+    descriptor = storage.persist_document(document, _lifecycle())
+    stored_bytes = (tmp_path / descriptor.storage.location).read_bytes()
+
+    assert descriptor.family == Family.document
+    assert descriptor.format == "json"
+    assert descriptor.storage.encrypted is True
+    assert descriptor.storage.location.endswith(".json.enc")
+    assert b"fixture" not in stored_bytes
+    assert storage.read_document(descriptor) == document
+    with pytest.raises(DatasetEncryptionError, match="encryption key"):
+        LocalDatasetStorage(tmp_path).read_document(descriptor)
 
 
 def test_local_storage_rejects_unsafe_descriptor_locations(tmp_path: Path) -> None:

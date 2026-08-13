@@ -1,5 +1,6 @@
 """Temporary Dataset storage abstractions and the local Parquet implementation."""
 
+import json
 import os
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -35,6 +36,11 @@ class DatasetEncryptionError(DatasetStorageError):
     """Raised when encrypted temporary data cannot be decrypted safely."""
 
 
+type JsonDocument = (
+    str | int | float | bool | None | list["JsonDocument"] | dict[str, "JsonDocument"]
+)
+
+
 @dataclass(frozen=True, slots=True)
 class DatasetLifecycle:
     """Ownership and expiry data required when storing a temporary Dataset."""
@@ -56,12 +62,20 @@ class DatasetStorage(Protocol):
     def read_tabular(self, descriptor: DatasetDescriptor) -> pl.DataFrame:
         """Load a previously persisted tabular Dataset from its descriptor."""
 
+    def persist_document(
+        self, document: JsonDocument, lifecycle: DatasetLifecycle
+    ) -> DatasetDescriptor:
+        """Persist a JSON document and return a descriptor for the stored Dataset."""
+
+    def read_document(self, descriptor: DatasetDescriptor) -> JsonDocument:
+        """Load a previously persisted JSON document from its descriptor."""
+
     def delete(self, descriptor: DatasetDescriptor) -> bool:
         """Delete a temporary Dataset, returning whether storage was removed."""
 
 
 class LocalDatasetStorage:
-    """Store temporary tabular Datasets as local Parquet files beneath one root.
+    """Store temporary tabular and document Datasets beneath one local root.
 
     Locations in descriptors are root-relative POSIX paths. The adapter rejects
     traversal and validates descriptors before touching the filesystem.
@@ -80,16 +94,12 @@ class LocalDatasetStorage:
         self, dataset: pl.DataFrame | pl.LazyFrame, lifecycle: DatasetLifecycle
     ) -> DatasetDescriptor:
         """Write a tabular Dataset atomically and describe its temporary lifecycle."""
-        now = datetime.now(UTC)
-        if lifecycle.expires_at.tzinfo is None:
-            raise ValueError("Dataset expiry must include a timezone.")
-        if lifecycle.expires_at <= now:
-            raise ValueError("Dataset expiry must be in the future.")
+        now = self._validate_lifecycle(lifecycle)
 
         frame = dataset.collect() if isinstance(dataset, pl.LazyFrame) else dataset
         dataset_id = uuid4()
         encrypted = self._cipher is not None
-        location = self._build_location(lifecycle.run_id, dataset_id, encrypted)
+        location = self._build_location(lifecycle.run_id, dataset_id, "parquet", encrypted)
         payload = self._serialize_parquet(frame)
         if self._cipher is not None:
             payload = self._cipher.encrypt(payload)
@@ -109,28 +119,42 @@ class LocalDatasetStorage:
             expiresAt=lifecycle.expires_at,
         )
 
+    def persist_document(
+        self, document: JsonDocument, lifecycle: DatasetLifecycle
+    ) -> DatasetDescriptor:
+        """Write a JSON document atomically and describe its temporary lifecycle."""
+        now = self._validate_lifecycle(lifecycle)
+        try:
+            payload = json.dumps(
+                document, allow_nan=False, ensure_ascii=False, separators=(",", ":")
+            ).encode("utf-8")
+        except (TypeError, ValueError) as error:
+            raise DatasetStorageError("Document dataset is not valid JSON.") from error
+
+        dataset_id = uuid4()
+        encrypted = self._cipher is not None
+        location = self._build_location(lifecycle.run_id, dataset_id, "json", encrypted)
+        if self._cipher is not None:
+            payload = self._cipher.encrypt(payload)
+
+        self._write_atomically(self._path_for_location(location), payload)
+        return DatasetDescriptor(
+            contractVersion="v1",
+            id=dataset_id,
+            family=Family.document,
+            format="json",
+            storage=Storage(kind=Kind.local, location=location.as_posix(), encrypted=encrypted),
+            structure=Structure(format="json"),
+            pipelineId=lifecycle.pipeline_id,
+            runId=lifecycle.run_id,
+            stepId=lifecycle.step_id,
+            createdAt=now,
+            expiresAt=lifecycle.expires_at,
+        )
+
     def read_tabular(self, descriptor: DatasetDescriptor) -> pl.DataFrame:
         """Read a local Parquet Dataset and decrypt it when its descriptor requires it."""
-        path = self._path_for_descriptor(descriptor)
-        try:
-            payload = path.read_bytes()
-        except FileNotFoundError as error:
-            raise DatasetStorageError(
-                f"Temporary dataset does not exist: {descriptor.id}."
-            ) from error
-
-        if descriptor.storage.encrypted:
-            if self._cipher is None:
-                raise DatasetEncryptionError(
-                    "An encryption key is required to read this temporary dataset."
-                )
-            try:
-                payload = self._cipher.decrypt(payload)
-            except InvalidToken as error:
-                raise DatasetEncryptionError(
-                    "Temporary dataset encryption could not be verified."
-                ) from error
-
+        payload = self._read_payload(descriptor, Family.tabular, "parquet")
         try:
             table = pq.read_table(pa.BufferReader(payload))
         except (OSError, pa.ArrowException) as error:
@@ -139,9 +163,21 @@ class LocalDatasetStorage:
             ) from error
         return cast(pl.DataFrame, pl.from_arrow(table))
 
+    def read_document(self, descriptor: DatasetDescriptor) -> JsonDocument:
+        """Read a local JSON Dataset and decrypt it when its descriptor requires it."""
+        payload = self._read_payload(descriptor, Family.document, "json")
+        try:
+            return cast(JsonDocument, json.loads(payload))
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise DatasetStorageError(
+                f"Temporary dataset is not valid JSON: {descriptor.id}."
+            ) from error
+
     def delete(self, descriptor: DatasetDescriptor) -> bool:
         """Remove one temporary Dataset without failing if prior cleanup removed it."""
-        path = self._path_for_descriptor(descriptor)
+        if descriptor.storage.kind != Kind.local:
+            raise UnsupportedDatasetError("Local storage cannot resolve a non-local Dataset.")
+        path = self._path_for_location(PurePosixPath(descriptor.storage.location))
         try:
             path.unlink()
         except FileNotFoundError:
@@ -162,13 +198,53 @@ class LocalDatasetStorage:
                 deleted_ids.append(descriptor.id)
         return deleted_ids
 
-    def _build_location(self, run_id: UUID, dataset_id: UUID, encrypted: bool) -> PurePosixPath:
-        suffix = ".parquet.enc" if encrypted else ".parquet"
+    def _validate_lifecycle(self, lifecycle: DatasetLifecycle) -> datetime:
+        """Validate temporal lifecycle metadata before persisting temporary data."""
+        now = datetime.now(UTC)
+        if lifecycle.expires_at.tzinfo is None:
+            raise ValueError("Dataset expiry must include a timezone.")
+        if lifecycle.expires_at <= now:
+            raise ValueError("Dataset expiry must be in the future.")
+        return now
+
+    def _build_location(
+        self, run_id: UUID, dataset_id: UUID, dataset_format: str, encrypted: bool
+    ) -> PurePosixPath:
+        suffix = f".{dataset_format}.enc" if encrypted else f".{dataset_format}"
         return PurePosixPath("runs") / str(run_id) / "datasets" / f"{dataset_id}{suffix}"
 
-    def _path_for_descriptor(self, descriptor: DatasetDescriptor) -> Path:
-        if descriptor.family != Family.tabular or descriptor.format != "parquet":
-            raise UnsupportedDatasetError("Local storage only supports tabular Parquet Datasets.")
+    def _read_payload(
+        self, descriptor: DatasetDescriptor, family: Family, dataset_format: str
+    ) -> bytes:
+        """Load and decrypt one local Dataset after checking its declared contract family."""
+        path = self._path_for_descriptor(descriptor, family, dataset_format)
+        try:
+            payload = path.read_bytes()
+        except FileNotFoundError as error:
+            raise DatasetStorageError(
+                f"Temporary dataset does not exist: {descriptor.id}."
+            ) from error
+
+        if descriptor.storage.encrypted:
+            if self._cipher is None:
+                raise DatasetEncryptionError(
+                    "An encryption key is required to read this temporary dataset."
+                )
+            try:
+                payload = self._cipher.decrypt(payload)
+            except InvalidToken as error:
+                raise DatasetEncryptionError(
+                    "Temporary dataset encryption could not be verified."
+                ) from error
+        return payload
+
+    def _path_for_descriptor(
+        self, descriptor: DatasetDescriptor, family: Family, dataset_format: str
+    ) -> Path:
+        if descriptor.family != family or descriptor.format != dataset_format:
+            raise UnsupportedDatasetError(
+                f"Local storage cannot read {descriptor.family} Dataset as {dataset_format}."
+            )
         if descriptor.storage.kind != Kind.local:
             raise UnsupportedDatasetError("Local storage cannot resolve a non-local Dataset.")
         return self._path_for_location(PurePosixPath(descriptor.storage.location))
