@@ -7,3 +7,7 @@ export type Timestamp = z.infer<typeof timestampSchema>;
 /** Runtime validator for major wire-version identifiers such as `v1`. */
 export const versionSchema = z.string().regex(/^v\d+$/);
 export type Version = z.infer<typeof versionSchema>;
+
+/** Broad dataset families shared by component input/output metadata. */
+export const dataFamilySchema = z.enum(["any", "document", "tabular", "file"]);
+export type DataFamily = z.infer<typeof dataFamilySchema>;

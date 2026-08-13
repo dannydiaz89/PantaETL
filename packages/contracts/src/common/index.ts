@@ -29,5 +29,5 @@ export {
 } from "./version.js";
 export type { ContractVersion, VersionedContract } from "./version.js";
 
-export { timestampSchema, versionSchema } from "./primitives.js";
-export type { Timestamp, Version } from "./primitives.js";
+export { dataFamilySchema, timestampSchema, versionSchema } from "./primitives.js";
+export type { DataFamily, Timestamp, Version } from "./primitives.js";

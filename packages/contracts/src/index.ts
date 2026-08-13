@@ -7,11 +7,31 @@ export * as execution from "./execution/index.js";
 export * as pipeline from "./pipeline/index.js";
 
 export {
+  componentKindSchema,
+  componentMetadataSchema,
+  componentTypeSchema,
+  configFieldSchema,
+  configFieldTypeSchema,
+  configOptionSchema,
+  translationKeySchema,
+} from "./components/index.js";
+export type {
+  ComponentKind,
+  ComponentMetadata,
+  ComponentType,
+  ConfigField,
+  ConfigFieldType,
+  ConfigOption,
+  TranslationKey,
+} from "./components/index.js";
+
+export {
   artifactIdSchema,
   checkpointIdSchema,
   componentIdSchema,
   CONTRACT_VERSION,
   contractVersionSchema,
+  dataFamilySchema,
   datasetIdSchema,
   identifierSchema,
   jobIdSchema,
@@ -27,6 +47,7 @@ export type {
   CheckpointId,
   ComponentId,
   ContractVersion,
+  DataFamily,
   DatasetId,
   Identifier,
   JobId,
