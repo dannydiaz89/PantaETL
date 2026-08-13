@@ -154,10 +154,10 @@ An agent can work on the frontend while separate agents work on database, schedu
 | DB-004 | Checkpoint and retention schema | Database | COMPLETE | DB-002 | Codex |
 | DB-005 | Secret storage model | Database | COMPLETE | DB-002, CONTRACT-003 | Codex |
 | DB-006 | Migration validation baseline | Database | COMPLETE | DB-002, APP-007 | Codex |
-| SCHED-001 | Scheduler runtime foundation | Scheduler | BLOCKED | APP-003, DB-003, PIPELINE-002 | Unassigned |
+| SCHED-001 | Scheduler runtime foundation | Scheduler | IN PROGRESS | APP-003, DB-003, PIPELINE-002 | Codex |
 | SCHED-002 | Due-schedule claiming | Scheduler | BLOCKED | SCHED-001 | Unassigned |
 | SCHED-003 | Run/job creation and same-pipeline queueing | Scheduler | BLOCKED | SCHED-002, CONTRACT-005 | Unassigned |
-| GC-001 | Garbage-collector runtime foundation | Garbage Collector | BLOCKED | APP-003, DB-004 | Unassigned |
+| GC-001 | Garbage-collector runtime foundation | Garbage Collector | IN PROGRESS | APP-003, DB-004 | Codex |
 | GC-002 | Dataset/artifact cleanup | Garbage Collector | BLOCKED | GC-001, WORKER-003 | Unassigned |
 | GC-003 | Run/log retention cleanup | Garbage Collector | BLOCKED | GC-001 | Unassigned |
 
@@ -166,7 +166,7 @@ An agent can work on the frontend while separate agents work on database, schedu
 | ID | Work Item | Workstream | Status | Depends On | Owner |
 |---|---|---|---|---|---|
 | WORKER-001 | Worker runtime foundation | Worker | COMPLETE | APP-004, CONTRACT-008 | Codex |
-| WORKER-002 | PostgreSQL job claiming and heartbeat | Worker | BLOCKED | WORKER-001, DB-003 | Unassigned |
+| WORKER-002 | PostgreSQL job claiming and heartbeat | Worker | COMPLETE | WORKER-001, DB-003 | Codex |
 | WORKER-003 | Dataset storage abstraction | Worker | COMPLETE | WORKER-001, CONTRACT-004 | Codex |
 | WORKER-004 | Source/Transform/Export registries | Worker | COMPLETE | WORKER-001, CONTRACT-003, PIPELINE-003 | Codex |
 | WORKER-005 | Cancellation and terminal cleanup signaling | Worker | BLOCKED | WORKER-002, WORKER-003 | Unassigned |
