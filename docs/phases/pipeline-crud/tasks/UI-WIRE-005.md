@@ -1,7 +1,7 @@
 # UI-WIRE-005 — Wire Duplicate Run Enable Disable
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** ui_pipeline_actions
 **Depends on:** API-CRUD-003, UI-WIRE-003
 
 ## Scope
@@ -10,11 +10,11 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Duplicate creates new draft/disabled pipeline.
-- [ ] Run Now uses real endpoint.
-- [ ] Enable/disable reflects server state.
-- [ ] Surface conflict errors without losing user edits.
-- [ ] Use localized action text.
+- [x] Duplicate creates new draft/disabled pipeline.
+- [x] Run Now uses real endpoint.
+- [x] Enable/disable reflects server state.
+- [x] Surface conflict errors without losing user edits.
+- [x] Use localized action text.
 
 ## Required checks
 
@@ -28,4 +28,4 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Notes / blockers
 
-None.
+The settings panel now invokes the owner-scoped pipeline action endpoints through the shared client boundary.

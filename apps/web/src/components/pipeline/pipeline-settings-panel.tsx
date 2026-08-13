@@ -1,12 +1,21 @@
 import { useMemo } from "react";
 
-import type { PipelineState } from "@pantaetl/contracts";
+import type { PipelineDetailRequest, PipelineState } from "@pantaetl/contracts";
 import { Field, Select } from "@pantaetl/ui";
 
 import { useI18n } from "../../locale-provider.js";
+import { PipelineActionControls } from "./pipeline-action-controls.js";
 
 /** Displays state controls, respecting the shared pipeline execution lock. */
-export function PipelineSettingsPanel({ editable, state }: { readonly editable: boolean; readonly state: PipelineState }) {
+export function PipelineSettingsPanel({
+  editable,
+  pipelineId,
+  state,
+}: {
+  readonly editable: boolean;
+  readonly pipelineId: PipelineDetailRequest["pipelineId"];
+  readonly state: PipelineState;
+}) {
   const { t } = useI18n();
   const stateOptions = useMemo(() => [
     { label: t("pipeline.state.draft"), value: "draft" },
@@ -30,6 +39,7 @@ export function PipelineSettingsPanel({ editable, state }: { readonly editable: 
           />
         )}
       </Field>
+      <PipelineActionControls editable={editable} pipelineId={pipelineId} state={state} />
     </div>
   );
 }

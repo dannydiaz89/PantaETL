@@ -106,7 +106,7 @@ export function PipelineEditor({
         </TabsContent>
         <TabsContent value="trigger"><PipelineTriggerPanel triggers={pipeline.triggers} /></TabsContent>
         <TabsContent value="history"><PipelineHistoryPanel editable={editable} /></TabsContent>
-        <TabsContent value="settings"><PipelineSettingsPanel editable={editable} state={pipeline.state} /></TabsContent>
+        <TabsContent value="settings"><PipelineSettingsPanel editable={editable} pipelineId={pipeline.id} state={pipeline.state} /></TabsContent>
       </Tabs>
     </form>
   );
