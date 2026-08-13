@@ -97,6 +97,28 @@ def test_local_storage_persists_reads_and_encrypts_document_datasets(tmp_path: P
         LocalDatasetStorage(tmp_path).read_document(descriptor)
 
 
+def test_local_storage_streams_tabular_batches_without_materializing_the_source(
+    tmp_path: Path,
+) -> None:
+    """Chunked writes keep each source frame bounded while preserving encrypted Parquet output."""
+    storage = LocalDatasetStorage(tmp_path, encryption_key=Fernet.generate_key())
+    frames = iter(
+        [
+            pl.DataFrame({"id": [1, 2], "name": ["one", "two"]}),
+            pl.DataFrame({"id": [3], "name": ["three"]}),
+        ]
+    )
+
+    descriptor = storage.persist_tabular_batches(frames, _lifecycle())
+
+    assert descriptor.storage.encrypted is True
+    assert storage.read_tabular(descriptor).to_dicts() == [
+        {"id": 1, "name": "one"},
+        {"id": 2, "name": "two"},
+        {"id": 3, "name": "three"},
+    ]
+
+
 def test_local_storage_rejects_unsafe_descriptor_locations(tmp_path: Path) -> None:
     """Never resolve externally supplied storage locations outside the local root."""
     descriptor = DatasetDescriptor(
