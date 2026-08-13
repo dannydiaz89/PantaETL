@@ -1,7 +1,7 @@
 # INT-CRUD-001 — Pipeline CRUD Integration Tests
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** pipeline_crud_integration
 **Depends on:** API-CRUD-004
 
 ## Scope
@@ -10,13 +10,13 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Test create-read-update-delete round trip.
-- [ ] Verify components/edges/triggers persistence.
-- [ ] Test owner isolation.
-- [ ] Test locked update/delete conflict.
-- [ ] Test duplicate secret-clearing.
-- [ ] Test run invalid-state behavior.
-- [ ] Verify failed transaction leaves no partial graph.
+- [x] Test create-read-update-delete round trip.
+- [x] Verify components/edges/triggers persistence.
+- [x] Test owner isolation.
+- [x] Test locked update/delete conflict.
+- [x] Test duplicate secret-clearing.
+- [x] Test run invalid-state behavior.
+- [x] Verify failed transaction leaves no partial graph.
 
 ## Required checks
 
@@ -30,4 +30,4 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Notes / blockers
 
-None.
+The suite runs against PostgreSQL only when `DATABASE_URL` is supplied and removes its isolated owner fixtures after every case.
