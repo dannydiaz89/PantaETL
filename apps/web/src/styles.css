@@ -7,11 +7,8 @@
 }
 
 body {
+  background: var(--panta-canvas);
+  color: var(--panta-text);
   margin: 0;
-  font-family: system-ui, sans-serif;
-}
-
-main {
-  width: min(42rem, calc(100% - 2rem));
-  margin: 4rem auto;
+  min-height: 100dvh;
 }

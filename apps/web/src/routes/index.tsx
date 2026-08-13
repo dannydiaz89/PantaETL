@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 
+import { t } from '../locales/index.js'
+
 export const Route = createFileRoute('/')({ component: Home })
 
 function Home() {
   return (
     <main>
-      <h1>Welcome to TanStack Start</h1>
-      <p>
-        Edit <code>src/routes/index.tsx</code> to get started.
-      </p>
+      <h1>{t('overview.title')}</h1>
+      <p>{t('overview.description')}</p>
     </main>
   )
 }
