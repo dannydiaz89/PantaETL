@@ -198,7 +198,7 @@ These can also proceed concurrently once the worker runtime and registries are c
 |---|---|---|---|---|---|
 | OBS-001 | Structured run events and metrics | Observability | IN PROGRESS | DB-002, CONTRACT-005 | Codex |
 | OBS-002 | System health aggregation | Observability | BLOCKED | OBS-001, SCHED-003, WORKER-002, GC-001 | Unassigned |
-| API-001 | OpenAPI generation baseline | API | IN PROGRESS | CONTRACT-007, WEB-001 | Codex |
+| API-001 | OpenAPI generation baseline | API | COMPLETE | CONTRACT-007, WEB-001 | Codex |
 | API-002 | API token model and authentication | API | BLOCKED | API-001, WEB-003, DB-002 | Unassigned |
 | PORTABILITY-001 | Pipeline definition export | Portability | COMPLETE | PIPELINE-004, WEB-006 | Codex |
 | PORTABILITY-002 | Pipeline definition import | Portability | BLOCKED | PORTABILITY-001 | Unassigned |

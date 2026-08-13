@@ -1,2 +1,3 @@
 /** Public boundary for API-facing contracts. */
-export {};
+export { createOpenApiDocument } from "./openapi.js";
+export type { OpenApiDocument } from "./openapi.js";
