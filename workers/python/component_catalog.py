@@ -37,7 +37,10 @@ def built_in_component_metadata() -> tuple[ComponentMetadata, ...]:
 
 def component_catalog_json() -> bytes:
     """Serialize the deterministic catalog without exposing component executors."""
-    catalog = [metadata.model_dump(mode="json") for metadata in built_in_component_metadata()]
+    catalog = [
+        metadata.model_dump(mode="json", exclude_none=True)
+        for metadata in built_in_component_metadata()
+    ]
     return (json.dumps(catalog, indent=2, sort_keys=True) + "\n").encode()
 
 

@@ -19,6 +19,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as ApiAuthenticationRouteImport } from './routes/api/authentication'
+import { Route as ApiComponentsRouteImport } from './routes/api/components'
 import { Route as ApiDocsRouteImport } from './routes/api/docs'
 import { Route as ApiOpenapiDotjsonRouteImport } from './routes/api/openapi[.]json'
 import { Route as ApiPipelinesRouteImport } from './routes/api/pipelines'
@@ -80,6 +81,11 @@ const UsersRoute = UsersRouteImport.update({
 const ApiAuthenticationRoute = ApiAuthenticationRouteImport.update({
   id: '/api/authentication',
   path: '/api/authentication',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiComponentsRoute = ApiComponentsRouteImport.update({
+  id: '/api/components',
+  path: '/api/components',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiDocsRoute = ApiDocsRouteImport.update({
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/system': typeof SystemRoute
   '/users': typeof UsersRoute
   '/api/authentication': typeof ApiAuthenticationRoute
+  '/api/components': typeof ApiComponentsRoute
   '/api/docs': typeof ApiDocsRoute
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
   '/api/pipelines': typeof ApiPipelinesRouteWithChildren
@@ -182,6 +189,7 @@ export interface FileRoutesByTo {
   '/system': typeof SystemRoute
   '/users': typeof UsersRoute
   '/api/authentication': typeof ApiAuthenticationRoute
+  '/api/components': typeof ApiComponentsRoute
   '/api/docs': typeof ApiDocsRoute
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
   '/api/pipelines': typeof ApiPipelinesRouteWithChildren
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   '/system': typeof SystemRoute
   '/users': typeof UsersRoute
   '/api/authentication': typeof ApiAuthenticationRoute
+  '/api/components': typeof ApiComponentsRoute
   '/api/docs': typeof ApiDocsRoute
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
   '/api/pipelines': typeof ApiPipelinesRouteWithChildren
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/system'
     | '/users'
     | '/api/authentication'
+    | '/api/components'
     | '/api/docs'
     | '/api/openapi.json'
     | '/api/pipelines'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/system'
     | '/users'
     | '/api/authentication'
+    | '/api/components'
     | '/api/docs'
     | '/api/openapi.json'
     | '/api/pipelines'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/system'
     | '/users'
     | '/api/authentication'
+    | '/api/components'
     | '/api/docs'
     | '/api/openapi.json'
     | '/api/pipelines'
@@ -306,6 +318,7 @@ export interface RootRouteChildren {
   SystemRoute: typeof SystemRoute
   UsersRoute: typeof UsersRoute
   ApiAuthenticationRoute: typeof ApiAuthenticationRoute
+  ApiComponentsRoute: typeof ApiComponentsRoute
   ApiDocsRoute: typeof ApiDocsRoute
   ApiOpenapiDotjsonRoute: typeof ApiOpenapiDotjsonRoute
   ApiPipelinesRoute: typeof ApiPipelinesRouteWithChildren
@@ -384,6 +397,13 @@ declare module '@tanstack/react-router' {
       path: '/api/authentication'
       fullPath: '/api/authentication'
       preLoaderRoute: typeof ApiAuthenticationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/components': {
+      id: '/api/components'
+      path: '/api/components'
+      fullPath: '/api/components'
+      preLoaderRoute: typeof ApiComponentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/docs': {
@@ -528,6 +548,7 @@ const rootRouteChildren: RootRouteChildren = {
   SystemRoute: SystemRoute,
   UsersRoute: UsersRoute,
   ApiAuthenticationRoute: ApiAuthenticationRoute,
+  ApiComponentsRoute: ApiComponentsRoute,
   ApiDocsRoute: ApiDocsRoute,
   ApiOpenapiDotjsonRoute: ApiOpenapiDotjsonRoute,
   ApiPipelinesRoute: ApiPipelinesRouteWithChildren,

@@ -2,10 +2,8 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "fileName",
         "labelKey": "components.exports.csv.fileName",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
@@ -24,10 +22,8 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "fileName",
         "labelKey": "components.exports.json.fileName",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
@@ -46,10 +42,8 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "fileName",
         "labelKey": "components.exports.parquet.fileName",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
@@ -68,16 +62,13 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "targetTable",
         "labelKey": "components.exports.postgres.targetTable",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "writeMode",
         "labelKey": "components.exports.postgres.writeMode",
         "options": [
@@ -95,10 +86,8 @@
         "type": "select"
       },
       {
-        "descriptionKey": null,
         "key": "connectionUrl",
         "labelKey": "components.exports.postgres.connectionUrl",
-        "options": null,
         "required": true,
         "secret": true,
         "type": "text"
@@ -117,28 +106,22 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "sourcePath",
         "labelKey": "components.sources.csv.sourcePath",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "hasHeader",
         "labelKey": "components.sources.csv.hasHeader",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "boolean"
       },
       {
-        "descriptionKey": null,
         "key": "separator",
         "labelKey": "components.sources.csv.separator",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
@@ -157,10 +140,8 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "sourcePath",
         "labelKey": "components.sources.json.sourcePath",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
@@ -179,46 +160,36 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "connectionUrl",
         "labelKey": "components.sources.postgres.connectionUrl",
-        "options": null,
         "required": true,
         "secret": true,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "table",
         "labelKey": "components.sources.postgres.table",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "query",
         "labelKey": "components.sources.postgres.query",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "textarea"
       },
       {
-        "descriptionKey": null,
         "key": "chunkSize",
         "labelKey": "components.sources.postgres.chunkSize",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "number"
       },
       {
-        "descriptionKey": null,
         "key": "checkpointColumn",
         "labelKey": "components.sources.postgres.checkpointColumn",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
@@ -237,109 +208,85 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "url",
         "labelKey": "components.sources.rest.url",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "path",
         "labelKey": "components.sources.rest.path",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "queryParams",
         "labelKey": "components.sources.rest.queryParams",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "json"
       },
       {
-        "descriptionKey": null,
         "key": "headers",
         "labelKey": "components.sources.rest.headers",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "json"
       },
       {
-        "descriptionKey": null,
         "key": "apiToken",
         "labelKey": "components.sources.rest.apiToken",
-        "options": null,
         "required": false,
         "secret": true,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "authHeader",
         "labelKey": "components.sources.rest.authHeader",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "authScheme",
         "labelKey": "components.sources.rest.authScheme",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "nextPagePath",
         "labelKey": "components.sources.rest.nextPagePath",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "pageParameter",
         "labelKey": "components.sources.rest.pageParameter",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "checkpointPath",
         "labelKey": "components.sources.rest.checkpointPath",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "checkpointParameter",
         "labelKey": "components.sources.rest.checkpointParameter",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "maxPages",
         "labelKey": "components.sources.rest.maxPages",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "number"
@@ -358,28 +305,22 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "sourcePath",
         "labelKey": "components.sources.xlsx.sourcePath",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "sheetName",
         "labelKey": "components.sources.xlsx.sheetName",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "hasHeader",
         "labelKey": "components.sources.xlsx.hasHeader",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "boolean"
@@ -398,10 +339,8 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "columns",
         "labelKey": "components.transforms.columns.drop.columns",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "json"
@@ -422,10 +361,8 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "renames",
         "labelKey": "components.transforms.columns.rename.renames",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "json"
@@ -446,10 +383,8 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "columns",
         "labelKey": "components.transforms.columns.reorder.columns",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "json"
@@ -470,10 +405,8 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "columns",
         "labelKey": "components.transforms.columns.select.columns",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "json"
@@ -494,16 +427,13 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "record_path",
         "labelKey": "components.transforms.document.flatten.recordPath",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "json"
       },
       {
-        "descriptionKey": null,
         "key": "array_mode",
         "labelKey": "components.transforms.document.flatten.arrayMode",
         "options": [
@@ -521,10 +451,8 @@
         "type": "select"
       },
       {
-        "descriptionKey": null,
         "key": "separator",
         "labelKey": "components.transforms.document.flatten.separator",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "text"
@@ -545,16 +473,13 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "columns",
         "labelKey": "components.transforms.rows.deduplicate.columns",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "json"
       },
       {
-        "descriptionKey": null,
         "key": "keep",
         "labelKey": "components.transforms.rows.deduplicate.keep",
         "options": [
@@ -591,16 +516,13 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "column",
         "labelKey": "components.transforms.rows.filter.column",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "operator",
         "labelKey": "components.transforms.rows.filter.operator",
         "options": [
@@ -642,10 +564,8 @@
         "type": "select"
       },
       {
-        "descriptionKey": null,
         "key": "value",
         "labelKey": "components.transforms.rows.filter.value",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "json"
@@ -666,10 +586,8 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "count",
         "labelKey": "components.transforms.rows.limit.count",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "number"
@@ -690,10 +608,8 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "columns",
         "labelKey": "components.transforms.rows.sort.columns",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "json"
@@ -714,16 +630,13 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "column",
         "labelKey": "components.transforms.values.cast.column",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "data_type",
         "labelKey": "components.transforms.values.cast.dataType",
         "options": [
@@ -757,10 +670,8 @@
         "type": "select"
       },
       {
-        "descriptionKey": null,
         "key": "strict",
         "labelKey": "components.transforms.values.cast.strict",
-        "options": null,
         "required": false,
         "secret": false,
         "type": "boolean"
@@ -781,19 +692,15 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "column",
         "labelKey": "components.transforms.values.fillNull.column",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "value",
         "labelKey": "components.transforms.values.fillNull.value",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "json"
@@ -814,16 +721,13 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "column",
         "labelKey": "components.transforms.values.normalizeString.column",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "operation",
         "labelKey": "components.transforms.values.normalizeString.operation",
         "options": [
@@ -864,19 +768,15 @@
   {
     "configFields": [
       {
-        "descriptionKey": null,
         "key": "column",
         "labelKey": "components.transforms.values.replace.column",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
-        "descriptionKey": null,
         "key": "replacements",
         "labelKey": "components.transforms.values.replace.replacements",
-        "options": null,
         "required": true,
         "secret": false,
         "type": "json"

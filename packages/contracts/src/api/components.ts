@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import componentCapabilityCatalog from "../generated/component-capability-catalog.json" with { type: "json" };
 import {
   componentKindSchema,
   componentMetadataSchema,
@@ -26,6 +27,11 @@ export const componentCapabilityListRequestSchema = z.strictObject({
 export const componentCapabilityListResponseSchema = z.strictObject({
   components: z.array(componentMetadataSchema as z.ZodType<ComponentMetadata>),
 }) as z.ZodType<ComponentCapabilityListResponse>;
+
+/** Static, canonically validated metadata for every built-in component compiled into this release. */
+export const builtInComponentCapabilities = componentCapabilityListResponseSchema.parse({
+  components: componentCapabilityCatalog,
+}).components;
 
 /** Narrow a validated component catalog to the requested component kind. */
 export function filterComponentCapabilities(

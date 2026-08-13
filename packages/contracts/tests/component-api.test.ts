@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  builtInComponentCapabilities,
   componentCapabilityListRequestSchema,
   componentCapabilityListResponseSchema,
   filterComponentCapabilities,
@@ -44,6 +45,13 @@ describe("component capability API contracts", () => {
   it("filters validated catalog metadata without defining a UI-only component type", () => {
     expect(filterComponentCapabilities(components, "source")).toEqual([components[0]]);
     expect(filterComponentCapabilities(components, undefined)).toEqual(components);
+  });
+
+  it("validates the generated built-in catalog before it can be published", () => {
+    expect(builtInComponentCapabilities).toHaveLength(22);
+    expect(componentCapabilityListResponseSchema.parse({ components: builtInComponentCapabilities })).toEqual({
+      components: builtInComponentCapabilities,
+    });
   });
 
   it("exports the canonical response validator through the package root", () => {

@@ -45,6 +45,17 @@ describe("OpenAPI contract baseline", () => {
     expect(endpoint.get?.security).toEqual([{ bearerAuth: [] }]);
   });
 
+  it("documents the authenticated component capability collection", () => {
+    const document = createOpenApiDocument();
+    const endpoint = document.paths["/api/components"] as { readonly get?: OpenApiOperation } | undefined;
+
+    expect(endpoint?.get?.security).toEqual([{ sessionAuth: [] }]);
+    expect(endpoint?.get?.parameters).toEqual([{ $ref: "#/components/parameters/ComponentKindQuery" }]);
+    expect(endpoint?.get?.responses?.["200"]?.content?.["application/json"]?.schema).toEqual({
+      $ref: "#/components/schemas/ComponentCapabilityListResponse",
+    });
+  });
+
   it("documents every pipeline route with canonical request and response components", () => {
     const document = createOpenApiDocument();
 

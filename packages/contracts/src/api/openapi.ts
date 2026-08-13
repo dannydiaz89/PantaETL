@@ -83,6 +83,13 @@ export function createOpenApiDocument(): OpenApiDocument {
         SourceExecutionRequest: canonicalSchemas.sourceExecutionRequest,
       },
       parameters: {
+        ComponentKindQuery: {
+          description: "Optionally limits the collection to one component kind.",
+          in: "query",
+          name: "kind",
+          required: false,
+          schema: { $ref: "#/components/schemas/ComponentKind" },
+        },
         PipelineIdentifier: {
           in: "path",
           name: "pipelineId",
@@ -122,6 +129,20 @@ export function createOpenApiDocument(): OpenApiDocument {
           security: [{ bearerAuth: [] }],
           summary: "Authenticate an API token",
           tags: ["authentication"],
+        },
+      },
+      "/api/components": {
+        get: {
+          operationId: "listComponentCapabilities",
+          parameters: [{ $ref: "#/components/parameters/ComponentKindQuery" }],
+          responses: {
+            200: jsonResponse("The release's built-in component capabilities.", "ComponentCapabilityListResponse"),
+            400: { description: "The component capability query is invalid." },
+            401: unauthenticatedResponse(),
+          },
+          security: [sessionSecurityRequirement],
+          summary: "List available component capabilities",
+          tags: ["components"],
         },
       },
       "/api/openapi.json": {

@@ -7,6 +7,7 @@ export * as execution from "./execution/index.js";
 export * as pipeline from "./pipeline/index.js";
 
 export {
+  builtInComponentCapabilities,
   componentCapabilityListRequestSchema,
   componentCapabilityListResponseSchema,
   filterComponentCapabilities,
