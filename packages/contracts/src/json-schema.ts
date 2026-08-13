@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import artifactDescriptor from "../../../schemas/contracts/artifact-descriptor.schema.json" with { type: "json" };
 import common from "../../../schemas/contracts/common.schema.json" with { type: "json" };
+import componentApi from "../../../schemas/contracts/component-api.schema.json" with { type: "json" };
 import componentMetadata from "../../../schemas/contracts/component-metadata.schema.json" with { type: "json" };
 import datasetDescriptor from "../../../schemas/contracts/dataset-descriptor.schema.json" with { type: "json" };
 import job from "../../../schemas/contracts/job.schema.json" with { type: "json" };
@@ -42,6 +43,7 @@ export function zodFromJsonSchema(schema: unknown): z.ZodType {
 export const canonicalSchemas = {
   artifactDescriptor,
   common,
+  componentApi,
   componentMetadata,
   datasetDescriptor,
   job,

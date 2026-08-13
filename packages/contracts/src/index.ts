@@ -7,6 +7,9 @@ export * as execution from "./execution/index.js";
 export * as pipeline from "./pipeline/index.js";
 
 export {
+  componentCapabilityListRequestSchema,
+  componentCapabilityListResponseSchema,
+  filterComponentCapabilities,
   pipelineCreateRequestSchema,
   pipelineCreateResponseSchema,
   pipelineDeleteRequestSchema,
@@ -25,6 +28,8 @@ export {
   pipelineUpdateResponseSchema,
 } from "./api/index.js";
 export type {
+  ComponentCapabilityListRequest,
+  ComponentCapabilityListResponse,
   PipelineCreateRequest,
   PipelineCreateResponse,
   PipelineDeleteRequest,

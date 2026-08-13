@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Canonical control-plane API contract definitions for built-in component capabilities.",
+  "$id": "https://pantaetl.dev/schemas/component-api.schema.json",
+  "title": "ComponentCapabilityApiContracts",
+  "type": "object",
+  "properties": {
+    "componentCapabilityListRequest": { "$ref": "#/$defs/componentCapabilityListRequest" },
+    "componentCapabilityListResponse": { "$ref": "#/$defs/componentCapabilityListResponse" }
+  },
+  "required": [
+    "componentCapabilityListRequest",
+    "componentCapabilityListResponse"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "componentKind": {
+      "$ref": "https://pantaetl.dev/schemas/component-metadata.schema.json#/properties/kind"
+    },
+    "componentMetadata": {
+      "$ref": "https://pantaetl.dev/schemas/component-metadata.schema.json"
+    },
+    "componentCapabilityListRequest": {
+      "type": "object",
+      "properties": {
+        "kind": { "$ref": "#/$defs/componentKind" }
+      },
+      "additionalProperties": false
+    },
+    "componentCapabilityListResponse": {
+      "type": "object",
+      "properties": {
+        "components": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/componentMetadata" }
+        }
+      },
+      "required": ["components"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -11,6 +11,9 @@ describe("OpenAPI contract baseline", () => {
     expect(document.components.schemas.ArtifactDescriptor).toBe(canonicalSchemas.artifactDescriptor);
     expect(document.components.schemas.CommonPrimitives).toBe(canonicalSchemas.common);
     expect(document.components.schemas.ComponentMetadata).toBe(canonicalSchemas.componentMetadata);
+    expect(document.components.schemas.ComponentKind).toEqual(
+      expect.objectContaining({ enum: ["source", "transform", "export"] }),
+    );
     expect(document.components.schemas.DatasetDescriptor).toBe(canonicalSchemas.datasetDescriptor);
     expect(document.components.schemas.Job).toBe(canonicalSchemas.job);
     expect(document.components.schemas.Pipeline).toBe(canonicalSchemas.pipeline);

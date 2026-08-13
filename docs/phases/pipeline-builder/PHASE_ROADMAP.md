@@ -7,8 +7,8 @@ Before work: read `AGENTS.md`, phase docs, verify dependencies, mark task/row IN
 | ID | Task | Status | Depends On | Owner |
 |---|---|---|---|---|
 | CAP-001 | Generate built-in component capability catalog | COMPLETE | — | Codex |
-| CAP-002 | Add component capability API contracts | READY | CAP-001 | Unassigned |
-| CAP-003 | Expose component capability API | BLOCKED | CAP-002 | Unassigned |
+| CAP-002 | Add component capability API contracts | COMPLETE | CAP-001 | Codex |
+| CAP-003 | Expose component capability API | READY | CAP-002 | Unassigned |
 | CAP-004 | Add frontend component capability query layer | BLOCKED | CAP-003 | Unassigned |
 | FORM-001 | Generic component configuration renderer | BLOCKED | CAP-002 | Unassigned |
 | FORM-002 | Write-only secret field and binding UX | BLOCKED | FORM-001 | Unassigned |

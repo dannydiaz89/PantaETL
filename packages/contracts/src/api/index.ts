@@ -2,6 +2,15 @@
 export { createOpenApiDocument } from "./openapi.js";
 export type { OpenApiDocument } from "./openapi.js";
 export {
+  componentCapabilityListRequestSchema,
+  componentCapabilityListResponseSchema,
+  filterComponentCapabilities,
+} from "./components.js";
+export type {
+  ComponentCapabilityListRequest,
+  ComponentCapabilityListResponse,
+} from "./components.js";
+export {
   pipelineCreateRequestSchema,
   pipelineCreateResponseSchema,
   pipelineDeleteRequestSchema,

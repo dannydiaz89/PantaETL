@@ -2,9 +2,12 @@ import { canonicalSchemas, definitionSchema, propertySchema } from "../json-sche
 
 const pipelineSchemaIdentifier = "https://pantaetl.dev/schemas/pipeline.schema.json";
 const commonSchemaIdentifier = "https://pantaetl.dev/schemas/common.schema.json";
+const componentMetadataSchemaIdentifier = "https://pantaetl.dev/schemas/component-metadata.schema.json";
 
 const openApiReferences: Readonly<Record<string, string>> = {
   [commonSchemaIdentifier + "#/properties/identifier"]: "#/components/schemas/PipelineIdentifier",
+  [componentMetadataSchemaIdentifier]: "#/components/schemas/ComponentMetadata",
+  [componentMetadataSchemaIdentifier + "#/properties/kind"]: "#/components/schemas/ComponentKind",
   [pipelineSchemaIdentifier]: "#/components/schemas/Pipeline",
   [pipelineSchemaIdentifier + "#/properties/contractVersion"]: "#/components/schemas/PipelineContractVersion",
   [pipelineSchemaIdentifier + "#/properties/edges"]: "#/components/schemas/PipelineEdges",
@@ -47,6 +50,9 @@ export function createOpenApiDocument(): OpenApiDocument {
         ArtifactDescriptor: canonicalSchemas.artifactDescriptor,
         CommonPrimitives: canonicalSchemas.common,
         ComponentMetadata: canonicalSchemas.componentMetadata,
+        ComponentKind: propertySchema(canonicalSchemas.componentMetadata, "kind"),
+        ComponentCapabilityListRequest: componentApiComponent("componentCapabilityListRequest"),
+        ComponentCapabilityListResponse: componentApiComponent("componentCapabilityListResponse"),
         DatasetDescriptor: canonicalSchemas.datasetDescriptor,
         Job: canonicalSchemas.job,
         Pipeline: canonicalSchemas.pipeline,
@@ -308,6 +314,13 @@ function pipelineConflictResponse(): unknown {
 function pipelineApiComponent(definitionName: string): unknown {
   return replaceCanonicalReferences(
     definitionSchema(canonicalSchemas.pipelineApi, definitionName),
+  );
+}
+
+/** Convert a component capability API definition into an OpenAPI component without copying its schema. */
+function componentApiComponent(definitionName: string): unknown {
+  return replaceCanonicalReferences(
+    definitionSchema(canonicalSchemas.componentApi, definitionName),
   );
 }
 
