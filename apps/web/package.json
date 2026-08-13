@@ -12,6 +12,8 @@
     "build": "pnpm generate-routes && vite build && tsc --noEmit",
     "test": "vitest run",
     "preview": "vite preview",
+    "admin:bootstrap": "tsx scripts/bootstrap-admin.ts",
+    "admin:reset-password": "tsx scripts/reset-admin-password.ts",
     "check": "pnpm test && pnpm build"
   },
   "dependencies": {
@@ -23,6 +25,7 @@
     "@tanstack/react-router": "latest",
     "@tanstack/react-start": "latest",
     "better-auth": "^1.6.27",
+    "drizzle-orm": "^0.45.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -35,6 +38,7 @@
     "@vitejs/plugin-react": "^6.0.1",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
+    "tsx": "^4.23.12",
     "vitest": "^4.1.10"
   }
 }
