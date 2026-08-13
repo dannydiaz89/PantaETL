@@ -1,7 +1,7 @@
 # FOUNDATION-003 — Python uv Quality Baseline
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE  
+**Owner:** Codex  
 **Workstream:** Foundation  
 **Depends on:** FOUNDATION-001
 
@@ -23,10 +23,10 @@ Create Python 3.13 uv project/tooling foundation.
 
 ## Acceptance criteria
 
-- [ ] `uv sync` succeeds.
-- [ ] Ruff succeeds.
-- [ ] mypy succeeds.
-- [ ] pytest succeeds.
+- [x] `uv sync` succeeds.
+- [x] Ruff succeeds.
+- [x] mypy succeeds.
+- [x] pytest succeeds.
 
 ## Validation
 
@@ -34,4 +34,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Added the Python 3.13 pin, root uv project and lockfile, Ruff and strict mypy
+configuration, pytest configuration, and a Python-version toolchain test. Validated
+with frozen dependency sync plus Ruff lint/format, mypy, and pytest checks.
