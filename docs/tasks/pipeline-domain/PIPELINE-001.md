@@ -1,8 +1,8 @@
 # PIPELINE-001 — Pipeline Domain Foundation
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
-**Workstream:** Pipeline Domain  
+**Status:** COMPLETE
+**Owner:** Codex
+**Workstream:** Pipeline Domain
 **Depends on:** CONTRACT-006, APP-005
 
 ## Scope
@@ -21,7 +21,7 @@ Use the pipeline package scaffold for pure pipeline-domain behavior.
 
 ## Acceptance criteria
 
-- [ ] Package tests independently.
+- [x] Package tests independently.
 
 ## Validation
 
@@ -29,4 +29,5 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+Added a pure, contract-backed pipeline topology API with independent Vitest
+coverage. The package contains no persistence or UI dependencies.

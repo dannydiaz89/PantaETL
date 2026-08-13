@@ -108,7 +108,7 @@ Contracts are established only after all runtime/package boundaries exist.
 | CONTRACT-006 | Pipeline and trigger contracts | Contracts | COMPLETE | CONTRACT-002, CONTRACT-003 | Codex |
 | CONTRACT-007 | Canonical JSON Schema contracts | Contracts | COMPLETE | CONTRACT-003, CONTRACT-004, CONTRACT-005, CONTRACT-006 | Codex |
 | CONTRACT-008 | Pydantic generation proof | Contracts | COMPLETE | CONTRACT-007, APP-004 | Codex |
-| PIPELINE-001 | Pipeline domain foundation | Pipeline Domain | BLOCKED | CONTRACT-006, APP-005 | Unassigned |
+| PIPELINE-001 | Pipeline domain foundation | Pipeline Domain | COMPLETE | CONTRACT-006, APP-005 | Codex |
 | PIPELINE-002 | Pipeline state machine | Pipeline Domain | BLOCKED | PIPELINE-001 | Unassigned |
 | PIPELINE-003 | Component compatibility rules | Pipeline Domain | BLOCKED | PIPELINE-001, CONTRACT-004 | Unassigned |
 | PIPELINE-004 | Duplication and import/export rules | Pipeline Domain | BLOCKED | PIPELINE-002, PIPELINE-003 | Unassigned |
