@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { TopLevelPage } from "../components/top-level-page.js";
+import { AppShell } from "../components/app-shell.js";
+import { SettingsWorkspace } from "../components/settings-workspace.js";
 import { useI18n } from "../locale-provider.js";
 
 export const Route = createFileRoute("/settings")({ component: Settings });
 
 function Settings() {
   const { t } = useI18n();
-  return <TopLevelPage description={t("page.settings.description")} eyebrow={t("app.name")} title={t("page.settings.title")} />;
+  return <AppShell><main className="app-page"><p className="app-page__eyebrow">{t("app.name")}</p><h1>{t("page.settings.title")}</h1><p>{t("page.settings.description")}</p><SettingsWorkspace /></main></AppShell>;
 }

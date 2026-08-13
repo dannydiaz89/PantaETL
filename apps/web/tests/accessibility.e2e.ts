@@ -113,3 +113,37 @@ test("run history shows safe metadata in accessible tables", async ({ page }) =>
   await expect(page.locator(".run-details").getByText(en["runs.status.running"], { exact: true }).first()).toBeVisible();
   await expectNoAccessibilityViolations(page);
 });
+
+test("system status presents safe application health accessibly", async ({ page }) => {
+  await page.route("**/api/system/health", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        checkedAt: "2026-08-13T12:00:00.000Z",
+        database: { status: "healthy" },
+        garbageCollector: { status: "healthy" },
+        queue: { queuedJobs: 4, runningJobs: 2, status: "healthy" },
+        scheduler: { status: "healthy" },
+        status: "healthy",
+        storage: { status: "healthy" },
+        workers: { status: "healthy" },
+      }),
+    });
+  });
+  await page.goto("/system");
+  await waitForApplication(page);
+
+  await expect(page.getByRole("heading", { name: en["system.health.title"] })).toBeVisible();
+  await expect(page.getByText(en["system.component.database"], { exact: true })).toBeVisible();
+  await expect(page.getByText(en["system.queue.queued"], { exact: true })).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(/host|container|cpu|memory|disk/i);
+  await expectNoAccessibilityViolations(page);
+});
+
+test("settings retains an accessible administrator boundary", async ({ page }) => {
+  await page.goto("/settings");
+  await waitForApplication(page);
+
+  await expect(page.getByRole("heading", { name: en["settings.retention.title"] })).toBeVisible();
+  await expectNoAccessibilityViolations(page);
+});

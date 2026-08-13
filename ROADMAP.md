@@ -142,7 +142,7 @@ An agent can work on the frontend while separate agents work on database, schedu
 | WEB-005 | Application navigation shell | Web | COMPLETE | WEB-002, UI-003 | Codex |
 | WEB-006 | Pipeline list/editor foundation | Web | COMPLETE | WEB-005, PIPELINE-003 | Codex |
 | WEB-007 | Runs and history UI foundation | Web | COMPLETE | WEB-005, CONTRACT-005 | Codex |
-| WEB-008 | System and settings UI foundation | Web | IN PROGRESS | WEB-005, OBS-002 | Codex |
+| WEB-008 | System and settings UI foundation | Web | COMPLETE | WEB-005, OBS-002 | Codex |
 
 ## Track B — Database and Control-Plane Backend
 
@@ -203,7 +203,7 @@ These can also proceed concurrently once the worker runtime and registries are c
 | PORTABILITY-001 | Pipeline definition export | Portability | COMPLETE | PIPELINE-004, WEB-006 | Codex |
 | PORTABILITY-002 | Pipeline definition import | Portability | COMPLETE | PORTABILITY-001 | Codex |
 | INTEGRATION-001 | End-to-end file pipeline | Integration | COMPLETE | WEB-006, SCHED-003, SOURCE-001, TRANSFORM-001, EXPORT-001, GC-002 | Codex |
-| INTEGRATION-002 | End-to-end scheduled API pipeline | Integration | BLOCKED | WEB-006, SCHED-003, SOURCE-004, EXPORT-004, WORKER-006 | Unassigned |
+| INTEGRATION-002 | End-to-end scheduled API pipeline | Integration | IN PROGRESS | WEB-006, SCHED-003, SOURCE-004, EXPORT-004, WORKER-006 | Codex |
 
 ## Deferred areas
 
