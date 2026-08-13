@@ -1,7 +1,7 @@
 # EXPORT-002 — JSON Artifact Export
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Exports  
 **Depends on:** WORKER-003, WORKER-004, DB-004
 
@@ -21,7 +21,7 @@ Implement JSON artifact Export.
 
 ## Acceptance criteria
 
-- [ ] Artifact metadata recorded.
+- [x] Artifact metadata recorded.
 
 ## Validation
 
@@ -29,4 +29,5 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+The JSON Export atomically finalizes a JSON artifact and records its durable
+metadata only after the complete output has been published.
