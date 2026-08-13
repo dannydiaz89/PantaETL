@@ -7,6 +7,33 @@ export * as execution from "./execution/index.js";
 export * as pipeline from "./pipeline/index.js";
 
 export {
+  cancellationRequestSchema,
+  executionErrorSchema,
+  executionMetricsSchema,
+  jobSchema,
+  jobStateSchema,
+  retryPolicySchema,
+  runSchema,
+  runStateSchema,
+  runStepResultSchema,
+  runStepStateSchema,
+  workerClaimSchema,
+} from "./execution/index.js";
+export type {
+  CancellationRequest,
+  ExecutionError,
+  ExecutionMetrics,
+  Job,
+  JobState,
+  RetryPolicy,
+  Run,
+  RunState,
+  RunStepResult,
+  RunStepState,
+  WorkerClaim,
+} from "./execution/index.js";
+
+export {
   artifactDescriptorSchema,
   artifactRetentionSchema,
   dataStructureSchema,

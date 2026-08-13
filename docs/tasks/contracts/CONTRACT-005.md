@@ -1,7 +1,7 @@
 # CONTRACT-005 — Job and Run Contracts
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Contracts  
 **Depends on:** CONTRACT-002
 
@@ -22,13 +22,20 @@ Define queue job, run, step/result, retry, and cancellation contracts.
 
 ## Acceptance criteria
 
-- [ ] Contracts remain ORM-independent.
-- [ ] Representative validation tests exist.
+- [x] Contracts remain ORM-independent.
+- [x] Representative validation tests exist.
 
 ## Validation
 
 Run all checks relevant to the packages/services introduced or changed by this task.
 
+- `pnpm --filter @pantaetl/contracts check`
+- `pnpm check`
+- Frozen lockfile installation
+
 ## Notes / blockers
 
-None.
+Added ORM-independent Zod contracts for jobs, retries, worker claims/heartbeats,
+cancellation requests, runs, step results, safe execution metrics/errors, and the
+`completed_with_warnings` state. Runtime tests cover valid execution metadata and
+invalid retry policies.
