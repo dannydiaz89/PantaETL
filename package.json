@@ -5,12 +5,24 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm web:check",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit --project tsconfig.json"
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "web:build": "pnpm --filter web build",
+    "web:check": "pnpm --filter web check",
+    "web:dev": "pnpm --filter web dev",
+    "web:generate-routes": "pnpm --filter web generate-routes",
+    "web:typecheck": "pnpm --filter web typecheck"
   },
   "packageManager": "pnpm@10.28.2",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lightningcss",
+      "unrs-resolver"
+    ]
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.2.0",

@@ -16,5 +16,5 @@
     "verbatimModuleSyntax": true
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "dist", "coverage"]
+  "exclude": ["node_modules", "dist", "coverage", "apps", "packages", "workers"]
 }
