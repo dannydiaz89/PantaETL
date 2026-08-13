@@ -1,0 +1,52 @@
+# Cross-Service Contracts
+
+## Goal
+
+TypeScript and Python communicate with versioned validated contracts.
+
+## Planned canonical flow
+
+```text
+Zod
+  |
+JSON Schema
+  |
+Pydantic interoperability/generation
+```
+
+Prove with representative contracts before scaling.
+
+Representative contracts:
+
+- Job;
+- Dataset;
+- Source execution request;
+- Run result.
+
+If generated Pydantic ergonomics are poor, retain JSON Schema as the wire source and enforce compatibility tests against thin handwritten models.
+
+## Package layout
+
+```text
+packages/contracts/
+  common/
+  pipeline/
+  execution/
+  dataset/
+  components/
+  api/
+```
+
+Avoid a giant schema file.
+
+## Versioning
+
+Payloads include explicit version information where compatibility matters.
+
+Services must not silently process unsupported contracts.
+
+## UI configuration
+
+Component schemas should support validation and, where reasonable, configuration forms.
+
+Secret fields remain identifiable for protected rendering and redaction.

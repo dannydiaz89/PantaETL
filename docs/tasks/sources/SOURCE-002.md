@@ -1,0 +1,32 @@
+# SOURCE-002 — XLSX Source
+
+**Status:** BLOCKED  
+**Owner:** Unassigned  
+**Workstream:** Sources  
+**Depends on:** WORKER-003, WORKER-004
+
+## Scope
+
+Implement XLSX Source.
+
+- Config schema.
+- Workbook/sheet behavior.
+- Dataset output.
+
+## Out of scope
+
+- Unrelated workstreams.
+- Product feature implementation beyond this task.
+- Architecture changes not required by this task.
+
+## Acceptance criteria
+
+- [ ] Produces supported Dataset.
+
+## Validation
+
+Run all checks relevant to the packages/services introduced or changed by this task.
+
+## Notes / blockers
+
+None.
