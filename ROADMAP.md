@@ -82,7 +82,7 @@ These tasks establish the real service/package topology before detailed contract
 
 | ID | Work Item | Workstream | Status | Depends On | Owner |
 |---|---|---|---|---|---|
-| APP-001 | Monorepo application topology | Application Setup | BLOCKED | FOUNDATION-002, FOUNDATION-003 | Unassigned |
+| APP-001 | Monorepo application topology | Application Setup | COMPLETE | FOUNDATION-002, FOUNDATION-003 | Codex |
 | APP-002 | TanStack Start web scaffold | Application Setup | BLOCKED | APP-001 | Unassigned |
 | APP-003 | TypeScript service scaffolds | Application Setup | BLOCKED | APP-001 | Unassigned |
 | APP-004 | Python worker application scaffold | Application Setup | BLOCKED | APP-001 | Unassigned |
