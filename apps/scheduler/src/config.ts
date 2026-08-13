@@ -1,8 +1,19 @@
 /** Runtime configuration needed to start a TypeScript service shell. */
 export interface ServiceConfig {
+  readonly databaseUrl: string;
   readonly host: string;
   readonly port: number;
   readonly serviceName: string;
+}
+
+function readDatabaseUrl(value: string | undefined): string {
+  const databaseUrl = value?.trim();
+
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL is required.');
+  }
+
+  return databaseUrl;
 }
 
 function readPort(value: string | undefined, fallback: number): number {
@@ -18,6 +29,7 @@ function readPort(value: string | undefined, fallback: number): number {
 /** Reads host and port settings without introducing service-specific behavior. */
 export function loadConfig(serviceName: string, defaultPort: number): ServiceConfig {
   return {
+    databaseUrl: readDatabaseUrl(process.env.DATABASE_URL),
     host: process.env.HOST ?? '127.0.0.1',
     port: readPort(process.env.PORT, defaultPort),
     serviceName,

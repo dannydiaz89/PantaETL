@@ -38,8 +38,24 @@ importers:
       typescript:
         specifier: 6.0.3
         version: 6.0.3
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.10(@types/node@26.2.0)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12))
 
   apps/scheduler:
+    dependencies:
+      '@pantaetl/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pantaetl/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@pantaetl/pipeline':
+        specifier: workspace:*
+        version: link:../../packages/pipeline
+      drizzle-orm:
+        specifier: ^0.45.2
+        version: 0.45.2(postgres@3.4.9)
     devDependencies:
       '@types/node':
         specifier: ^26.2.0

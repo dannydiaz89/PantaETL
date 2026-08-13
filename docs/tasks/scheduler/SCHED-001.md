@@ -1,7 +1,7 @@
 # SCHED-001 — Scheduler Runtime Foundation
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Scheduler  
 **Depends on:** APP-003, DB-003, PIPELINE-002
 
@@ -21,8 +21,8 @@ Connect scheduler scaffold to DB/domain/contracts.
 
 ## Acceptance criteria
 
-- [ ] No ETL execution code.
-- [ ] Starts cleanly.
+- [x] No ETL execution code.
+- [x] Starts cleanly.
 
 ## Validation
 
@@ -30,4 +30,4 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+The runtime validates persisted pipeline state before future scheduling work, provides database-backed health, and does not claim schedules or execute work.

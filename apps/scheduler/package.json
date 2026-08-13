@@ -6,12 +6,20 @@
     "dev": "tsx src/main.ts",
     "build": "tsc --project tsconfig.json",
     "typecheck": "tsc --noEmit --project tsconfig.json",
+    "test": "vitest run tests",
     "start": "node dist/main.js",
-    "check": "pnpm build"
+    "check": "pnpm typecheck && pnpm test && pnpm build"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
     "tsx": "^4.23.12",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@pantaetl/contracts": "workspace:*",
+    "@pantaetl/database": "workspace:*",
+    "@pantaetl/pipeline": "workspace:*",
+    "drizzle-orm": "^0.45.2"
   }
 }
