@@ -181,7 +181,7 @@ These can also proceed concurrently once the worker runtime and registries are c
 | SOURCE-001 | CSV Source | Sources | COMPLETE | WORKER-003, WORKER-004 | Codex |
 | SOURCE-002 | XLSX Source | Sources | COMPLETE | WORKER-003, WORKER-004 | Codex |
 | SOURCE-003 | JSON Source | Sources | COMPLETE | WORKER-003, WORKER-004 | Codex |
-| SOURCE-004 | REST API Source | Sources | BLOCKED | WORKER-004, WORKER-006 | Unassigned |
+| SOURCE-004 | REST API Source | Sources | COMPLETE | WORKER-004, WORKER-006 | Codex |
 | SOURCE-005 | PostgreSQL Source | Sources | BLOCKED | WORKER-004, WORKER-006 | Unassigned |
 | TRANSFORM-001 | Column transform set | Transforms | COMPLETE | WORKER-003, WORKER-004 | Codex |
 | TRANSFORM-002 | Row transform set | Transforms | COMPLETE | WORKER-003, WORKER-004 | Codex |

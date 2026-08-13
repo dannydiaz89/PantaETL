@@ -1,7 +1,7 @@
 # SOURCE-004 — REST API Source
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Sources  
 **Depends on:** WORKER-004, WORKER-006
 
@@ -24,8 +24,8 @@ Implement REST Source.
 
 ## Acceptance criteria
 
-- [ ] Checkpoint candidate supported.
-- [ ] Secrets redact.
+- [x] Checkpoint candidate supported.
+- [x] Secrets redact.
 
 ## Validation
 
@@ -33,4 +33,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+The REST Source validates safe HTTP requests, resolves only assigned secret
+bindings, redacts sensitive request context, and holds pagination/checkpoint
+candidates until the successful pipeline lifecycle commits them.
