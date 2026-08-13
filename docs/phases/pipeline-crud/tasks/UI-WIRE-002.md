@@ -1,7 +1,7 @@
 # UI-WIRE-002 — Pipeline Workspace Decomposition
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** web_pipeline_decomposition
 **Depends on:** CRUD-001
 
 ## Scope
@@ -10,12 +10,12 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Split current large workspace by meaningful responsibility.
-- [ ] Preserve visible behavior.
-- [ ] Preserve design system/localization/accessibility.
-- [ ] Do not add direct Radix imports.
-- [ ] Do not hardcode user-facing English.
-- [ ] Existing tests continue to pass.
+- [x] Split current large workspace by meaningful responsibility.
+- [x] Preserve visible behavior.
+- [x] Preserve design system/localization/accessibility.
+- [x] Do not add direct Radix imports.
+- [x] Do not hardcode user-facing English.
+- [x] Existing tests continue to pass.
 
 ## Required checks
 
@@ -30,3 +30,8 @@ Implement only the behavior described by this task and its acceptance criteria. 
 ## Notes / blockers
 
 None.
+
+## Implementation notes
+
+- Extracted the fixture, list, editor, and responsibility-specific editor panels while retaining the existing composition boundary.
+- Existing locale catalog, design-system primitives, and edit-lock behavior are preserved.
