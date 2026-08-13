@@ -1,7 +1,7 @@
 # FORM-003 — Component Picker Foundation
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** Codex
 **Depends on:** CAP-004, FORM-001
 
 ## Scope
@@ -10,12 +10,12 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Acceptance criteria
 
-- [ ] Display localized name/description.
-- [ ] Filter by component kind.
-- [ ] Keyboard-usable search/filter.
-- [ ] Selection feeds generic configuration renderer.
-- [ ] Can represent disabled incompatible options with reason.
-- [ ] Match selected utility-style direction.
+- [x] Display localized name/description.
+- [x] Filter by component kind.
+- [x] Keyboard-usable search/filter.
+- [x] Selection feeds generic configuration renderer.
+- [x] Can represent disabled incompatible options with reason.
+- [x] Match selected utility-style direction.
 
 ## Required checks
 
@@ -30,4 +30,4 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Notes / blockers
 
-None.
+The picker consumes the centralized kind-aware capability query. A caller can supply future compatibility results as disabled state and a localized explanation; selected metadata is passed to the generic configuration renderer.
