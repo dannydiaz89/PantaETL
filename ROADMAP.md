@@ -130,8 +130,8 @@ An agent can work on the frontend while separate agents work on database, schedu
 
 | ID | Work Item | Workstream | Status | Depends On | Owner |
 |---|---|---|---|---|---|
-| UI-001 | Design-system implementation foundation | Design System | BLOCKED | APP-005, CONTRACT-003 | Unassigned |
-| UI-002 | Theme and token foundation | Design System | BLOCKED | UI-001 | Unassigned |
+| UI-001 | Design-system implementation foundation | Design System | COMPLETE | APP-005, CONTRACT-003 | Codex |
+| UI-002 | Theme and token foundation | Design System | READY | UI-001 | Unassigned |
 | UI-003 | Accessible primitive foundation | Design System | BLOCKED | UI-002 | Unassigned |
 | UI-004 | Data table foundation | Design System | BLOCKED | UI-003 | Unassigned |
 | UI-005 | Accessibility test baseline | Design System | BLOCKED | UI-003, APP-007 | Unassigned |

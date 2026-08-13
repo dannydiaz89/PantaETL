@@ -1,5 +1,7 @@
 
 
+@import '@pantaetl/ui/styles.css';
+
 * {
   box-sizing: border-box;
 }
@@ -13,4 +15,3 @@ main {
   width: min(42rem, calc(100% - 2rem));
   margin: 4rem auto;
 }
-
