@@ -108,6 +108,13 @@ pnpm garbage-collector:dev
 pnpm worker:dev
 ```
 
+All three direct commands read the same root `.env`. Scheduler and garbage
+collector require `DATABASE_URL`; their default ports are 3010 and 3011.
+Garbage collector additionally accepts `GC_INTERVAL_SECONDS`, `GC_BATCH_SIZE`,
+and `STORAGE_ROOT`. The current worker health process accepts optional `HOST`,
+`PORT`, `WORKER_ID`, and `LOG_LEVEL`; it will use `DATABASE_URL` once job
+execution is connected to its process entrypoint.
+
 Or start the complete development topology, including PostgreSQL:
 
 ```bash

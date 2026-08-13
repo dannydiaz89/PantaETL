@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @pantaetl/database build && tsx src/main.ts",
+    "dev": "pnpm --filter @pantaetl/database build && node --env-file=../../.env --import tsx src/main.ts",
     "build": "tsc --project tsconfig.json",
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "start": "node dist/main.js",
