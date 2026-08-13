@@ -8,6 +8,13 @@
       "when": 1786612777061,
       "tag": "0000_elite_shape",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786613066382,
+      "tag": "0001_fantastic_king_cobra",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { index, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { jobState, runState, runStepState } from "./enums.js";
@@ -47,7 +48,7 @@ export const runSteps = pgTable(
   (table) => [index("run_steps_run_id_index").on(table.runId)],
 );
 
-/** Durable work units; queue claim fields and indexes are introduced separately. */
+/** Durable work units with state needed for short, concurrent-safe worker claims. */
 export const jobs = pgTable(
   "jobs",
   {
@@ -65,10 +66,20 @@ export const jobs = pgTable(
       .notNull()
       .references(() => pipelineComponents.id, { onDelete: "restrict" }),
     state: jobState("state").default("queued").notNull(),
+    availableAt: timestamp("available_at", { withTimezone: true }).defaultNow().notNull(),
+    claimedAt: timestamp("claimed_at", { withTimezone: true }),
+    heartbeatAt: timestamp("heartbeat_at", { withTimezone: true }),
+    workerId: uuid("worker_id"),
+    attempt: integer("attempt").default(0).notNull(),
     retryMaxAttempts: integer("retry_max_attempts").default(1).notNull(),
     retryDelaySeconds: integer("retry_delay_seconds").default(0).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     completedAt: timestamp("completed_at", { withTimezone: true }),
   },
-  (table) => [index("jobs_run_id_index").on(table.runId)],
+  (table) => [
+    index("jobs_run_id_index").on(table.runId),
+    index("jobs_eligible_work_index")
+      .on(table.availableAt, table.createdAt)
+      .where(sql`${table.state} = 'queued'`),
+  ],
 );
