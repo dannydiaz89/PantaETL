@@ -1,7 +1,7 @@
 # CRUD-006 — Pipeline Duplication Operation
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** pipeline_duplicate
 **Depends on:** CRUD-003, CRUD-004
 
 ## Scope
@@ -10,13 +10,13 @@ Implement only the behavior described by this task and its acceptance criteria. 
 
 ## Acceptance criteria
 
-- [ ] Generate new pipeline identity.
-- [ ] Keep graph internally consistent.
-- [ ] Copy non-secret configuration.
-- [ ] Do not copy usable credentials.
-- [ ] Assign copy to requesting user.
-- [ ] Start draft/disabled.
-- [ ] Reset schedule runtime metadata.
+- [x] Generate new pipeline identity.
+- [x] Keep graph internally consistent.
+- [x] Copy non-secret configuration.
+- [x] Do not copy usable credentials.
+- [x] Assign copy to requesting user.
+- [x] Start draft/disabled.
+- [x] Reset schedule runtime metadata.
 
 ## Required checks
 
@@ -31,3 +31,8 @@ Implement only the behavior described by this task and its acceptance criteria. 
 ## Notes / blockers
 
 None.
+
+## Implementation notes
+
+- Remaps every component and edge identifier into a new owner-scoped draft pipeline.
+- Uses portable sanitization to remove secret bindings and creates disabled trigger definitions without schedule runtime state.
