@@ -4,6 +4,7 @@ import console from "node:console";
 import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { createServer } from "node:net";
+import { get as getHttp } from "node:http";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process, { loadEnvFile } from "node:process";
@@ -19,10 +20,10 @@ const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 const docker = process.platform === "win32" ? "docker.exe" : "docker";
 
 const services = [
-  { name: "web", arguments: ["web:dev"], port: 3000 },
-  { name: "scheduler", arguments: ["scheduler:dev"], port: 3010 },
-  { name: "garbage-collector", arguments: ["garbage-collector:dev"], port: 3011 },
-  { name: "worker", arguments: ["worker:dev"], port: 3020 },
+  { name: "web", arguments: ["web:dev"], healthPath: "/", port: 3000 },
+  { name: "scheduler", arguments: ["scheduler:dev"], healthPath: "/health", port: 3010 },
+  { name: "garbage-collector", arguments: ["garbage-collector:dev"], healthPath: "/health", port: 3011 },
+  { name: "worker", arguments: ["worker:dev"], healthPath: "/health", port: 3020 },
 ];
 
 /** Run a command to completion while preserving its interactive output. */
@@ -124,6 +125,127 @@ async function stopOwnedSupervisor(supervisorPid) {
 
   if (!(await waitForSupervisorExit(supervisorPid))) {
     throw new Error("The local service supervisor did not stop within 10 seconds.");
+  }
+}
+
+/** Return process IDs currently listening on a local TCP port. */
+function listeningProcessIds(port) {
+  if (process.platform === "win32") {
+    return [];
+  }
+
+  try {
+    const output = execFileSync("lsof", ["-nP", "-t", `-iTCP:${port}`, "-sTCP:LISTEN"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    return output
+      .split("\n")
+      .map((value) => Number(value))
+      .filter((value) => Number.isInteger(value) && value > 0);
+  } catch {
+    return [];
+  }
+}
+
+/** Return the current working directory of a process when the platform exposes it. */
+function processWorkingDirectory(processId) {
+  try {
+    const output = execFileSync("lsof", ["-a", "-p", String(processId), "-d", "cwd", "-Fn"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    return output
+      .split("\n")
+      .find((line) => line.startsWith("n"))
+      ?.slice(1);
+  } catch {
+    return undefined;
+  }
+}
+
+/** Return the process group identifier for a process without assuming it is the group leader. */
+function processGroupId(processId) {
+  try {
+    const output = execFileSync("ps", ["-p", String(processId), "-o", "pgid="], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    const groupId = Number(output);
+    return Number.isInteger(groupId) && groupId > 0 ? groupId : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Return whether a listener belongs to this repository rather than another local application. */
+function isWorkspaceProcess(processId) {
+  const workingDirectory = processWorkingDirectory(processId);
+  return workingDirectory === repositoryRoot || workingDirectory?.startsWith(`${repositoryRoot}${path.sep}`);
+}
+
+/** Send a signal to one owned Unix process group without affecting unrelated listeners. */
+function signalProcessGroup(groupId, signal) {
+  try {
+    process.kill(-groupId, signal);
+  } catch (error) {
+    if (!(error && typeof error === "object" && "code" in error && error.code === "ESRCH")) {
+      throw error;
+    }
+  }
+}
+
+/** Stop PantaETL services left behind by an interrupted supervisor. */
+async function stopOrphanedServices() {
+  if (process.platform === "win32") {
+    return;
+  }
+
+  const processGroups = new Set();
+  for (const service of services) {
+    for (const processId of listeningProcessIds(service.port)) {
+      if (!isWorkspaceProcess(processId)) {
+        continue;
+      }
+
+      const groupId = processGroupId(processId);
+      if (groupId) {
+        processGroups.add(groupId);
+      }
+    }
+  }
+
+  if (processGroups.size === 0) {
+    return;
+  }
+
+  console.log("Stopping orphaned local services...");
+  for (const groupId of processGroups) {
+    signalProcessGroup(groupId, "SIGTERM");
+  }
+
+  const deadline = Date.now() + 10_000;
+  while (
+    services.some((service) =>
+      listeningProcessIds(service.port).some((processId) => isWorkspaceProcess(processId)),
+    ) && Date.now() < deadline
+  ) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
+  }
+
+  for (const service of services) {
+    for (const processId of listeningProcessIds(service.port)) {
+      if (!isWorkspaceProcess(processId)) {
+        continue;
+      }
+
+      const groupId = processGroupId(processId);
+      if (groupId) {
+        signalProcessGroup(groupId, "SIGKILL");
+      }
+    }
   }
 }
 
@@ -297,6 +419,7 @@ async function startStack() {
   if (priorState && isOwnedSupervisor(priorState.supervisorPid)) {
     await stopOwnedSupervisor(priorState.supervisorPid);
   }
+  await stopOrphanedServices();
   if (priorState) {
     await removeStackState();
   }
@@ -375,16 +498,78 @@ async function startStack() {
   await new Promise(() => {});
 }
 
-/** Show both the supervisor state and the Docker-managed PostgreSQL status. */
-async function showStackStatus() {
-  const state = await readStackState();
-  const localServicesRunning = Boolean(state && isOwnedSupervisor(state.supervisorPid));
-  console.log(`Local services: ${localServicesRunning ? "running" : "stopped"}`);
-
-  if (state && !localServicesRunning) {
-    console.log("Ignoring stale local-stack state.");
+/** Return whether a recorded local service process group is still alive. */
+function isRecordedServiceRunning(serviceState) {
+  if (!serviceState || !Number.isInteger(serviceState.pid) || serviceState.pid <= 0) {
+    return false;
   }
 
+  if (process.platform === "win32") {
+    try {
+      process.kill(serviceState.pid, 0);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  const groupId = processGroupId(serviceState.pid);
+  if (!groupId) {
+    return false;
+  }
+
+  try {
+    process.kill(-groupId, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Request a service health endpoint without delaying status indefinitely. */
+function requestServiceHealth(service) {
+  return new Promise((resolve) => {
+    const request = getHttp(
+      {
+        host: "127.0.0.1",
+        path: service.healthPath,
+        port: service.port,
+        timeout: 2_000,
+      },
+      (response) => {
+        response.resume();
+        resolve(response.statusCode && response.statusCode >= 200 && response.statusCode < 400);
+      },
+    );
+
+    request.once("error", () => {
+      resolve(false);
+    });
+    request.once("timeout", () => {
+      request.destroy();
+      resolve(false);
+    });
+  });
+}
+
+/** Show each local service alongside the Docker-managed PostgreSQL status. */
+async function showStackStatus() {
+  const state = await readStackState();
+  const stateServices = new Map(state?.services?.map((service) => [service.name, service]) ?? []);
+  console.log("Local services:");
+
+  for (const service of services) {
+    const recordedService = stateServices.get(service.name);
+    const ownedListener = listeningProcessIds(service.port).some((processId) =>
+      isWorkspaceProcess(processId),
+    );
+    const isRunning = isRecordedServiceRunning(recordedService) || ownedListener;
+    const isHealthy = await requestServiceHealth(service);
+    const status = isHealthy ? "running (healthy)" : isRunning ? "running (unhealthy)" : "stopped";
+    console.log(`  ${service.name}: ${status} — http://127.0.0.1:${service.port}${service.healthPath}`);
+  }
+
+  console.log("\nPostgreSQL:");
   await run(docker, ["compose", "ps"]);
 }
 
@@ -401,6 +586,7 @@ async function resetStack() {
       throw new Error("The local service supervisor did not stop within 10 seconds.");
     }
   }
+  await stopOrphanedServices();
 
   await removeStackState();
   await run(docker, ["compose", "down", "--volumes", "--remove-orphans"]);

@@ -105,6 +105,9 @@ pnpm stack:reset # deletes local Compose volumes, then starts a fresh stack
 Running `pnpm stack:up` again restarts the locally supervised services while
 keeping PostgreSQL and its data in place.
 
+`pnpm stack:status` reports the health of web, scheduler, garbage collector,
+worker, and Docker PostgreSQL individually.
+
 For development databases created before migration history was tracked, the
 migration command verifies the known schema fingerprints, adopts only complete
 historical migrations, and applies any missing ones. It refuses incomplete or
