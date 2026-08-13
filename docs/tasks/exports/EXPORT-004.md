@@ -1,7 +1,7 @@
 # EXPORT-004 — PostgreSQL Export
 
-**Status:** BLOCKED  
-**Owner:** Unassigned  
+**Status:** COMPLETE
+**Owner:** Codex
 **Workstream:** Exports  
 **Depends on:** WORKER-004, DB-005
 
@@ -22,7 +22,7 @@ Implement PostgreSQL Export.
 
 ## Acceptance criteria
 
-- [ ] Partial failure has explicit safe retry behavior.
+- [x] Partial failure has explicit safe retry behavior.
 
 ## Validation
 
@@ -30,4 +30,6 @@ Run all checks relevant to the packages/services introduced or changed by this t
 
 ## Notes / blockers
 
-None.
+The PostgreSQL Export stages each run inside a transaction: replacement is
+atomic, and append requires a target uniqueness constraint for idempotent retry.
+Errors omit connection and record contents.

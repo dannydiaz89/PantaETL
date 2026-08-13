@@ -44,7 +44,7 @@ class ExportExecutor(Protocol):
         self,
         dataset: DatasetDescriptor,
         configuration: ComponentConfiguration,
-    ) -> ArtifactDescriptor: ...
+    ) -> ArtifactDescriptor | None: ...
 
 
 @dataclass(frozen=True, slots=True)

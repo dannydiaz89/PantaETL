@@ -190,7 +190,7 @@ These can also proceed concurrently once the worker runtime and registries are c
 | EXPORT-001 | CSV artifact Export | Exports | COMPLETE | WORKER-003, WORKER-004, DB-004 | Codex |
 | EXPORT-002 | JSON artifact Export | Exports | COMPLETE | WORKER-003, WORKER-004, DB-004 | Codex |
 | EXPORT-003 | Parquet artifact Export | Exports | COMPLETE | WORKER-003, WORKER-004, DB-004 | Codex |
-| EXPORT-004 | PostgreSQL Export | Exports | BLOCKED | WORKER-004, DB-005 | Unassigned |
+| EXPORT-004 | PostgreSQL Export | Exports | COMPLETE | WORKER-004, DB-005 | Codex |
 
 ## Integration, API, and Operations
 
