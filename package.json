@@ -36,7 +36,6 @@
     "db:migrate": "node scripts/development.mjs migrate",
     "stack:up": "node scripts/development.mjs stack-up",
     "stack:status": "node scripts/development.mjs stack-status",
-    "stack:down": "node scripts/development.mjs stack-down",
     "stack:reset": "node scripts/development.mjs stack-reset"
   },
   "packageManager": "pnpm@10.28.2",

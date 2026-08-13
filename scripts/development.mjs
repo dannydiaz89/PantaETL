@@ -117,6 +117,16 @@ async function waitForSupervisorExit(supervisorPid, timeoutMilliseconds = 10_000
   return !isOwnedSupervisor(supervisorPid);
 }
 
+/** Stop an owned service supervisor while preserving Docker PostgreSQL and its data. */
+async function stopOwnedSupervisor(supervisorPid) {
+  console.log("Restarting local services...");
+  process.kill(supervisorPid, "SIGTERM");
+
+  if (!(await waitForSupervisorExit(supervisorPid))) {
+    throw new Error("The local service supervisor did not stop within 10 seconds.");
+  }
+}
+
 /** Require the ignored local environment and its database URL before using PostgreSQL. */
 async function requireLocalDatabaseEnvironment() {
   const environmentPath = path.join(repositoryRoot, ".env");
@@ -285,7 +295,7 @@ async function startStack() {
 
   const priorState = await readStackState();
   if (priorState && isOwnedSupervisor(priorState.supervisorPid)) {
-    throw new Error("The local stack is already running. Use pnpm stack:status or pnpm stack:down.");
+    await stopOwnedSupervisor(priorState.supervisorPid);
   }
   if (priorState) {
     await removeStackState();
@@ -326,7 +336,7 @@ async function startStack() {
   );
 
   console.log("\nLocal stack is running. Press Ctrl+C to stop services; PostgreSQL remains available.");
-  console.log("Use pnpm stack:down to stop PostgreSQL too.\n");
+  console.log("Run pnpm stack:up to restart services or pnpm stack:reset for a fresh local stack.\n");
 
   let stopping = false;
   const shutdown = async (exitCode) => {
@@ -338,7 +348,7 @@ async function startStack() {
     console.log("\nStopping local services...");
     await Promise.all(children.map(stopService));
     await removeStackState();
-    console.log("Local services stopped. PostgreSQL is still running; use pnpm stack:down to stop it.");
+    console.log("Local services stopped. PostgreSQL remains available for the next pnpm stack:up.");
     process.exit(exitCode);
   };
 
@@ -378,11 +388,13 @@ async function showStackStatus() {
   await run(docker, ["compose", "ps"]);
 }
 
-/** Stop the owned supervisor, then stop only the Compose PostgreSQL service without deleting data. */
-async function stopStack() {
+/** Remove Compose volumes, then immediately build and start a fresh local stack. */
+async function resetStack() {
+  await requireLocalDatabaseEnvironment();
+
   const state = await readStackState();
   if (state && isOwnedSupervisor(state.supervisorPid)) {
-    console.log("Stopping local service supervisor...");
+    console.log("Stopping local services for reset...");
     process.kill(state.supervisorPid, "SIGTERM");
 
     if (!(await waitForSupervisorExit(state.supervisorPid))) {
@@ -391,18 +403,8 @@ async function stopStack() {
   }
 
   await removeStackState();
-  await run(docker, ["compose", "stop", "postgres"]);
-}
-
-/** Remove the Compose PostgreSQL data volume after the local services are stopped. */
-async function resetStack() {
-  const state = await readStackState();
-  if (state && isOwnedSupervisor(state.supervisorPid)) {
-    throw new Error("Stop the local services with pnpm stack:down before resetting local data.");
-  }
-
-  await removeStackState();
   await run(docker, ["compose", "down", "--volumes", "--remove-orphans"]);
+  await startStack();
 }
 
 /** Run the requested development command. */
@@ -430,15 +432,12 @@ async function main() {
     case "stack-status":
       await showStackStatus();
       return;
-    case "stack-down":
-      await stopStack();
-      return;
     case "stack-reset":
       await resetStack();
       return;
     default:
       throw new Error(
-        "Use one of: setup, generate, generate-check, migrate, stack-up, stack-status, stack-down, stack-reset.",
+        "Use one of: setup, generate, generate-check, migrate, stack-up, stack-status, stack-reset.",
       );
   }
 }

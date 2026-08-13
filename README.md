@@ -99,9 +99,11 @@ companion commands when needed:
 
 ```bash
 pnpm stack:status
-pnpm stack:down # stops the local services and Docker PostgreSQL
-pnpm stack:reset # deletes local Docker volumes, including PostgreSQL data
+pnpm stack:reset # deletes local Compose volumes, then starts a fresh stack
 ```
+
+Running `pnpm stack:up` again restarts the locally supervised services while
+keeping PostgreSQL and its data in place.
 
 For development databases created before migration history was tracked, the
 migration command verifies the known schema fingerprints, adopts only complete
