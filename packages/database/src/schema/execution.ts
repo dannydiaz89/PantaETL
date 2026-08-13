@@ -1,0 +1,74 @@
+import { index, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+
+import { jobState, runState, runStepState } from "./enums.js";
+import { pipelineComponents, pipelines } from "./pipelines.js";
+import { users } from "./users.js";
+
+/** Durable execution records for a pipeline invocation. */
+export const runs = pgTable(
+  "runs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    pipelineId: uuid("pipeline_id")
+      .notNull()
+      .references(() => pipelines.id, { onDelete: "restrict" }),
+    contractVersion: text("contract_version").default("v1").notNull(),
+    state: runState("state").default("queued").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    cancellationRequestedAt: timestamp("cancellation_requested_at", { withTimezone: true }),
+    cancellationRequestedByUserId: uuid("cancellation_requested_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    warningCount: integer("warning_count").default(0).notNull(),
+  },
+  (table) => [index("runs_pipeline_id_created_at_index").on(table.pipelineId, table.createdAt)],
+);
+
+/** Per-component execution state and safe operational result metadata. */
+export const runSteps = pgTable(
+  "run_steps",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    runId: uuid("run_id")
+      .notNull()
+      .references(() => runs.id, { onDelete: "restrict" }),
+    componentId: uuid("component_id")
+      .notNull()
+      .references(() => pipelineComponents.id, { onDelete: "restrict" }),
+    state: runStepState("state").default("queued").notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    warningCount: integer("warning_count").default(0).notNull(),
+    metrics: jsonb("metrics").$type<Record<string, number>>().default({}).notNull(),
+    error: jsonb("error").$type<Record<string, unknown>>(),
+  },
+  (table) => [index("run_steps_run_id_index").on(table.runId)],
+);
+
+/** Durable work units; queue claim fields and indexes are introduced separately. */
+export const jobs = pgTable(
+  "jobs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    pipelineId: uuid("pipeline_id")
+      .notNull()
+      .references(() => pipelines.id, { onDelete: "restrict" }),
+    runId: uuid("run_id")
+      .notNull()
+      .references(() => runs.id, { onDelete: "restrict" }),
+    runStepId: uuid("run_step_id")
+      .notNull()
+      .references(() => runSteps.id, { onDelete: "restrict" }),
+    componentId: uuid("component_id")
+      .notNull()
+      .references(() => pipelineComponents.id, { onDelete: "restrict" }),
+    state: jobState("state").default("queued").notNull(),
+    retryMaxAttempts: integer("retry_max_attempts").default(1).notNull(),
+    retryDelaySeconds: integer("retry_delay_seconds").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [index("jobs_run_id_index").on(table.runId)],
+);

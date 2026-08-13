@@ -149,7 +149,7 @@ An agent can work on the frontend while separate agents work on database, schedu
 | ID | Work Item | Workstream | Status | Depends On | Owner |
 |---|---|---|---|---|---|
 | DB-001 | Database implementation foundation | Database | COMPLETE | APP-005, CONTRACT-002 | Codex |
-| DB-002 | Core control-plane schema | Database | IN PROGRESS | DB-001, CONTRACT-004, CONTRACT-005, CONTRACT-006 | Codex |
+| DB-002 | Core control-plane schema | Database | COMPLETE | DB-001, CONTRACT-004, CONTRACT-005, CONTRACT-006 | Codex |
 | DB-003 | Job queue schema and indexes | Database | BLOCKED | DB-002 | Unassigned |
 | DB-004 | Checkpoint and retention schema | Database | BLOCKED | DB-002 | Unassigned |
 | DB-005 | Secret storage model | Database | BLOCKED | DB-002, CONTRACT-003 | Unassigned |
