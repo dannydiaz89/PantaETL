@@ -74,7 +74,7 @@ The application skeleton comes before contracts so every service/package boundar
 | FOUNDATION-001 | Repository scaffolding | Foundation | COMPLETE | — | Codex |
 | FOUNDATION-002 | TypeScript quality baseline | Foundation | COMPLETE | FOUNDATION-001 | Codex |
 | FOUNDATION-003 | Python uv quality baseline | Foundation | COMPLETE | FOUNDATION-001 | Codex |
-| FOUNDATION-004 | GitHub Actions baseline | Foundation | BLOCKED | FOUNDATION-002, FOUNDATION-003 | Unassigned |
+| FOUNDATION-004 | GitHub Actions baseline | Foundation | COMPLETE | FOUNDATION-002, FOUNDATION-003 | Codex |
 
 ## Milestone 2 — Complete Application Skeleton
 
