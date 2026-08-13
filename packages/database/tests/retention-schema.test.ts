@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { artifacts } from "../src/schema/artifacts.js";
 import { runLogs, runs } from "../src/schema/execution.js";
-import { datasets, sourceCheckpoints } from "../src/schema/retention.js";
+import { datasets, sourceCheckpoints, stagedUploads } from "../src/schema/retention.js";
 import { pipelineComponents, pipelines } from "../src/schema/pipelines.js";
 
 describe("checkpoint and retention schema", () => {
@@ -40,5 +40,13 @@ describe("checkpoint and retention schema", () => {
     expect(runLogs.expiresAt.notNull).toBe(true);
     expect(getTableConfig(artifacts).indexes.map((index) => index.config.name)).toContain("artifacts_expiry_index");
     expect(getTableConfig(runLogs).indexes.map((index) => index.config.name)).toContain("run_logs_expiry_index");
+  });
+
+  it("tracks uploads by explicit owner and expiry instead of file names", () => {
+    const config = getTableConfig(stagedUploads);
+
+    expect(stagedUploads.ownerUserId.notNull).toBe(true);
+    expect(stagedUploads.expiresAt.notNull).toBe(true);
+    expect(config.indexes.map((index) => index.config.name)).toContain("uploads_expiry_index");
   });
 });

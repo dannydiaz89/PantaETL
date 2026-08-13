@@ -7,8 +7,13 @@ export {
   listExpiredDatasets,
   listExpiredRunLogs,
   listExpiredRuns,
+  listExpiredStagedUploads,
+  deleteExpiredArtifact,
+  deleteExpiredDataset,
+  deleteExpiredStagedUpload,
   type ExpiredArtifact,
   type ExpiredDataset,
   type ExpiredRun,
   type ExpiredRunLog,
+  type ExpiredStagedUpload,
 } from "./retention.js";

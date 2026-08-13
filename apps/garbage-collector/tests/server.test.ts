@@ -6,10 +6,13 @@ import type { ServiceConfig } from '../src/config.js';
 import { createGarbageCollectorServer } from '../src/server.js';
 
 const config: ServiceConfig = {
+  cleanupBatchSize: 100,
+  cleanupIntervalMilliseconds: 60_000,
   databaseUrl: 'postgresql://pantaetl:password@localhost:5432/pantaetl',
   host: '127.0.0.1',
   port: 3011,
   serviceName: 'garbage-collector',
+  storageRoot: '/var/lib/pantaetl/storage',
 };
 
 const servers: ReturnType<typeof createGarbageCollectorServer>[] = [];

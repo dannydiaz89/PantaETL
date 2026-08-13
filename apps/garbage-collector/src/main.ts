@@ -1,11 +1,22 @@
 import { createDatabaseConnection } from '@pantaetl/database';
 
+import { RetentionCleanup, createRetentionRepository } from './cleanup.js';
 import { loadConfig } from './config.js';
 import { writeLog } from './logging.js';
+import { GarbageCollectorRuntime } from './runtime.js';
 import { createGarbageCollectorServer } from './server.js';
+import { LocalRetentionStorage } from './storage.js';
 
 const config = loadConfig('garbage-collector', 3011);
 const database = createDatabaseConnection(config.databaseUrl);
+const cleanup = new RetentionCleanup(
+  createRetentionRepository(database.db),
+  new LocalRetentionStorage(config.storageRoot),
+  config.cleanupBatchSize,
+);
+const runtime = new GarbageCollectorRuntime(cleanup, config.cleanupIntervalMilliseconds, () => {
+  writeLog('error', 'retention_cleanup_failed', { service: config.serviceName });
+});
 
 const server = createGarbageCollectorServer(config, {
   checkDatabase: async () => {
@@ -15,6 +26,7 @@ const server = createGarbageCollectorServer(config, {
 
 function stop(signal: NodeJS.Signals): void {
   writeLog('info', 'service_stopping', { service: config.serviceName, signal });
+  runtime.stop();
   server.close(async (error) => {
     if (error) {
       writeLog('error', 'service_stop_failed', {
@@ -47,4 +59,5 @@ server.listen(config.port, config.host, () => {
     port: config.port,
     service: config.serviceName,
   });
+  runtime.start();
 });
