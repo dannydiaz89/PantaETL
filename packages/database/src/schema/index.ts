@@ -3,5 +3,6 @@ export * from "./enums.js";
 export * from "./execution.js";
 export * from "./pipelines.js";
 export * from "./retention.js";
+export * from "./secrets.js";
 export * from "./settings.js";
 export * from "./users.js";
