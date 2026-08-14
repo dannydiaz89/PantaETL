@@ -90,3 +90,48 @@ export function setPipelineBuilderSourceValues(draft: PipelineBuilderDraft, valu
   if (draft.source === undefined) return draft;
   return updatePipelineBuilderDraft(draft, { source: { ...draft.source, values } });
 }
+
+/** Appends a new Transform after the existing ones with a fresh draft-local id and empty configuration. */
+export function addPipelineBuilderTransform(
+  draft: PipelineBuilderDraft,
+  metadata: ComponentMetadata,
+  createId: () => string = () => globalThis.crypto.randomUUID(),
+): PipelineBuilderDraft {
+  const transform: PipelineBuilderComponentSelection = { id: createId(), metadata, secretBindings: [], values: {} };
+  return updatePipelineBuilderDraft(draft, { transforms: [...draft.transforms, transform] });
+}
+
+/** Replaces the non-secret configuration values of one existing Transform slot; a no-op if the id is not present. */
+export function setPipelineBuilderTransformValues(draft: PipelineBuilderDraft, id: string, values: ConfigurationValues): PipelineBuilderDraft {
+  return updatePipelineBuilderDraft(draft, {
+    transforms: draft.transforms.map((transform) => (transform.id === id ? { ...transform, values } : transform)),
+  });
+}
+
+/** Removes one Transform slot; the remaining Transforms keep their existing ids and relative order. */
+export function removePipelineBuilderTransform(draft: PipelineBuilderDraft, id: string): PipelineBuilderDraft {
+  return updatePipelineBuilderDraft(draft, { transforms: draft.transforms.filter((transform) => transform.id !== id) });
+}
+
+/** Swaps one Transform with its neighbor in the given direction; a no-op at either end of the list or for an unknown id. */
+export function movePipelineBuilderTransform(
+  draft: PipelineBuilderDraft,
+  id: string,
+  direction: "up" | "down",
+): PipelineBuilderDraft {
+  const index = draft.transforms.findIndex((transform) => transform.id === id);
+  const targetIndex = direction === "up" ? index - 1 : index + 1;
+  if (index === -1 || targetIndex < 0 || targetIndex >= draft.transforms.length) return draft;
+
+  const moved = draft.transforms[index];
+  const displaced = draft.transforms[targetIndex];
+  if (moved === undefined || displaced === undefined) return draft;
+
+  const transforms = draft.transforms.map((transform, position) => {
+    if (position === index) return displaced;
+    if (position === targetIndex) return moved;
+    return transform;
+  });
+
+  return updatePipelineBuilderDraft(draft, { transforms });
+}

@@ -2,13 +2,17 @@ import type { ComponentMetadata } from "@pantaetl/contracts";
 import { describe, expect, it } from "vitest";
 
 import {
+  addPipelineBuilderTransform,
   createEmptyPipelineBuilderDraft,
+  movePipelineBuilderTransform,
   nextPipelineBuilderComponentSelection,
   nextPipelineBuilderStep,
   PIPELINE_BUILDER_STEPS,
   previousPipelineBuilderStep,
+  removePipelineBuilderTransform,
   setPipelineBuilderSource,
   setPipelineBuilderSourceValues,
+  setPipelineBuilderTransformValues,
   updatePipelineBuilderDraft,
 } from "../src/components/pipeline/pipeline-builder-draft.js";
 
@@ -97,7 +101,90 @@ describe("pipeline builder draft model", () => {
 
     expect(setPipelineBuilderSourceValues(draft, { path: "orders.csv" })).toBe(draft);
   });
+
+  it("allows zero Transforms and appends added Transforms with fresh ids in order", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    expect(draft.transforms).toEqual([]);
+
+    let nextId = 0;
+    const createId = () => `transform-${++nextId}`;
+    draft = addPipelineBuilderTransform(draft, limitTransform, createId);
+    draft = addPipelineBuilderTransform(draft, fillNullTransform, createId);
+
+    expect(draft.transforms).toEqual([
+      { id: "transform-1", metadata: limitTransform, secretBindings: [], values: {} },
+      { id: "transform-2", metadata: fillNullTransform, secretBindings: [], values: {} },
+    ]);
+  });
+
+  it("replaces one Transform's configuration values by id without affecting the others", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = addPipelineBuilderTransform(draft, limitTransform, () => "t1");
+    draft = addPipelineBuilderTransform(draft, fillNullTransform, () => "t2");
+
+    draft = setPipelineBuilderTransformValues(draft, "t1", { count: 10 });
+
+    expect(draft.transforms[0]).toEqual({ id: "t1", metadata: limitTransform, secretBindings: [], values: { count: 10 } });
+    expect(draft.transforms[1]).toEqual({ id: "t2", metadata: fillNullTransform, secretBindings: [], values: {} });
+  });
+
+  it("removes a Transform by id and keeps the remaining ids and order", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = addPipelineBuilderTransform(draft, limitTransform, () => "t1");
+    draft = addPipelineBuilderTransform(draft, fillNullTransform, () => "t2");
+
+    draft = removePipelineBuilderTransform(draft, "t1");
+
+    expect(draft.transforms).toEqual([{ id: "t2", metadata: fillNullTransform, secretBindings: [], values: {} }]);
+  });
+
+  it("reorders Transforms without recreating their ids", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = addPipelineBuilderTransform(draft, limitTransform, () => "t1");
+    draft = addPipelineBuilderTransform(draft, fillNullTransform, () => "t2");
+
+    draft = movePipelineBuilderTransform(draft, "t2", "up");
+
+    expect(draft.transforms.map((transform) => transform.id)).toEqual(["t2", "t1"]);
+  });
+
+  it("does not move a Transform past either end of the list", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = addPipelineBuilderTransform(draft, limitTransform, () => "t1");
+    draft = addPipelineBuilderTransform(draft, fillNullTransform, () => "t2");
+
+    const atStart = movePipelineBuilderTransform(draft, "t1", "up");
+    const atEnd = movePipelineBuilderTransform(draft, "t2", "down");
+
+    expect(atStart.transforms.map((transform) => transform.id)).toEqual(["t1", "t2"]);
+    expect(atEnd.transforms.map((transform) => transform.id)).toEqual(["t1", "t2"]);
+  });
 });
+
+const limitTransform: ComponentMetadata = {
+  configFields: [{ key: "count", labelKey: "components.transforms.rows.limit.count", required: true, secret: false, type: "number" }],
+  descriptionKey: "components.transforms.rows.limit.description",
+  displayNameKey: "components.transforms.rows.limit.name",
+  inputFamilies: ["tabular"],
+  kind: "transform",
+  outputFamilies: ["tabular"],
+  type: "transform.limit",
+  version: "v1",
+};
+
+const fillNullTransform: ComponentMetadata = {
+  configFields: [
+    { key: "column", labelKey: "components.transforms.values.fillNull.column", required: true, secret: false, type: "text" },
+    { key: "value", labelKey: "components.transforms.values.fillNull.value", required: true, secret: false, type: "text" },
+  ],
+  descriptionKey: "components.transforms.values.fillNull.description",
+  displayNameKey: "components.transforms.values.fillNull.name",
+  inputFamilies: ["tabular"],
+  kind: "transform",
+  outputFamilies: ["tabular"],
+  type: "transform.values.fill-null",
+  version: "v1",
+};
 
 const csvSource: ComponentMetadata = {
   configFields: [{ key: "path", labelKey: "components.sources.csv.sourcePath", required: true, secret: false, type: "text" }],

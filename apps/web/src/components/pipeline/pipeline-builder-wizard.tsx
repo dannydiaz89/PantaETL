@@ -7,16 +7,21 @@ import { useI18n } from "../../locale-provider.js";
 import type { TranslationKey } from "../../locales/en.js";
 import { ComponentPickerConfiguration } from "./component-picker.js";
 import {
+  addPipelineBuilderTransform,
   createEmptyPipelineBuilderDraft,
+  movePipelineBuilderTransform,
   nextPipelineBuilderStep,
   PIPELINE_BUILDER_STEPS,
   previousPipelineBuilderStep,
+  removePipelineBuilderTransform,
   setPipelineBuilderSource,
   setPipelineBuilderSourceValues,
+  setPipelineBuilderTransformValues,
   updatePipelineBuilderDraft,
   type PipelineBuilderDraft,
   type PipelineBuilderStep,
 } from "./pipeline-builder-draft.js";
+import { PipelineBuilderTransformsStep } from "./pipeline-builder-transforms-step.js";
 
 type StepStatus = "completed" | "current" | "upcoming";
 
@@ -57,10 +62,10 @@ export interface PipelineBuilderWizardProps {
 /**
  * Three-step Source/Transforms/Export pipeline creation shell.
  *
- * Owns the local in-progress draft and step navigation. The Source stage
- * selects and configures one component from the capability catalog; the
- * Transforms and Export stages are supplied by later work and currently
- * render a placeholder description.
+ * Owns the local in-progress draft and step navigation. The Source and
+ * Transforms stages select and configure components from the capability
+ * catalog; the Export stage is supplied by later work and currently renders
+ * a placeholder description.
  */
 export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange }: PipelineBuilderWizardProps) {
   const { t } = useI18n();
@@ -89,6 +94,38 @@ export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange
   function changeSourceValues(values: ComponentConfiguration["values"]): void {
     setDraft((current) => {
       const next = setPipelineBuilderSourceValues(current, values);
+      onDraftChange?.(next);
+      return next;
+    });
+  }
+
+  function addTransform(metadata: ComponentMetadata): void {
+    setDraft((current) => {
+      const next = addPipelineBuilderTransform(current, metadata);
+      onDraftChange?.(next);
+      return next;
+    });
+  }
+
+  function changeTransformValues(id: string, values: ComponentConfiguration["values"]): void {
+    setDraft((current) => {
+      const next = setPipelineBuilderTransformValues(current, id, values);
+      onDraftChange?.(next);
+      return next;
+    });
+  }
+
+  function removeTransform(id: string): void {
+    setDraft((current) => {
+      const next = removePipelineBuilderTransform(current, id);
+      onDraftChange?.(next);
+      return next;
+    });
+  }
+
+  function moveTransform(id: string, direction: "up" | "down"): void {
+    setDraft((current) => {
+      const next = movePipelineBuilderTransform(current, id, direction);
       onDraftChange?.(next);
       return next;
     });
@@ -148,6 +185,15 @@ export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange
             onValuesChange={changeSourceValues}
             selected={draft.source?.metadata}
             values={draft.source?.values ?? {}}
+          />
+        ) : null}
+        {step === "transforms" ? (
+          <PipelineBuilderTransformsStep
+            onAdd={addTransform}
+            onMove={moveTransform}
+            onRemove={removeTransform}
+            onValuesChange={changeTransformValues}
+            transforms={draft.transforms}
           />
         ) : null}
       </div>

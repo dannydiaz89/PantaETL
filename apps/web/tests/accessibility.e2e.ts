@@ -354,6 +354,63 @@ test("pipeline creation wizard selects a Source from the capability catalog and 
   await expectNoAccessibilityViolations(page);
 });
 
+test("pipeline creation wizard adds, configures, reorders, and removes Transforms accessibly", async ({ page }) => {
+  const limitTransform: ComponentMetadata = {
+    configFields: [{ key: "count", labelKey: "components.transforms.rows.limit.count", required: true, secret: false, type: "number" }],
+    descriptionKey: "components.transforms.rows.limit.description",
+    displayNameKey: "components.transforms.rows.limit.name",
+    inputFamilies: ["tabular"],
+    kind: "transform",
+    outputFamilies: ["tabular"],
+    type: "transform.limit",
+    version: "v1",
+  };
+  const fillNullTransform: ComponentMetadata = {
+    configFields: [
+      { key: "column", labelKey: "components.transforms.values.fillNull.column", required: true, secret: false, type: "text" },
+      { key: "value", labelKey: "components.transforms.values.fillNull.value", required: true, secret: false, type: "text" },
+    ],
+    descriptionKey: "components.transforms.values.fillNull.description",
+    displayNameKey: "components.transforms.values.fillNull.name",
+    inputFamilies: ["tabular"],
+    kind: "transform",
+    outputFamilies: ["tabular"],
+    type: "transform.values.fill-null",
+    version: "v1",
+  };
+
+  await page.route("**/api/components**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path !== "/api/components") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({ body: JSON.stringify({ components: [limitTransform, fillNullTransform] }), contentType: "application/json" });
+  });
+
+  await page.goto("/pipelines/new");
+  await waitForApplication(page);
+  await page.getByRole("button", { name: en["pipeline.builder.next"] }).click();
+  await expect(page.getByText(en["pipeline.builder.transform.empty"])).toBeVisible();
+
+  const transformList = page.locator(".pipeline-builder-transforms__list");
+  await page.getByRole("button", { name: en["components.transforms.rows.limit.name"] }).click();
+  await page.getByRole("button", { name: en["components.transforms.values.fillNull.name"] }).click();
+  await expect(transformList.getByRole("listitem")).toHaveCount(2);
+  await expect(transformList.getByRole("listitem").first()).toContainText(en["components.transforms.rows.limit.name"]);
+
+  await transformList.getByLabel(en["components.transforms.rows.limit.count"]).fill("100");
+
+  await transformList.getByRole("listitem").last().getByRole("button", { name: en["pipeline.builder.transform.moveUp"] }).click();
+  await expect(transformList.getByRole("listitem").first()).toContainText(en["components.transforms.values.fillNull.name"]);
+  await expect(transformList.getByLabel(en["components.transforms.rows.limit.count"])).toHaveValue("100");
+
+  await transformList.getByRole("listitem").first().getByRole("button", { name: en["pipeline.builder.transform.remove"] }).click();
+  await expect(transformList.getByRole("listitem")).toHaveCount(1);
+  await expect(transformList.getByRole("listitem").first()).toContainText(en["components.transforms.rows.limit.name"]);
+  await expectNoAccessibilityViolations(page);
+});
+
 test("run history shows safe metadata in accessible tables", async ({ page }) => {
   await page.goto("/runs");
   await waitForApplication(page);

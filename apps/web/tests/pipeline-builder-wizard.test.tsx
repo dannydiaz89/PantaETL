@@ -3,7 +3,7 @@ import type { ComponentMetadata } from "@pantaetl/contracts";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { createEmptyPipelineBuilderDraft, setPipelineBuilderSource, setPipelineBuilderSourceValues, updatePipelineBuilderDraft, type PipelineBuilderDraft, type PipelineBuilderStep } from "../src/components/pipeline/pipeline-builder-draft.js";
+import { addPipelineBuilderTransform, createEmptyPipelineBuilderDraft, setPipelineBuilderSource, setPipelineBuilderSourceValues, updatePipelineBuilderDraft, type PipelineBuilderDraft, type PipelineBuilderStep } from "../src/components/pipeline/pipeline-builder-draft.js";
 import { PipelineBuilderWizard } from "../src/components/pipeline/pipeline-builder-wizard.js";
 import { componentCapabilityQueryKeys } from "../src/data/components/index.js";
 import { LocaleProvider } from "../src/locale-provider.js";
@@ -13,6 +13,7 @@ import { en } from "../src/locales/en.js";
 function renderWizard(props: { readonly initialDraft?: PipelineBuilderDraft; readonly initialStep?: PipelineBuilderStep } = {}): string {
   const queryClient = new QueryClient();
   queryClient.setQueryData(componentCapabilityQueryKeys.list({ kind: "source" }), { components: [csvSource, restSource] });
+  queryClient.setQueryData(componentCapabilityQueryKeys.list({ kind: "transform" }), { components: [limitTransform] });
 
   return renderToStaticMarkup(
     <QueryClientProvider client={queryClient}>
@@ -92,6 +93,26 @@ describe("PipelineBuilderWizard", () => {
     expect(markup).toContain(en["components.sources.csv.sourcePath"]);
     expect(markup).toContain("orders.csv");
   });
+
+  it("allows zero Transforms and offers the capability catalog to add one", () => {
+    const markup = renderWizard({ initialStep: "transforms" });
+
+    expect(markup).toContain(en["pipeline.builder.transform.empty"]);
+    expect(markup).toContain(en["components.transforms.rows.limit.name"]);
+  });
+
+  it("shows each added Transform with its order, configuration, and keyboard-operable reorder controls", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = addPipelineBuilderTransform(draft, limitTransform, () => "t1");
+
+    const markup = renderWizard({ initialDraft: draft, initialStep: "transforms" });
+
+    expect(markup).toContain(en["components.transforms.rows.limit.name"]);
+    expect(markup).toContain(en["components.transforms.rows.limit.count"]);
+    expect(markup).toContain(en["pipeline.builder.transform.moveUp"]);
+    expect(markup).toContain(en["pipeline.builder.transform.moveDown"]);
+    expect(markup).toContain(en["pipeline.builder.transform.remove"]);
+  });
 });
 
 const csvSource: ComponentMetadata = {
@@ -113,5 +134,16 @@ const restSource: ComponentMetadata = {
   kind: "source",
   outputFamilies: ["document"],
   type: "source.rest-api",
+  version: "v1",
+};
+
+const limitTransform: ComponentMetadata = {
+  configFields: [{ key: "count", labelKey: "components.transforms.rows.limit.count", required: true, secret: false, type: "number" }],
+  descriptionKey: "components.transforms.rows.limit.description",
+  displayNameKey: "components.transforms.rows.limit.name",
+  inputFamilies: ["tabular"],
+  kind: "transform",
+  outputFamilies: ["tabular"],
+  type: "transform.limit",
   version: "v1",
 };

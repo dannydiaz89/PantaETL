@@ -1,7 +1,7 @@
 # BUILDER-003 — Transform Add Configure Remove Reorder Step
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** Claude
 **Depends on:** BUILDER-002
 
 ## Scope
@@ -10,13 +10,13 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Acceptance criteria
 
-- [ ] Zero transforms allowed.
-- [ ] Add multiple transforms.
-- [ ] Configure via metadata.
-- [ ] Remove transforms.
-- [ ] Reorder without recreating stable IDs.
-- [ ] Clearly show order.
-- [ ] Keyboard reorder available.
+- [x] Zero transforms allowed.
+- [x] Add multiple transforms.
+- [x] Configure via metadata.
+- [x] Remove transforms.
+- [x] Reorder without recreating stable IDs.
+- [x] Clearly show order.
+- [x] Keyboard reorder available.
 
 ## Required checks
 
@@ -31,4 +31,4 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Notes / blockers
 
-None.
+Reordering uses explicit Move up/Move down buttons per Transform rather than drag-and-drop, so keyboard reorder is the only control surface (matching the spec's requirement that keyboard controls exist regardless of whether drag-and-drop is added later). Changing an existing Transform's component type is not supported from the wizard; removing and re-adding covers that case, keeping the step's interaction model simple. Secret-bound Transform fields have the same limitation noted in BUILDER-002: no secret-write backend exists yet.
