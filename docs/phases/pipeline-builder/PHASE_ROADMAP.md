@@ -25,8 +25,8 @@ Before work: read `AGENTS.md`, phase docs, verify dependencies, mark task/row IN
 | VALID-003 | Enforce executable validation on enable | COMPLETE | VALID-002 | Claude |
 | VALID-004 | Preserve unsaved builder state on lock conflicts | COMPLETE | BUILDER-006 | Claude |
 | TRIGGER-001 | Replace read-only trigger panel with pipeline trigger editor | COMPLETE | BUILDER-007 | Claude |
-| E2E-001 | Real create/configure/save/reload browser workflow | READY | BUILDER-007, VALID-003 | Unassigned |
-| E2E-002 | Enable/run/lock/duplicate/delete browser workflow | BLOCKED | E2E-001, VALID-004 | Unassigned |
+| E2E-001 | Real create/configure/save/reload browser workflow | COMPLETE | BUILDER-007, VALID-003 | Claude |
+| E2E-002 | Enable/run/lock/duplicate/delete browser workflow | READY | E2E-001, VALID-004 | Unassigned |
 | CLEAN-001 | Remove obsolete CSV-specific creation and fixtures | BLOCKED | E2E-002 | Unassigned |
 
 After CAP-002, CAP-003 and FORM-001 can proceed in parallel. Avoid multiple agents heavily editing the wizard component tree simultaneously.

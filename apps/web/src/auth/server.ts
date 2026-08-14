@@ -14,13 +14,18 @@ export const controlPlaneDatabase = database.db;
 
 /** Local password authentication and server-managed sessions for the control plane. */
 export const auth = betterAuth({
+  advanced: {
+    database: {
+      generateId: false,
+    },
+  },
   baseURL: process.env.BETTER_AUTH_URL,
   database: drizzleAdapter(controlPlaneDatabase, {
     provider: "pg",
     schema: {
       account: accounts,
       session: sessions,
-      user: users,
+      users,
       verification: verifications,
     },
   }),
