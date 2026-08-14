@@ -27,6 +27,16 @@ import { PipelineBuilderTransformsStep } from "./pipeline-builder-transforms-ste
 import { PipelineSettingsPanel } from "./pipeline-settings-panel.js";
 import { PipelineStateBadge } from "./pipeline-state-badge.js";
 import { PipelineStepPanel } from "./pipeline-step-panel.js";
+import {
+  addPipelineScheduleTrigger,
+  createPipelineTriggerDraft,
+  removePipelineScheduleTrigger,
+  setPipelineManualTriggerEnabled,
+  updatePipelineScheduleTrigger,
+  writablePipelineTriggersFromDraft,
+  type PipelineTriggerDraft,
+} from "./pipeline-trigger-draft.js";
+import { PipelineTriggerEditor } from "./pipeline-trigger-editor.js";
 import { PipelineTriggerPanel } from "./pipeline-trigger-panel.js";
 
 /** Coordinates the selected pipeline's form and its configuration panels. */
@@ -61,11 +71,13 @@ export function PipelineEditor({
   const exportCapabilities = useComponentCapabilityListQuery({ kind: "export" });
   const capabilitiesReady = sourceCapabilities.isSuccess && transformCapabilities.isSuccess && exportCapabilities.isSuccess;
   const [graphDraft, setGraphDraft] = useState<PipelineBuilderDraft | undefined>(undefined);
+  const [triggerDraft, setTriggerDraft] = useState<PipelineTriggerDraft>(() => createPipelineTriggerDraft(pipeline.triggers));
 
   useEffect(() => {
     setDraftName(pipeline.name);
     setSubmitted(false);
-  }, [pipeline.id, pipeline.name]);
+    setTriggerDraft(createPipelineTriggerDraft(pipeline.triggers));
+  }, [pipeline.id, pipeline.name, pipeline.triggers]);
 
   useEffect(() => {
     if (!capabilitiesReady) return;
@@ -83,6 +95,10 @@ export function PipelineEditor({
     setGraphDraft((current) => (current === undefined ? current : updater(current)));
   }
 
+  function updateTriggerDraft(updater: (draft: PipelineTriggerDraft) => PipelineTriggerDraft): void {
+    setTriggerDraft(updater);
+  }
+
   const compatibilityOptionState = createPipelineBuilderCompatibilityResolver(
     graphDraft === undefined ? undefined : pipelineBuilderChainTail(graphDraft),
     t("pipeline.builder.compatibility.incompatible"),
@@ -93,7 +109,7 @@ export function PipelineEditor({
     if (!editable || draftName.trim().length === 0) return;
 
     const graphUpdate = editable && graphDraft !== undefined ? createPipelineUpdateRequestFromDraft(graphDraft) : {};
-    onSave({ ...graphUpdate, name: draftName.trim() });
+    onSave({ ...graphUpdate, name: draftName.trim(), triggers: writablePipelineTriggersFromDraft(triggerDraft) });
   }
 
   return (
@@ -190,7 +206,23 @@ export function PipelineEditor({
             <PipelineStepPanel description={t("pipeline.export.description")} kind="export" pipeline={pipeline} />
           )}
         </TabsContent>
-        <TabsContent value="trigger"><PipelineTriggerPanel triggers={pipeline.triggers} /></TabsContent>
+        <TabsContent value="trigger">
+          {editable ? (
+            <div className="pipeline-tab-panel">
+              <p>{t("pipeline.trigger.description")}</p>
+              <PipelineTriggerEditor
+                disabled={!editable}
+                draft={triggerDraft}
+                onAddSchedule={() => updateTriggerDraft(addPipelineScheduleTrigger)}
+                onChangeManualEnabled={(enabled) => updateTriggerDraft((draft) => setPipelineManualTriggerEnabled(draft, enabled))}
+                onChangeSchedule={(localId, changes) => updateTriggerDraft((draft) => updatePipelineScheduleTrigger(draft, localId, changes))}
+                onRemoveSchedule={(localId) => updateTriggerDraft((draft) => removePipelineScheduleTrigger(draft, localId))}
+              />
+            </div>
+          ) : (
+            <PipelineTriggerPanel triggers={pipeline.triggers} />
+          )}
+        </TabsContent>
         <TabsContent value="history"><PipelineHistoryPanel editable={editable} /></TabsContent>
         <TabsContent value="settings"><PipelineSettingsPanel editable={editable} pipelineId={pipeline.id} state={pipeline.state} /></TabsContent>
       </Tabs>

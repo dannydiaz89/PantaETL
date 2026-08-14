@@ -31,6 +31,19 @@ async function waitForApplication(page: Page) {
   await expect(page.locator(".app-shell")).toHaveAttribute("data-hydrated", "true");
 }
 
+/** Applies a PATCH body over a mocked pipeline, assigning fresh ids to any replaced triggers as the real API would. */
+function applyPipelinePatch(pipeline: Pipeline, body: Record<string, unknown>): Pipeline {
+  const triggers = Array.isArray(body.triggers)
+    ? (body.triggers as readonly Omit<Pipeline["triggers"][number], "id" | "pipelineId">[]).map((trigger) => ({
+      ...trigger,
+      id: globalThis.crypto.randomUUID(),
+      pipelineId: pipeline.id,
+    })) as Pipeline["triggers"]
+    : pipeline.triggers;
+
+  return { ...pipeline, ...body, triggers };
+}
+
 test("uses the persisted locale for the document language", async ({ page }) => {
   await page.addInitScript((storageKey) => window.localStorage.setItem(storageKey, "en-GB"), LOCALE_STORAGE_KEY);
   await page.goto("/");
@@ -194,7 +207,7 @@ test("pipeline name updates use the control-plane API and announce completion", 
       return;
     }
     if (path === `/api/pipelines/${pipeline.id}` && request.method() === "PATCH") {
-      pipeline = { ...pipeline, ...request.postDataJSON() };
+      pipeline = applyPipelinePatch(pipeline, request.postDataJSON() as Record<string, unknown>);
       await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
       return;
     }
@@ -330,7 +343,7 @@ test("pipeline editor reuses the wizard's Source, Transforms, and Export editors
     }
     if (path === `/api/pipelines/${pipeline.id}` && request.method() === "PATCH") {
       updateCount += 1;
-      pipeline = { ...pipeline, ...(request.postDataJSON() as object), updatedAt: "2026-08-13T13:00:00.000Z" };
+      pipeline = applyPipelinePatch(pipeline, { ...(request.postDataJSON() as object), updatedAt: "2026-08-13T13:00:00.000Z" });
       await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
       return;
     }
@@ -468,6 +481,99 @@ test("pipeline editor disables Transform and Export options incompatible with th
   await expectNoAccessibilityViolations(page);
 });
 
+test("pipeline editor edits manual and scheduled triggers with friendly controls and saves them through the canonical PATCH", async ({ page }) => {
+  let pipeline: Pipeline = {
+    contractVersion: "v1",
+    createdAt: "2026-08-13T12:00:00.000Z",
+    edges: [{ fromStepId: "133e4567-e89b-12d3-a456-426614174002", toStepId: "133e4567-e89b-12d3-a456-426614174003" }],
+    id: "133e4567-e89b-12d3-a456-426614174001",
+    name: "Idle pipeline",
+    ownerUserId: "133e4567-e89b-12d3-a456-426614174004",
+    state: "enabled",
+    steps: [
+      {
+        componentType: "source.csv",
+        componentVersion: "v1",
+        configuration: { secretBindings: [], values: { path: "orders.csv" } },
+        id: "133e4567-e89b-12d3-a456-426614174002",
+        kind: "source",
+      },
+      {
+        componentType: "export.json",
+        componentVersion: "v1",
+        configuration: { secretBindings: [], values: { fileName: "orders.json" } },
+        id: "133e4567-e89b-12d3-a456-426614174003",
+        kind: "export",
+      },
+    ],
+    triggers: [
+      { enabled: false, id: "133e4567-e89b-12d3-a456-426614174010", pipelineId: "133e4567-e89b-12d3-a456-426614174001", type: "manual" },
+      {
+        cron: "0 9 * * *",
+        enabled: true,
+        id: "133e4567-e89b-12d3-a456-426614174011",
+        pipelineId: "133e4567-e89b-12d3-a456-426614174001",
+        timezone: "UTC",
+        type: "schedule",
+      },
+    ],
+    updatedAt: "2026-08-13T12:00:00.000Z",
+  };
+  let updateCount = 0;
+
+  await page.route("**/api/pipelines**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    if (path === "/api/pipelines" && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify({ pipelines: [pipeline] }), contentType: "application/json" });
+      return;
+    }
+    if (path === `/api/pipelines/${pipeline.id}` && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
+      return;
+    }
+    if (path === `/api/pipelines/${pipeline.id}` && request.method() === "PATCH") {
+      updateCount += 1;
+      pipeline = applyPipelinePatch(pipeline, { ...(request.postDataJSON() as object), updatedAt: "2026-08-13T13:00:00.000Z" });
+      await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/pipelines");
+  await waitForApplication(page);
+  await page.getByRole("tab", { name: en["pipeline.tab.trigger"] }).click();
+
+  const manualCheckbox = page.getByRole("checkbox", { name: en["pipeline.trigger.manual.label"] });
+  await expect(manualCheckbox).not.toBeChecked();
+  await manualCheckbox.click();
+  await expect(manualCheckbox).toBeChecked();
+
+  const scheduleItems = page.locator(".pipeline-trigger-editor__schedule");
+  await expect(scheduleItems).toHaveCount(1);
+  await expect(page.getByLabel(en["pipeline.trigger.hour.label"])).toHaveValue("9");
+  await expect(page.getByLabel(en["pipeline.trigger.minute.label"])).toHaveValue("0");
+
+  await page.getByRole("button", { name: en["pipeline.trigger.schedule.add"] }).click();
+  await expect(scheduleItems).toHaveCount(2);
+
+  await page.getByRole("button", { name: en["pipeline.trigger.schedule.remove"] }).first().click();
+  await expect(scheduleItems).toHaveCount(1);
+
+  await page.getByRole("tab", { name: en["pipeline.tab.overview"] }).click();
+  await page.getByRole("button", { name: en["pipeline.save"] }).click();
+  await expect(page.getByText(en["pipeline.saveSuccess"])).toBeVisible();
+
+  expect(updateCount).toBe(1);
+  const savedManual = pipeline.triggers.find((trigger) => trigger.type === "manual");
+  expect(savedManual?.enabled).toBe(true);
+  const savedSchedules = pipeline.triggers.filter((trigger) => trigger.type === "schedule");
+  expect(savedSchedules).toHaveLength(1);
+  expect(savedSchedules[0]).toMatchObject({ cron: "0 0 * * *", enabled: true });
+  await expectNoAccessibilityViolations(page);
+});
+
 test("pipeline create and deletion keep controls accessible and reconcile the workspace", async ({ page }) => {
   let pipelines: Pipeline[] = [persistedPipeline];
   let pipeline = persistedPipeline;
@@ -495,7 +601,7 @@ test("pipeline create and deletion keep controls accessible and reconcile the wo
     }
 
     if (path === `/api/pipelines/${pipeline.id}` && request.method() === "PATCH") {
-      pipeline = { ...pipeline, ...request.postDataJSON(), updatedAt: "2026-08-13T12:30:00.000Z" };
+      pipeline = applyPipelinePatch(pipeline, { ...(request.postDataJSON() as object), updatedAt: "2026-08-13T12:30:00.000Z" });
       pipelines = pipelines.map((candidate) => candidate.id === pipeline.id ? pipeline : candidate);
       await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
       return;
