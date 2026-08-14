@@ -1,7 +1,7 @@
 # BUILDER-005 — Deterministic Linear Graph Derivation
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** Claude
 **Depends on:** BUILDER-002
 
 ## Scope
@@ -10,13 +10,13 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Acceptance criteria
 
-- [ ] Generate adjacent edges deterministically.
-- [ ] Source connects to first Transform or Export.
-- [ ] Transforms connect in displayed order.
-- [ ] Last Transform connects to Export.
-- [ ] Removal/reorder updates edges.
-- [ ] Preserve step IDs.
-- [ ] Tests cover 0/1/multiple transforms.
+- [x] Generate adjacent edges deterministically.
+- [x] Source connects to first Transform or Export.
+- [x] Transforms connect in displayed order.
+- [x] Last Transform connects to Export.
+- [x] Removal/reorder updates edges.
+- [x] Preserve step IDs.
+- [x] Tests cover 0/1/multiple transforms.
 
 ## Required checks
 
@@ -31,4 +31,4 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Notes / blockers
 
-None.
+Pure derivation only, in a new module (`pipeline-builder-graph.ts`) that reads the existing draft model without modifying it. `derivePipelineBuilderSteps`/`derivePipelineBuilderEdges`/`derivePipelineBuilderGraph` are pure functions of current draft state (no incremental edge bookkeeping), so they naturally stay correct across add/remove/reorder. Not yet wired into the wizard's save flow; that lands with draft persistence.

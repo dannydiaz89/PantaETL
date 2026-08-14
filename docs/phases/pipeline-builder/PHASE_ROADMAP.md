@@ -15,9 +15,9 @@ Before work: read `AGENTS.md`, phase docs, verify dependencies, mark task/row IN
 | FORM-003 | Component picker foundation | COMPLETE | CAP-004, FORM-001 | Codex |
 | BUILDER-001 | Three-step wizard shell and local draft model | COMPLETE | FORM-003 | Claude |
 | BUILDER-002 | Source selection and configuration step | COMPLETE | BUILDER-001 | Claude |
-| BUILDER-003 | Transform add/configure/remove/reorder step | READY | BUILDER-002 | Unassigned |
+| BUILDER-003 | Transform add/configure/remove/reorder step | IN PROGRESS | BUILDER-002 | Claude |
 | BUILDER-004 | Export selection and configuration step | BLOCKED | BUILDER-003 | Unassigned |
-| BUILDER-005 | Deterministic linear graph derivation | READY | BUILDER-002 | Unassigned |
+| BUILDER-005 | Deterministic linear graph derivation | COMPLETE | BUILDER-002 | Claude |
 | BUILDER-006 | Draft persistence and resume | BLOCKED | BUILDER-004, BUILDER-005, FORM-002 | Unassigned |
 | BUILDER-007 | Reuse builder editors for existing pipelines | BLOCKED | BUILDER-006 | Unassigned |
 | VALID-001 | Compatibility-aware component selection | BLOCKED | CAP-004, BUILDER-003 | Unassigned |
