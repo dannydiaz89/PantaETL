@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import type { ComponentConfiguration, ComponentMetadata, Pipeline, PipelineCreateRequest, PipelineUpdateRequest } from "@pantaetl/contracts";
 import { Button, Check, Field, Icon, Input } from "@pantaetl/ui";
@@ -112,9 +112,11 @@ export function PipelineBuilderWizard({
     pipelineBuilderChainTail(draft),
     t("pipeline.builder.compatibility.incompatible"),
   );
+  const saveInFlight = useRef(false);
 
   async function save(): Promise<void> {
-    if (!canSave || isSaving) return;
+    if (!canSave || isSaving || saveInFlight.current) return;
+    saveInFlight.current = true;
 
     try {
       const pipeline = pipelineId === undefined
@@ -126,6 +128,8 @@ export function PipelineBuilderWizard({
       setDraft(markPipelineBuilderDraftSaved);
     } catch {
       // The caller surfaces the failure through `saveErrorMessage`; the draft is left untouched so no input is lost.
+    } finally {
+      saveInFlight.current = false;
     }
   }
 

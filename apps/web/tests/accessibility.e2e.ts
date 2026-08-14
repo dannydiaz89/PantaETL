@@ -781,6 +781,135 @@ test("pipeline creation wizard saves an incomplete draft through the real API, t
   await expectNoAccessibilityViolations(page);
 });
 
+test("pipeline creation wizard preserves unsaved input and allows retry after a lock conflict", async ({ page }) => {
+  const csvSource: ComponentMetadata = {
+    configFields: [{ key: "path", labelKey: "components.sources.csv.sourcePath", required: true, secret: false, type: "text" }],
+    descriptionKey: "components.sources.csv.description",
+    displayNameKey: "components.sources.csv.name",
+    inputFamilies: [],
+    kind: "source",
+    outputFamilies: ["tabular"],
+    type: "source.csv",
+    version: "v1",
+  };
+  let createAttempts = 0;
+
+  await page.route("**/api/components**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path !== "/api/components") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({ body: JSON.stringify({ components: [csvSource] }), contentType: "application/json" });
+  });
+
+  await page.route("**/api/pipelines", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fallback();
+      return;
+    }
+    createAttempts += 1;
+    if (createAttempts === 1) {
+      await route.fulfill({ body: JSON.stringify({ code: "pipeline_locked" }), contentType: "application/json", status: 409 });
+      return;
+    }
+    const body = route.request().postDataJSON() as PipelineCreateRequest;
+    const pipeline = pipelineCreateResponseSchema.parse({
+      ...body,
+      createdAt: "2026-08-13T12:00:00.000Z",
+      id: "e33e4567-e89b-12d3-a456-426614174099",
+      ownerUserId: "e33e4567-e89b-12d3-a456-426614174000",
+      state: "draft",
+      triggers: body.triggers.map((trigger, index) => ({
+        ...trigger,
+        id: `e33e4567-e89b-12d3-a456-42661417409${index + 1}`,
+        pipelineId: "e33e4567-e89b-12d3-a456-426614174099",
+      })),
+      updatedAt: "2026-08-13T12:00:00.000Z",
+    });
+    await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json", status: 201 });
+  });
+
+  await page.goto("/pipelines/new");
+  await waitForApplication(page);
+  await page.getByLabel(en["pipeline.name"]).fill("Orders sync");
+  await page.getByRole("button", { name: en["components.sources.csv.name"] }).click();
+  await page.getByLabel(en["components.sources.csv.sourcePath"]).fill("imports/orders.csv");
+
+  const saveButton = page.getByRole("button", { name: en["pipeline.builder.save"] });
+  await saveButton.click();
+  await expect(page.getByRole("alert")).toContainText(en["pipeline.mutation.locked"]);
+  await expect(page.getByLabel(en["pipeline.name"])).toHaveValue("Orders sync");
+  await expect(page.getByLabel(en["components.sources.csv.sourcePath"])).toHaveValue("imports/orders.csv");
+  await expect(saveButton).toBeEnabled();
+
+  await saveButton.click();
+  await expect.poll(() => createAttempts).toBe(2);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expectNoAccessibilityViolations(page);
+});
+
+test("pipeline creation wizard ignores a duplicate Save click while a save is already in flight", async ({ page }) => {
+  const csvSource: ComponentMetadata = {
+    configFields: [{ key: "path", labelKey: "components.sources.csv.sourcePath", required: true, secret: false, type: "text" }],
+    descriptionKey: "components.sources.csv.description",
+    displayNameKey: "components.sources.csv.name",
+    inputFamilies: [],
+    kind: "source",
+    outputFamilies: ["tabular"],
+    type: "source.csv",
+    version: "v1",
+  };
+  let createRequestCount = 0;
+
+  await page.route("**/api/components**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path !== "/api/components") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({ body: JSON.stringify({ components: [csvSource] }), contentType: "application/json" });
+  });
+
+  await page.route("**/api/pipelines", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fallback();
+      return;
+    }
+    createRequestCount += 1;
+    await new Promise((resolve) => { setTimeout(resolve, 300); });
+    const body = route.request().postDataJSON() as PipelineCreateRequest;
+    const pipeline = pipelineCreateResponseSchema.parse({
+      ...body,
+      createdAt: "2026-08-13T12:00:00.000Z",
+      id: "f33e4567-e89b-12d3-a456-426614174099",
+      ownerUserId: "f33e4567-e89b-12d3-a456-426614174000",
+      state: "draft",
+      triggers: body.triggers.map((trigger, index) => ({
+        ...trigger,
+        id: `f33e4567-e89b-12d3-a456-42661417409${index + 1}`,
+        pipelineId: "f33e4567-e89b-12d3-a456-426614174099",
+      })),
+      updatedAt: "2026-08-13T12:00:00.000Z",
+    });
+    await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json", status: 201 });
+  });
+
+  await page.goto("/pipelines/new");
+  await waitForApplication(page);
+  await page.getByLabel(en["pipeline.name"]).fill("Orders sync");
+  await page.getByRole("button", { name: en["components.sources.csv.name"] }).click();
+  await page.getByLabel(en["components.sources.csv.sourcePath"]).fill("imports/orders.csv");
+
+  const saveButton = page.getByRole("button", { name: en["pipeline.builder.save"] });
+  await saveButton.dispatchEvent("click");
+  await saveButton.dispatchEvent("click");
+  await saveButton.dispatchEvent("click");
+  await expect.poll(() => createRequestCount, { timeout: 5_000 }).toBeGreaterThan(0);
+  await expect(saveButton).toBeEnabled();
+  expect(createRequestCount).toBe(1);
+});
+
 test("run history shows safe metadata in accessible tables", async ({ page }) => {
   await page.goto("/runs");
   await waitForApplication(page);
