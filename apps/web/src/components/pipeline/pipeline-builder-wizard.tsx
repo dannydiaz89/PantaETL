@@ -1,14 +1,18 @@
 import { useState } from "react";
 
+import type { ComponentConfiguration, ComponentMetadata } from "@pantaetl/contracts";
 import { Button, Check, Field, Icon, Input } from "@pantaetl/ui";
 
 import { useI18n } from "../../locale-provider.js";
 import type { TranslationKey } from "../../locales/en.js";
+import { ComponentPickerConfiguration } from "./component-picker.js";
 import {
   createEmptyPipelineBuilderDraft,
   nextPipelineBuilderStep,
   PIPELINE_BUILDER_STEPS,
   previousPipelineBuilderStep,
+  setPipelineBuilderSource,
+  setPipelineBuilderSourceValues,
   updatePipelineBuilderDraft,
   type PipelineBuilderDraft,
   type PipelineBuilderStep,
@@ -53,9 +57,10 @@ export interface PipelineBuilderWizardProps {
 /**
  * Three-step Source/Transforms/Export pipeline creation shell.
  *
- * Owns only the local in-progress draft and step navigation; each stage's
- * component selection and configuration UI is supplied by later work and
- * currently renders a placeholder description.
+ * Owns the local in-progress draft and step navigation. The Source stage
+ * selects and configures one component from the capability catalog; the
+ * Transforms and Export stages are supplied by later work and currently
+ * render a placeholder description.
  */
 export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange }: PipelineBuilderWizardProps) {
   const { t } = useI18n();
@@ -68,6 +73,22 @@ export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange
   function changeName(name: string): void {
     setDraft((current) => {
       const next = updatePipelineBuilderDraft(current, { name });
+      onDraftChange?.(next);
+      return next;
+    });
+  }
+
+  function changeSource(metadata: ComponentMetadata): void {
+    setDraft((current) => {
+      const next = setPipelineBuilderSource(current, metadata);
+      onDraftChange?.(next);
+      return next;
+    });
+  }
+
+  function changeSourceValues(values: ComponentConfiguration["values"]): void {
+    setDraft((current) => {
+      const next = setPipelineBuilderSourceValues(current, values);
       onDraftChange?.(next);
       return next;
     });
@@ -120,6 +141,15 @@ export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange
       <div className="pipeline-builder__content">
         <p className="pipeline-builder__step-position">{t(STEP_POSITION_KEYS[step])}</p>
         <p>{t(STEP_DESCRIPTION_KEYS[step])}</p>
+        {step === "source" ? (
+          <ComponentPickerConfiguration
+            kind="source"
+            onSelect={changeSource}
+            onValuesChange={changeSourceValues}
+            selected={draft.source?.metadata}
+            values={draft.source?.values ?? {}}
+          />
+        ) : null}
       </div>
 
       <div className="pipeline-builder__actions">

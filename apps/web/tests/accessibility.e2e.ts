@@ -2,6 +2,7 @@ import { AxeBuilder } from "@axe-core/playwright";
 import {
   pipelineCreateRequestSchema,
   pipelineCreateResponseSchema,
+  type ComponentMetadata,
   type Pipeline,
   type PipelineCreateRequest,
 } from "@pantaetl/contracts";
@@ -314,6 +315,42 @@ test("pipeline creation wizard keeps the collected name across steps and announc
 
   await page.getByRole("button", { name: en["pipeline.builder.back"] }).click();
   await expect(page.getByLabel(en["pipeline.name"])).toHaveValue("Orders sync");
+  await expectNoAccessibilityViolations(page);
+});
+
+test("pipeline creation wizard selects a Source from the capability catalog and configures it accessibly", async ({ page }) => {
+  const csvSource: ComponentMetadata = {
+    configFields: [{ key: "path", labelKey: "components.sources.csv.sourcePath", required: true, secret: false, type: "text" }],
+    descriptionKey: "components.sources.csv.description",
+    displayNameKey: "components.sources.csv.name",
+    inputFamilies: [],
+    kind: "source",
+    outputFamilies: ["tabular"],
+    type: "source.csv",
+    version: "v1",
+  };
+
+  await page.route("**/api/components**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path !== "/api/components") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({ body: JSON.stringify({ components: [csvSource] }), contentType: "application/json" });
+  });
+
+  await page.goto("/pipelines/new");
+  await waitForApplication(page);
+
+  await page.getByRole("button", { name: en["components.sources.csv.name"] }).click();
+  const configurationField = page.getByLabel(en["components.sources.csv.sourcePath"]);
+  await expect(configurationField).toBeVisible();
+  await configurationField.fill("imports/orders.csv");
+  await expect(page.getByRole("button", { name: en["components.sources.csv.name"] })).toHaveAttribute("aria-pressed", "true");
+
+  await page.getByRole("button", { name: en["pipeline.builder.next"] }).click();
+  await page.getByRole("button", { name: en["pipeline.builder.back"] }).click();
+  await expect(configurationField).toHaveValue("imports/orders.csv");
   await expectNoAccessibilityViolations(page);
 });
 
