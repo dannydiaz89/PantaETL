@@ -1,7 +1,7 @@
 /** Public design-system entrypoint for application feature code. */
 export { cx, type ClassNameValue } from "./classnames.js";
 export { Icon, type IconProps } from "./icon.js";
-export { BarChart3, Boxes, Moon, Network, PanelLeftClose, PanelLeftOpen, Settings, ShieldCheck, Sun, Users } from "./icons.js";
+export { BarChart3, Boxes, Check, Moon, Network, PanelLeftClose, PanelLeftOpen, Settings, ShieldCheck, Sun, Users } from "./icons.js";
 export { applyTheme, resolveTheme, THEME_ATTRIBUTE, type Theme } from "./theme.js";
 export { Button, type ButtonProps, type ButtonVariant } from "./button.js";
 export { Checkbox, type CheckboxProps } from "./checkbox.js";

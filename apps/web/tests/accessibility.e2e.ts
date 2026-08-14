@@ -299,6 +299,24 @@ test("pipeline create and deletion keep controls accessible and reconcile the wo
   await expectNoAccessibilityViolations(page);
 });
 
+test("pipeline creation wizard keeps the collected name across steps and announces progress accessibly", async ({ page }) => {
+  await page.goto("/pipelines/new");
+  await waitForApplication(page);
+
+  const steps = page.getByRole("list", { name: en["pipeline.builder.progressLabel"] }).getByRole("listitem");
+  await expect(steps).toHaveCount(3);
+  await expect(steps.first()).toContainText(en["pipeline.builder.step.source.label"]);
+  await expect(page.getByRole("button", { name: en["pipeline.builder.back"] })).toHaveCount(0);
+
+  await page.getByLabel(en["pipeline.name"]).fill("Orders sync");
+  await page.getByRole("button", { name: en["pipeline.builder.next"] }).click();
+  await expect(steps.first()).toContainText(en["pipeline.builder.status.completed"]);
+
+  await page.getByRole("button", { name: en["pipeline.builder.back"] }).click();
+  await expect(page.getByLabel(en["pipeline.name"])).toHaveValue("Orders sync");
+  await expectNoAccessibilityViolations(page);
+});
+
 test("run history shows safe metadata in accessible tables", async ({ page }) => {
   await page.goto("/runs");
   await waitForApplication(page);
