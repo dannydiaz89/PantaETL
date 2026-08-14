@@ -1,0 +1,63 @@
+{
+  "generatedAt": "2026-08-14T09:00:00Z",
+  "source": "sample catalog export",
+  "catalog": {
+    "region": "global",
+    "products": [
+      {
+        "sku": "AL-1001",
+        "name": "Aurora Desk Lamp",
+        "active": true,
+        "stock": 142,
+        "pricing": { "currency": "USD", "amount": 249.0, "discount": 0.1 },
+        "supplier": { "name": "Aurora Labs", "country": "US" },
+        "tags": ["lighting", "office", "featured"]
+      },
+      {
+        "sku": "BF-2044",
+        "name": "Belmont Pantry Crate",
+        "active": true,
+        "stock": 1280,
+        "pricing": { "currency": "USD", "amount": 18.5, "discount": 0.0 },
+        "supplier": { "name": "Belmont Foods", "country": "US" },
+        "tags": ["grocery", "bulk"]
+      },
+      {
+        "sku": "CW-3310",
+        "name": "Cedar Workbench",
+        "active": false,
+        "stock": 6,
+        "pricing": { "currency": "USD", "amount": 1250.0, "discount": 0.15 },
+        "supplier": { "name": "Cedar Works", "country": "CA" },
+        "tags": ["furniture", "workshop"]
+      },
+      {
+        "sku": "FR-4102",
+        "name": "Fjord Storage Rack",
+        "active": true,
+        "stock": 87,
+        "pricing": { "currency": "EUR", "amount": 315.0, "discount": 0.05 },
+        "supplier": { "name": "Fjord Retail", "country": "NO" },
+        "tags": ["storage", "featured"]
+      },
+      {
+        "sku": "GS-5567",
+        "name": "Granite Tool Set",
+        "active": true,
+        "stock": 430,
+        "pricing": { "currency": "USD", "amount": 67.25, "discount": 0.0 },
+        "supplier": { "name": "Granite Supply", "country": "US" },
+        "tags": ["tools"]
+      },
+      {
+        "sku": "HM-6001",
+        "name": "Harbor Studio Monitor",
+        "active": false,
+        "stock": 0,
+        "pricing": { "currency": "GBP", "amount": 540.0, "discount": 0.2 },
+        "supplier": { "name": "Harbor Media", "country": "GB" },
+        "tags": ["audio", "studio", "clearance"]
+      }
+    ]
+  }
+}

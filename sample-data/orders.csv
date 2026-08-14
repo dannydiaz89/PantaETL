@@ -1,0 +1,16 @@
+order_id,order_date,customer,region,status,quantity,unit_price
+1001,2026-07-01,Aurora Labs,north,shipped,3,249.00
+1002,2026-07-01,Belmont Foods,SOUTH,pending,12,18.50
+1003,2026-07-02,Cedar Works,North,shipped,1,1250.00
+1004,2026-07-02,Delta Print,east,cancelled,5,42.75
+1005,2026-07-03,Aurora Labs,north,shipped,2,249.00
+1006,2026-07-03,Everline Group,,pending,7,99.99
+1007,2026-07-04,Belmont Foods,south,shipped,20,18.50
+1008,2026-07-04,Fjord Retail,WEST,shipped,4,315.00
+1009,2026-07-05,Cedar Works,north,pending,,1250.00
+1010,2026-07-05,Granite Supply,east,shipped,9,67.25
+1010,2026-07-05,Granite Supply,east,shipped,9,67.25
+1011,2026-07-06,Harbor Media,south,cancelled,2,540.00
+1012,2026-07-06,Fjord Retail,west,shipped,6,315.00
+1013,2026-07-07,Ironwood Co,,shipped,15,33.40
+1014,2026-07-07,Juniper Health,NORTH,pending,8,187.60

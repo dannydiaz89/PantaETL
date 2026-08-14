@@ -1,0 +1,6 @@
+order_id;order_date;customer;region;status;quantity;unit_price
+2001;2026-08-01;Kestrel Design;north;shipped;4;120.00
+2002;2026-08-01;Lantern Books;south;pending;30;12.25
+2003;2026-08-02;Meridian Tools;east;shipped;2;875.50
+2004;2026-08-02;Northgate Cafe;west;cancelled;6;54.90
+2005;2026-08-03;Orchard Supply;north;shipped;11;73.10
