@@ -8,6 +8,8 @@ const schedulerRunUrl = `http://127.0.0.1:${schedulerPort}/internal/pipeline-run
 /** Browser test configuration for representative accessibility checks. */
 export default defineConfig({
   fullyParallel: true,
+  globalSetup: "./tests/global-setup.ts",
+  globalTeardown: "./tests/global-teardown.ts",
   reporter: process.env.CI === "true" ? [["github"], ["list"]] : "list",
   testDir: "./tests",
   testMatch: "**/*.e2e.ts",
@@ -15,6 +17,9 @@ export default defineConfig({
   use: {
     baseURL: playwrightBaseUrl,
     screenshot: "only-on-failure",
+    // Guarded pages resolve a session on the server, so every test starts signed in.
+    // Tests needing an isolated owner create their own context instead.
+    storageState: "tests/.auth/state.json",
     trace: "retain-on-failure",
   },
   webServer: [

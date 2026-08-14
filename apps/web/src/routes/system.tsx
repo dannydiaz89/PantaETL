@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { requireSession } from "../auth/route-guard.js";
 import { AppShell } from "../components/app-shell.js";
 import { SystemWorkspace } from "../components/system-workspace.js";
 import { useI18n } from "../locale-provider.js";
 
-export const Route = createFileRoute("/system")({ component: System });
+export const Route = createFileRoute("/system")({ beforeLoad: requireSession, component: System });
 
 function System() {
   const { t } = useI18n();

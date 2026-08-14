@@ -108,6 +108,26 @@ test("login form and account dialog meet the accessibility baseline", async ({ p
   await expect(page.getByRole("dialog")).toBeHidden();
 });
 
+test("signed-out visitors reach the sign-in form instead of a page of failing requests", async ({ browser }) => {
+  const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
+
+  try {
+    const page = await context.newPage();
+
+    for (const guarded of ["/pipelines", "/pipelines/new", "/runs", "/settings"]) {
+      await page.goto(guarded);
+      await expect(page.getByRole("heading", { name: en["login.title"] })).toBeVisible();
+      // The requested location is carried so signing in can return the visitor to it.
+      expect(new URL(page.url()).searchParams.get("returnTo")).toBe(guarded);
+      await expect(page.getByText(en["pipeline.table.error"])).toHaveCount(0);
+    }
+
+    await expectNoAccessibilityViolations(page);
+  } finally {
+    await context.close();
+  }
+});
+
 test("pipeline editor loads a persisted pipeline through accessible query states", async ({ page }) => {
   await page.route("**/api/pipelines**", async (route) => {
     const request = route.request();

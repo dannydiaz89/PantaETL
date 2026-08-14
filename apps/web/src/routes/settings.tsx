@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { requireSession } from "../auth/route-guard.js";
 import { AppShell } from "../components/app-shell.js";
 import { SettingsWorkspace } from "../components/settings-workspace.js";
 import { useI18n } from "../locale-provider.js";
 
-export const Route = createFileRoute("/settings")({ component: Settings });
+export const Route = createFileRoute("/settings")({ beforeLoad: requireSession, component: Settings });
 
 function Settings() {
   const { t } = useI18n();

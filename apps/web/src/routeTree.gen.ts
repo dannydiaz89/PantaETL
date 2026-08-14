@@ -13,7 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PipelinesRouteImport } from './routes/pipelines'
 import { Route as PluginsRouteImport } from './routes/plugins'
-import { Route as ProtectedRouteImport } from './routes/protected'
 import { Route as RunsRouteImport } from './routes/runs'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SystemRouteImport } from './routes/system'
@@ -53,11 +52,6 @@ const PipelinesRoute = PipelinesRouteImport.update({
 const PluginsRoute = PluginsRouteImport.update({
   id: '/plugins',
   path: '/plugins',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProtectedRoute = ProtectedRouteImport.update({
-  id: '/protected',
-  path: '/protected',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RunsRoute = RunsRouteImport.update({
@@ -171,7 +165,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/pipelines': typeof PipelinesRoute
   '/plugins': typeof PluginsRoute
-  '/protected': typeof ProtectedRoute
   '/runs': typeof RunsRoute
   '/settings': typeof SettingsRoute
   '/system': typeof SystemRoute
@@ -198,7 +191,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/pipelines': typeof PipelinesRoute
   '/plugins': typeof PluginsRoute
-  '/protected': typeof ProtectedRoute
   '/runs': typeof RunsRoute
   '/settings': typeof SettingsRoute
   '/system': typeof SystemRoute
@@ -226,7 +218,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/pipelines': typeof PipelinesRoute
   '/plugins': typeof PluginsRoute
-  '/protected': typeof ProtectedRoute
   '/runs': typeof RunsRoute
   '/settings': typeof SettingsRoute
   '/system': typeof SystemRoute
@@ -255,7 +246,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/pipelines'
     | '/plugins'
-    | '/protected'
     | '/runs'
     | '/settings'
     | '/system'
@@ -282,7 +272,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/pipelines'
     | '/plugins'
-    | '/protected'
     | '/runs'
     | '/settings'
     | '/system'
@@ -309,7 +298,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/pipelines'
     | '/plugins'
-    | '/protected'
     | '/runs'
     | '/settings'
     | '/system'
@@ -337,7 +325,6 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PipelinesRoute: typeof PipelinesRoute
   PluginsRoute: typeof PluginsRoute
-  ProtectedRoute: typeof ProtectedRoute
   RunsRoute: typeof RunsRoute
   SettingsRoute: typeof SettingsRoute
   SystemRoute: typeof SystemRoute
@@ -381,13 +368,6 @@ declare module '@tanstack/react-router' {
       path: '/plugins'
       fullPath: '/plugins'
       preLoaderRoute: typeof PluginsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/protected': {
-      id: '/protected'
-      path: '/protected'
-      fullPath: '/protected'
-      preLoaderRoute: typeof ProtectedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/runs': {
@@ -585,7 +565,6 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PipelinesRoute: PipelinesRoute,
   PluginsRoute: PluginsRoute,
-  ProtectedRoute: ProtectedRoute,
   RunsRoute: RunsRoute,
   SettingsRoute: SettingsRoute,
   SystemRoute: SystemRoute,

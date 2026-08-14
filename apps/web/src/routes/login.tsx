@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { Button, Field, Input } from "@pantaetl/ui";
@@ -7,10 +7,19 @@ import { authClient } from "../auth/client.js";
 import { useI18n } from "../locale-provider.js";
 
 /** Guest route reserved for the local password sign-in form. */
-export const Route = createFileRoute("/login")({ component: Login });
+export const Route = createFileRoute("/login")({
+  component: Login,
+  validateSearch: (search: Record<string, unknown>): { readonly returnTo?: string } => (
+    typeof search.returnTo === "string" && search.returnTo.startsWith("/") && !search.returnTo.startsWith("//")
+      ? { returnTo: search.returnTo }
+      : {}
+  ),
+});
 
 function Login() {
   const { t } = useI18n();
+  const navigate = useNavigate();
+  const { returnTo } = Route.useSearch();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -22,7 +31,12 @@ function Login() {
       password: String(formData.get("password")),
     });
     setIsSubmitting(false);
-    setHasError(result.error !== null);
+    if (result.error !== null) {
+      setHasError(true);
+      return;
+    }
+
+    await navigate({ href: returnTo ?? "/", replace: true });
   }
 
   return (
