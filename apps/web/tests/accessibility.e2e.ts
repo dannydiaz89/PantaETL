@@ -411,6 +411,57 @@ test("pipeline creation wizard adds, configures, reorders, and removes Transform
   await expectNoAccessibilityViolations(page);
 });
 
+test("pipeline creation wizard selects an Export and reports draft readiness once Source and Export are both chosen", async ({ page }) => {
+  const csvSource: ComponentMetadata = {
+    configFields: [{ key: "path", labelKey: "components.sources.csv.sourcePath", required: true, secret: false, type: "text" }],
+    descriptionKey: "components.sources.csv.description",
+    displayNameKey: "components.sources.csv.name",
+    inputFamilies: [],
+    kind: "source",
+    outputFamilies: ["tabular"],
+    type: "source.csv",
+    version: "v1",
+  };
+  const jsonExport: ComponentMetadata = {
+    configFields: [{ key: "fileName", labelKey: "components.exports.json.fileName", required: true, secret: false, type: "text" }],
+    descriptionKey: "components.exports.json.description",
+    displayNameKey: "components.exports.json.name",
+    inputFamilies: ["tabular"],
+    kind: "export",
+    outputFamilies: [],
+    type: "export.json",
+    version: "v1",
+  };
+
+  await page.route("**/api/components**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path !== "/api/components") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({ body: JSON.stringify({ components: [csvSource, jsonExport] }), contentType: "application/json" });
+  });
+
+  await page.goto("/pipelines/new");
+  await waitForApplication(page);
+  await page.getByRole("button", { name: en["components.sources.csv.name"] }).click();
+  await page.getByLabel(en["components.sources.csv.sourcePath"]).fill("imports/orders.csv");
+
+  await page.getByRole("button", { name: en["pipeline.builder.next"] }).click();
+  await page.getByRole("button", { name: en["pipeline.builder.next"] }).click();
+  await expect(page.getByText(en["pipeline.builder.readiness.incomplete"])).toBeVisible();
+
+  await page.getByRole("button", { name: en["components.exports.json.name"] }).click();
+  const configurationField = page.getByLabel(en["components.exports.json.fileName"]);
+  await configurationField.fill("orders.json");
+  await expect(page.getByText(en["pipeline.builder.readiness.complete"])).toBeVisible();
+
+  await page.getByRole("button", { name: en["pipeline.builder.back"] }).click();
+  await page.getByRole("button", { name: en["pipeline.builder.back"] }).click();
+  await expect(page.getByLabel(en["components.sources.csv.sourcePath"])).toHaveValue("imports/orders.csv");
+  await expectNoAccessibilityViolations(page);
+});
+
 test("run history shows safe metadata in accessible tables", async ({ page }) => {
   await page.goto("/runs");
   await waitForApplication(page);

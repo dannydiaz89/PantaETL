@@ -137,6 +137,8 @@ export const en = {
   "pipeline.builder.transform.moveUp": "Move up",
   "pipeline.builder.transform.moveDown": "Move down",
   "pipeline.builder.transform.remove": "Remove",
+  "pipeline.builder.readiness.complete": "This draft has a Source and an Export and can be saved.",
+  "pipeline.builder.readiness.incomplete": "Choose a Source and an Export to complete this pipeline.",
   "pipeline.delete.open": "Delete pipeline",
   "pipeline.delete.title": "Delete this pipeline?",
   "pipeline.delete.description": "This permanently removes the pipeline configuration. Pipelines with active runs or retained run history cannot be deleted.",

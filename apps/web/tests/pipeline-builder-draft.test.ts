@@ -4,12 +4,15 @@ import { describe, expect, it } from "vitest";
 import {
   addPipelineBuilderTransform,
   createEmptyPipelineBuilderDraft,
+  isPipelineBuilderDraftComplete,
   movePipelineBuilderTransform,
   nextPipelineBuilderComponentSelection,
   nextPipelineBuilderStep,
   PIPELINE_BUILDER_STEPS,
   previousPipelineBuilderStep,
   removePipelineBuilderTransform,
+  setPipelineBuilderExport,
+  setPipelineBuilderExportValues,
   setPipelineBuilderSource,
   setPipelineBuilderSourceValues,
   setPipelineBuilderTransformValues,
@@ -159,7 +162,56 @@ describe("pipeline builder draft model", () => {
     expect(atStart.transforms.map((transform) => transform.id)).toEqual(["t1", "t2"]);
     expect(atEnd.transforms.map((transform) => transform.id)).toEqual(["t1", "t2"]);
   });
+
+  it("sets the draft Export and preserves its id across reselecting a different component", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = setPipelineBuilderExport(draft, jsonExport, () => "export-id");
+    draft = setPipelineBuilderExportValues(draft, { fileName: "orders.json" });
+
+    draft = setPipelineBuilderExport(draft, csvExport, () => "unused");
+
+    expect(draft.export).toEqual({ id: "export-id", metadata: csvExport, secretBindings: [], values: {} });
+  });
+
+  it("does nothing when setting Export values without a selected Export", () => {
+    const draft = createEmptyPipelineBuilderDraft();
+
+    expect(setPipelineBuilderExportValues(draft, { fileName: "orders.json" })).toBe(draft);
+  });
+
+  it("is complete only once both a Source and an Export are selected", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    expect(isPipelineBuilderDraftComplete(draft)).toBe(false);
+
+    draft = setPipelineBuilderSource(draft, csvSource, () => "source-id");
+    expect(isPipelineBuilderDraftComplete(draft)).toBe(false);
+
+    draft = setPipelineBuilderExport(draft, jsonExport, () => "export-id");
+    expect(isPipelineBuilderDraftComplete(draft)).toBe(true);
+  });
 });
+
+const jsonExport: ComponentMetadata = {
+  configFields: [{ key: "fileName", labelKey: "components.exports.json.fileName", required: true, secret: false, type: "text" }],
+  descriptionKey: "components.exports.json.description",
+  displayNameKey: "components.exports.json.name",
+  inputFamilies: ["tabular"],
+  kind: "export",
+  outputFamilies: [],
+  type: "export.json",
+  version: "v1",
+};
+
+const csvExport: ComponentMetadata = {
+  configFields: [{ key: "fileName", labelKey: "components.exports.csv.fileName", required: true, secret: false, type: "text" }],
+  descriptionKey: "components.exports.csv.description",
+  displayNameKey: "components.exports.csv.name",
+  inputFamilies: ["tabular"],
+  kind: "export",
+  outputFamilies: [],
+  type: "export.csv",
+  version: "v1",
+};
 
 const limitTransform: ComponentMetadata = {
   configFields: [{ key: "count", labelKey: "components.transforms.rows.limit.count", required: true, secret: false, type: "number" }],

@@ -9,11 +9,14 @@ import { ComponentPickerConfiguration } from "./component-picker.js";
 import {
   addPipelineBuilderTransform,
   createEmptyPipelineBuilderDraft,
+  isPipelineBuilderDraftComplete,
   movePipelineBuilderTransform,
   nextPipelineBuilderStep,
   PIPELINE_BUILDER_STEPS,
   previousPipelineBuilderStep,
   removePipelineBuilderTransform,
+  setPipelineBuilderExport,
+  setPipelineBuilderExportValues,
   setPipelineBuilderSource,
   setPipelineBuilderSourceValues,
   setPipelineBuilderTransformValues,
@@ -62,10 +65,9 @@ export interface PipelineBuilderWizardProps {
 /**
  * Three-step Source/Transforms/Export pipeline creation shell.
  *
- * Owns the local in-progress draft and step navigation. The Source and
- * Transforms stages select and configure components from the capability
- * catalog; the Export stage is supplied by later work and currently renders
- * a placeholder description.
+ * Owns the local in-progress draft and step navigation. Each stage selects
+ * and configures components from the capability catalog; the final stage
+ * replaces Next with a readiness status once there is no further step.
  */
 export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange }: PipelineBuilderWizardProps) {
   const { t } = useI18n();
@@ -126,6 +128,22 @@ export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange
   function moveTransform(id: string, direction: "up" | "down"): void {
     setDraft((current) => {
       const next = movePipelineBuilderTransform(current, id, direction);
+      onDraftChange?.(next);
+      return next;
+    });
+  }
+
+  function changeExport(metadata: ComponentMetadata): void {
+    setDraft((current) => {
+      const next = setPipelineBuilderExport(current, metadata);
+      onDraftChange?.(next);
+      return next;
+    });
+  }
+
+  function changeExportValues(values: ComponentConfiguration["values"]): void {
+    setDraft((current) => {
+      const next = setPipelineBuilderExportValues(current, values);
       onDraftChange?.(next);
       return next;
     });
@@ -196,6 +214,15 @@ export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange
             transforms={draft.transforms}
           />
         ) : null}
+        {step === "export" ? (
+          <ComponentPickerConfiguration
+            kind="export"
+            onSelect={changeExport}
+            onValuesChange={changeExportValues}
+            selected={draft.export?.metadata}
+            values={draft.export?.values ?? {}}
+          />
+        ) : null}
       </div>
 
       <div className="pipeline-builder__actions">
@@ -204,7 +231,11 @@ export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange
             {t("pipeline.builder.back")}
           </Button>
         )}
-        {nextStep === undefined ? null : (
+        {nextStep === undefined ? (
+          <p aria-live="polite" className="pipeline-builder__readiness" role="status">
+            {t(isPipelineBuilderDraftComplete(draft) ? "pipeline.builder.readiness.complete" : "pipeline.builder.readiness.incomplete")}
+          </p>
+        ) : (
           <Button onClick={() => setStep(nextStep)} type="button">
             {t("pipeline.builder.next")}
           </Button>

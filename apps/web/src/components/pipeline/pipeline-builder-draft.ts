@@ -91,6 +91,26 @@ export function setPipelineBuilderSourceValues(draft: PipelineBuilderDraft, valu
   return updatePipelineBuilderDraft(draft, { source: { ...draft.source, values } });
 }
 
+/** Replaces the Export selection, preserving its draft-local id and clearing stale configuration on a component change. */
+export function setPipelineBuilderExport(
+  draft: PipelineBuilderDraft,
+  metadata: ComponentMetadata,
+  createId?: () => string,
+): PipelineBuilderDraft {
+  return updatePipelineBuilderDraft(draft, { export: nextPipelineBuilderComponentSelection(draft.export, metadata, createId) });
+}
+
+/** Replaces the non-secret configuration values of the current Export selection; a no-op without a selected Export. */
+export function setPipelineBuilderExportValues(draft: PipelineBuilderDraft, values: ConfigurationValues): PipelineBuilderDraft {
+  if (draft.export === undefined) return draft;
+  return updatePipelineBuilderDraft(draft, { export: { ...draft.export, values } });
+}
+
+/** True once a Source and an Export are both selected; Transforms remain optional. */
+export function isPipelineBuilderDraftComplete(draft: PipelineBuilderDraft): boolean {
+  return draft.source !== undefined && draft.export !== undefined;
+}
+
 /** Appends a new Transform after the existing ones with a fresh draft-local id and empty configuration. */
 export function addPipelineBuilderTransform(
   draft: PipelineBuilderDraft,

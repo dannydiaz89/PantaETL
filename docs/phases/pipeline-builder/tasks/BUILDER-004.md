@@ -1,7 +1,7 @@
 # BUILDER-004 — Export Selection and Configuration Step
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** Claude
 **Depends on:** BUILDER-003
 
 ## Scope
@@ -10,12 +10,12 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Acceptance criteria
 
-- [ ] Choose one Export.
-- [ ] Metadata-driven form.
-- [ ] Changing Export clears stale config safely.
-- [ ] Stable PipelineStep draft ID.
-- [ ] Final action communicates draft/readiness.
-- [ ] No CSV Export assumption.
+- [x] Choose one Export.
+- [x] Metadata-driven form.
+- [x] Changing Export clears stale config safely.
+- [x] Stable PipelineStep draft ID.
+- [x] Final action communicates draft/readiness.
+- [x] No CSV Export assumption.
 
 ## Required checks
 
@@ -30,4 +30,4 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Notes / blockers
 
-None.
+The Export step mirrors the Source step exactly, reusing the same generic picker/configuration components and the same stable-id/clear-on-change slot logic. On the final stage, Next is replaced by a localized, non-interactive readiness status (draft complete once a Source and an Export are both selected) rather than a Save action, since draft persistence is separate follow-up work. Secret-bound Export fields have the same limitation noted in BUILDER-002/BUILDER-003: no secret-write backend exists yet.

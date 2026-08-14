@@ -3,7 +3,7 @@ import type { ComponentMetadata } from "@pantaetl/contracts";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { addPipelineBuilderTransform, createEmptyPipelineBuilderDraft, setPipelineBuilderSource, setPipelineBuilderSourceValues, updatePipelineBuilderDraft, type PipelineBuilderDraft, type PipelineBuilderStep } from "../src/components/pipeline/pipeline-builder-draft.js";
+import { addPipelineBuilderTransform, createEmptyPipelineBuilderDraft, setPipelineBuilderExport, setPipelineBuilderExportValues, setPipelineBuilderSource, setPipelineBuilderSourceValues, updatePipelineBuilderDraft, type PipelineBuilderDraft, type PipelineBuilderStep } from "../src/components/pipeline/pipeline-builder-draft.js";
 import { PipelineBuilderWizard } from "../src/components/pipeline/pipeline-builder-wizard.js";
 import { componentCapabilityQueryKeys } from "../src/data/components/index.js";
 import { LocaleProvider } from "../src/locale-provider.js";
@@ -14,6 +14,7 @@ function renderWizard(props: { readonly initialDraft?: PipelineBuilderDraft; rea
   const queryClient = new QueryClient();
   queryClient.setQueryData(componentCapabilityQueryKeys.list({ kind: "source" }), { components: [csvSource, restSource] });
   queryClient.setQueryData(componentCapabilityQueryKeys.list({ kind: "transform" }), { components: [limitTransform] });
+  queryClient.setQueryData(componentCapabilityQueryKeys.list({ kind: "export" }), { components: [jsonExport] });
 
   return renderToStaticMarkup(
     <QueryClientProvider client={queryClient}>
@@ -57,6 +58,19 @@ describe("PipelineBuilderWizard", () => {
     const lastStepMarkup = renderWizard({ initialStep: "export" });
     expect(lastStepMarkup).toContain(en["pipeline.builder.back"]);
     expect(lastStepMarkup).not.toContain(en["pipeline.builder.next"]);
+  });
+
+  it("communicates draft readiness in place of Next once a Source and an Export are both selected", () => {
+    const incompleteMarkup = renderWizard({ initialStep: "export" });
+    expect(incompleteMarkup).toContain(en["pipeline.builder.readiness.incomplete"]);
+    expect(incompleteMarkup).not.toContain(en["pipeline.builder.readiness.complete"]);
+
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = setPipelineBuilderSource(draft, csvSource, () => "source-id");
+    draft = setPipelineBuilderExport(draft, jsonExport, () => "export-id");
+    const completeMarkup = renderWizard({ initialDraft: draft, initialStep: "export" });
+    expect(completeMarkup).toContain(en["pipeline.builder.readiness.complete"]);
+    expect(completeMarkup).not.toContain(en["pipeline.builder.readiness.incomplete"]);
   });
 
   it("keeps the collected pipeline name visible regardless of the active stage, proving Back/Next preserve the draft", () => {
@@ -113,6 +127,24 @@ describe("PipelineBuilderWizard", () => {
     expect(markup).toContain(en["pipeline.builder.transform.moveDown"]);
     expect(markup).toContain(en["pipeline.builder.transform.remove"]);
   });
+
+  it("lists available Export capabilities from the capability catalog without a hardcoded component list", () => {
+    const markup = renderWizard({ initialStep: "export" });
+
+    expect(markup).toContain(en["components.exports.json.name"]);
+  });
+
+  it("renders the selected Export's metadata-driven configuration with its saved values", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = setPipelineBuilderExport(draft, jsonExport, () => "export-id");
+    draft = setPipelineBuilderExportValues(draft, { fileName: "orders.json" });
+
+    const markup = renderWizard({ initialDraft: draft, initialStep: "export" });
+
+    expect(markup).toContain('aria-pressed="true"');
+    expect(markup).toContain(en["components.exports.json.fileName"]);
+    expect(markup).toContain("orders.json");
+  });
 });
 
 const csvSource: ComponentMetadata = {
@@ -145,5 +177,16 @@ const limitTransform: ComponentMetadata = {
   kind: "transform",
   outputFamilies: ["tabular"],
   type: "transform.limit",
+  version: "v1",
+};
+
+const jsonExport: ComponentMetadata = {
+  configFields: [{ key: "fileName", labelKey: "components.exports.json.fileName", required: true, secret: false, type: "text" }],
+  descriptionKey: "components.exports.json.description",
+  displayNameKey: "components.exports.json.name",
+  inputFamilies: ["tabular"],
+  kind: "export",
+  outputFamilies: [],
+  type: "export.json",
   version: "v1",
 };
