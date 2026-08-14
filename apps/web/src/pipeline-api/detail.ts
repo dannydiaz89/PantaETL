@@ -16,6 +16,8 @@ import {
 } from "@pantaetl/contracts";
 import { PipelineStateTransitionError } from "@pantaetl/pipeline";
 
+import { claimPipelineUploads } from "../uploads/pipeline-claims.js";
+
 /** Minimal authenticated identity required for owner-scoped pipeline operations. */
 export interface PipelineApiSession {
   readonly user: {
@@ -38,10 +40,14 @@ export interface PipelineDetailRouteDependencies {
   readonly getSession: (headers: Headers) => Promise<PipelineApiSession | null>;
   readonly getPipeline: typeof getPipeline;
   readonly updatePipeline: typeof updatePipeline;
+  /** Stops retention from collecting files the saved pipeline now reads. */
+  readonly claimUploads?: typeof claimPipelineUploads;
 }
 
 /** Builds authenticated owner-scoped handlers for one pipeline resource. */
 export function createPipelineDetailRouteHandlers(dependencies: PipelineDetailRouteDependencies) {
+  const claimUploads = dependencies.claimUploads ?? claimPipelineUploads;
+
   return {
     DELETE: async (input: PipelineDetailRouteInput): Promise<Response> => {
       const session = await dependencies.getSession(input.request.headers);
@@ -91,6 +97,7 @@ export function createPipelineDetailRouteHandlers(dependencies: PipelineDetailRo
         });
         if (!pipeline) return notFoundResponse();
 
+        await claimUploads(dependencies.database, session.user.id, pipeline);
         return Response.json(pipelineUpdateResponseSchema.parse(pipeline));
       } catch (error) {
         return updateErrorResponse(error);

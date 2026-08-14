@@ -11,6 +11,7 @@ import pipeline from "../../../schemas/contracts/pipeline.schema.json" with { ty
 import pipelineApi from "../../../schemas/contracts/pipeline-api.schema.json" with { type: "json" };
 import run from "../../../schemas/contracts/run.schema.json" with { type: "json" };
 import sourceExecutionRequest from "../../../schemas/contracts/source-execution-request.schema.json" with { type: "json" };
+import uploadApi from "../../../schemas/contracts/upload-api.schema.json" with { type: "json" };
 
 type JsonSchema = Parameters<typeof z.fromJSONSchema>[0];
 
@@ -51,6 +52,7 @@ export const canonicalSchemas = {
   pipelineApi,
   run,
   sourceExecutionRequest,
+  uploadApi,
 } as const;
 
 /** Return a property subschema from a canonical object schema. */

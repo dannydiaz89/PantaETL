@@ -21,10 +21,12 @@ JSON_SOURCE_METADATA = ComponentMetadata.model_validate(
         "configFields": [
             {
                 "key": "sourcePath",
-                "type": "text",
+                "type": "file",
                 "labelKey": "components.sources.json.sourcePath",
+                "descriptionKey": "components.sources.json.sourcePathDescription",
                 "required": True,
                 "secret": False,
+                "width": "full",
             },
         ],
         "inputFamilies": [],

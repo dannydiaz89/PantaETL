@@ -61,6 +61,79 @@ export async function listExpiredDatasets(
     .limit(limit);
 }
 
+/** Durable metadata describing one file staged in internal storage. */
+export interface StagedUploadRecord {
+  /** The account that supplied the file and remains accountable for it. */
+  readonly ownerUserId: string;
+  /** Where the file lives, relative to the configured storage root. */
+  readonly storageLocation: string;
+  /** Which storage backend holds the file. */
+  readonly storageKind: (typeof stagedUploads.$inferInsert)["storageKind"];
+  /** When retention may reclaim the file if no pipeline configuration has claimed it. */
+  readonly expiresAt: Date;
+}
+
+/**
+ * Records a file staged in internal storage before any pipeline references it.
+ *
+ * The explicit owner and expiry are what make the file collectable: retention
+ * never infers a cleanup candidate from a storage location or a file name, so a
+ * staged upload without this metadata would leak. The caller must have written
+ * the file already, because a row pointing at nothing is indistinguishable from
+ * one whose file was collected.
+ */
+export async function createStagedUpload(
+  db: DatabaseClient,
+  record: StagedUploadRecord,
+): Promise<{ readonly id: string }> {
+  const [created] = await db
+    .insert(stagedUploads)
+    .values({
+      ownerUserId: record.ownerUserId,
+      storageKind: record.storageKind,
+      storageLocation: record.storageLocation,
+      expiresAt: record.expiresAt,
+    })
+    .returning({ id: stagedUploads.id });
+
+  if (created === undefined) {
+    throw new Error("Staged upload metadata could not be recorded.");
+  }
+
+  return created;
+}
+
+/**
+ * Releases staged uploads that a pipeline configuration now depends on.
+ *
+ * A staged upload is a cleanup candidate purely because of its expiry, so a file
+ * that a saved pipeline reads must stop being staged or retention would delete
+ * it out from under that pipeline. Dropping the row transfers responsibility for
+ * the file to the pipeline that names it. Scoped to the owner so one account
+ * cannot release, and thereby make permanent, another account's staged file.
+ * Returns how many rows were released, which is zero when a pipeline references
+ * nothing staged.
+ */
+export async function claimStagedUploads(
+  db: DatabaseClient,
+  ownerUserId: string,
+  storageLocations: readonly string[],
+): Promise<number> {
+  if (storageLocations.length === 0) {
+    return 0;
+  }
+
+  const released = await db
+    .delete(stagedUploads)
+    .where(and(
+      eq(stagedUploads.ownerUserId, ownerUserId),
+      inArray(stagedUploads.storageLocation, [...storageLocations]),
+    ))
+    .returning({ id: stagedUploads.id });
+
+  return released.length;
+}
+
 /** Reads stale uploads whose durable expiry has elapsed before they were claimed. */
 export async function listExpiredStagedUploads(
   db: DatabaseClient,

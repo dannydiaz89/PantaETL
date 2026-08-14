@@ -8,11 +8,13 @@ displayNameKey: string
 descriptionKey: string
 configFields: {
 key: string
-type: ("text" | "textarea" | "number" | "boolean" | "select" | "json")
+type: ("text" | "textarea" | "number" | "boolean" | "select" | "json" | "file")
 labelKey: string
 descriptionKey?: string
 required: boolean
 secret: boolean
+width?: ("short" | "medium" | "full")
+defaultValue?: (string | number | boolean)
 options?: {
 value: string
 labelKey: string

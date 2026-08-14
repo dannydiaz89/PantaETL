@@ -108,6 +108,7 @@ Contracts are established only after all runtime/package boundaries exist.
 | CONTRACT-006 | Pipeline and trigger contracts | Contracts | COMPLETE | CONTRACT-002, CONTRACT-003 | Codex |
 | CONTRACT-007 | Canonical JSON Schema contracts | Contracts | COMPLETE | CONTRACT-003, CONTRACT-004, CONTRACT-005, CONTRACT-006 | Codex |
 | CONTRACT-008 | Pydantic generation proof | Contracts | COMPLETE | CONTRACT-007, APP-004 | Codex |
+| CONTRACT-009 | Config field presentation and default hints | Contracts | COMPLETE | CONTRACT-003, CONTRACT-007 | Claude |
 | PIPELINE-001 | Pipeline domain foundation | Pipeline Domain | COMPLETE | CONTRACT-006, APP-005 | Codex |
 | PIPELINE-002 | Pipeline state machine | Pipeline Domain | COMPLETE | PIPELINE-001 | Codex |
 | PIPELINE-003 | Component compatibility rules | Pipeline Domain | COMPLETE | PIPELINE-001, CONTRACT-004 | Codex |
@@ -143,6 +144,7 @@ An agent can work on the frontend while separate agents work on database, schedu
 | WEB-006 | Pipeline list/editor foundation | Web | COMPLETE | WEB-005, PIPELINE-003 | Codex |
 | WEB-007 | Runs and history UI foundation | Web | COMPLETE | WEB-005, CONTRACT-005 | Codex |
 | WEB-008 | System and settings UI foundation | Web | COMPLETE | WEB-005, OBS-002 | Codex |
+| WEB-009 | Source file upload | Web | COMPLETE | WEB-003, WEB-006, DB-004, GC-002, CONTRACT-009 | Claude |
 
 ## Track B — Database and Control-Plane Backend
 

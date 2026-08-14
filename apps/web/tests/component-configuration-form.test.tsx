@@ -51,6 +51,43 @@ describe("ComponentConfigurationForm", () => {
     expect(parseJsonConfigurationValue("not json")).toBeUndefined();
   });
 
+  it("gives each control the width its metadata declares", () => {
+    const markup = renderMetadata(presentationMetadata, {});
+
+    expect(markup).toContain("component-configuration-form__field--short");
+    expect(markup).toContain("component-configuration-form__field--full");
+  });
+
+  it("falls back to a readable width when metadata declares none", () => {
+    const markup = renderMetadata(allFieldTypesMetadata, {});
+
+    expect(markup).toContain("component-configuration-form__field--medium");
+    expect(markup).toContain("component-configuration-form__field--full");
+    expect(markup).not.toContain("component-configuration-form__field--short");
+  });
+
+  it("shows an untouched control in the state the component will execute with", () => {
+    const markup = renderMetadata(presentationMetadata, {});
+
+    expect(markup).toContain('data-state="checked"');
+    expect(markup).toContain('placeholder=","');
+  });
+
+  it("lets an explicit false override a declared true default", () => {
+    const markup = renderMetadata(presentationMetadata, { hasHeader: false });
+
+    expect(markup).toContain('data-state="unchecked"');
+    expect(markup).not.toContain('data-state="checked"');
+  });
+
+  it("offers to supply the file a declared file field names, without replacing the path", () => {
+    const markup = renderMetadata(presentationMetadata, { sourcePath: "uploads/orders.csv" });
+
+    expect(markup).toContain(en["component.form.upload.action"]);
+    expect(markup).toContain('value="uploads/orders.csv"');
+    expect(markup).toContain('type="file"');
+  });
+
   it("includes every generated capability translation key in the English catalog", () => {
     const metadataKeys = builtInComponentCapabilities.flatMap((component) => [
       component.displayNameKey,
@@ -67,6 +104,53 @@ describe("ComponentConfigurationForm", () => {
     }
   });
 });
+
+/** Renders one metadata document with the locale provider the controls expect. */
+function renderMetadata(metadata: ComponentMetadata, values: Record<string, string | number | boolean>): string {
+  return renderToStaticMarkup(
+    <LocaleProvider>
+      <ComponentConfigurationForm metadata={metadata} onChange={() => undefined} values={values} />
+    </LocaleProvider>,
+  );
+}
+
+const presentationMetadata: ComponentMetadata = {
+  configFields: [
+    {
+      key: "sourcePath",
+      labelKey: "components.sources.csv.sourcePath",
+      required: true,
+      secret: false,
+      type: "file",
+      width: "full",
+    },
+    {
+      defaultValue: true,
+      key: "hasHeader",
+      labelKey: "components.sources.csv.hasHeader",
+      required: false,
+      secret: false,
+      type: "boolean",
+      width: "full",
+    },
+    {
+      defaultValue: ",",
+      key: "separator",
+      labelKey: "components.sources.csv.separator",
+      required: false,
+      secret: false,
+      type: "text",
+      width: "short",
+    },
+  ],
+  descriptionKey: "components.sources.csv.description",
+  displayNameKey: "components.sources.csv.name",
+  inputFamilies: [],
+  kind: "source",
+  outputFamilies: ["tabular"],
+  type: "source.presentation-test",
+  version: "v1",
+};
 
 const allFieldTypesMetadata: ComponentMetadata = {
   configFields: [

@@ -2,11 +2,13 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.exports.csv.fileNameDescription",
         "key": "fileName",
         "labelKey": "components.exports.csv.fileName",
         "required": true,
         "secret": false,
-        "type": "text"
+        "type": "text",
+        "width": "medium"
       }
     ],
     "descriptionKey": "components.exports.csv.description",
@@ -106,25 +108,33 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.sources.csv.sourcePathDescription",
         "key": "sourcePath",
         "labelKey": "components.sources.csv.sourcePath",
         "required": true,
         "secret": false,
-        "type": "text"
+        "type": "file",
+        "width": "full"
       },
       {
+        "defaultValue": true,
+        "descriptionKey": "components.sources.csv.hasHeaderDescription",
         "key": "hasHeader",
         "labelKey": "components.sources.csv.hasHeader",
         "required": false,
         "secret": false,
-        "type": "boolean"
+        "type": "boolean",
+        "width": "full"
       },
       {
+        "defaultValue": ",",
+        "descriptionKey": "components.sources.csv.separatorDescription",
         "key": "separator",
         "labelKey": "components.sources.csv.separator",
         "required": false,
         "secret": false,
-        "type": "text"
+        "type": "text",
+        "width": "short"
       }
     ],
     "descriptionKey": "components.sources.csv.description",
@@ -140,11 +150,13 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.sources.json.sourcePathDescription",
         "key": "sourcePath",
         "labelKey": "components.sources.json.sourcePath",
         "required": true,
         "secret": false,
-        "type": "text"
+        "type": "file",
+        "width": "full"
       }
     ],
     "descriptionKey": "components.sources.json.description",
@@ -305,25 +317,32 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.sources.xlsx.sourcePathDescription",
         "key": "sourcePath",
         "labelKey": "components.sources.xlsx.sourcePath",
         "required": true,
         "secret": false,
-        "type": "text"
+        "type": "file",
+        "width": "full"
       },
       {
+        "descriptionKey": "components.sources.xlsx.sheetNameDescription",
         "key": "sheetName",
         "labelKey": "components.sources.xlsx.sheetName",
         "required": false,
         "secret": false,
-        "type": "text"
+        "type": "text",
+        "width": "medium"
       },
       {
+        "defaultValue": true,
+        "descriptionKey": "components.sources.xlsx.hasHeaderDescription",
         "key": "hasHeader",
         "labelKey": "components.sources.xlsx.hasHeader",
         "required": false,
         "secret": false,
-        "type": "boolean"
+        "type": "boolean",
+        "width": "full"
       }
     ],
     "descriptionKey": "components.sources.xlsx.description",

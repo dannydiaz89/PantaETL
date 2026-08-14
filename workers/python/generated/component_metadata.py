@@ -22,6 +22,13 @@ class Type(StrEnum):
     boolean = "boolean"
     select = "select"
     json = "json"
+    file = "file"
+
+
+class Width(StrEnum):
+    short = "short"
+    medium = "medium"
+    full = "full"
 
 
 class Option(BaseModel):
@@ -42,6 +49,8 @@ class ConfigField(BaseModel):
     descriptionKey: Annotated[str | None, Field(min_length=1)] = None
     required: bool
     secret: bool
+    width: Width | None = None
+    defaultValue: str | float | bool | None = None
     options: list[Option] | None = None
 
 

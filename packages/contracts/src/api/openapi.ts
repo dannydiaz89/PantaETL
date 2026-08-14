@@ -83,6 +83,7 @@ export function createOpenApiDocument(): OpenApiDocument {
         PipelineUpdateResponse: pipelineApiComponent("pipelineUpdateResponse"),
         Run: canonicalSchemas.run,
         SourceExecutionRequest: canonicalSchemas.sourceExecutionRequest,
+        SourceUploadResponse: uploadApiComponent("sourceUploadResponse"),
       },
       parameters: {
         ComponentKindQuery: {
@@ -276,6 +277,35 @@ export function createOpenApiDocument(): OpenApiDocument {
           tags: ["pipelines"],
         },
       },
+      "/api/uploads": {
+        post: {
+          operationId: "uploadSourceFile",
+          requestBody: {
+            content: {
+              "multipart/form-data": {
+                schema: {
+                  properties: {
+                    file: { contentMediaType: "application/octet-stream", type: "string" },
+                  },
+                  required: ["file"],
+                  type: "object",
+                },
+              },
+            },
+            required: true,
+          },
+          responses: {
+            201: jsonResponse("Where the staged file can be read from.", "SourceUploadResponse"),
+            400: { description: "The upload request carries no usable file." },
+            401: unauthenticatedResponse(),
+            413: { description: "The file exceeds the accepted upload size." },
+            415: { description: "No built-in Source can read this file type." },
+          },
+          security: [sessionSecurityRequirement],
+          summary: "Stage a file for a file-backed Source",
+          tags: ["uploads"],
+        },
+      },
     },
     servers: [{ url: "/" }],
   };
@@ -302,6 +332,11 @@ function pipelineStateActionPath(operationId: string, summary: string): unknown 
       tags: ["pipelines"],
     },
   };
+}
+
+/** Resolve one canonical source upload API definition. */
+function uploadApiComponent(definitionName: string): unknown {
+  return definitionSchema(canonicalSchemas.uploadApi, definitionName);
 }
 
 /** Reference a canonical component for a JSON request body. */

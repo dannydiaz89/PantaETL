@@ -224,18 +224,20 @@ export function PipelineBuilderWizard({
         </div>
       </div>
 
-      <Field label={t("pipeline.name")} description={t("pipeline.nameDescription")} required>
-        {({ describedBy, id, invalid }) => (
-          <Input
-            aria-describedby={describedBy}
-            aria-invalid={invalid}
-            id={id}
-            onChange={(event) => changeName(event.target.value)}
-            required
-            value={draft.name}
-          />
-        )}
-      </Field>
+      <div className="pipeline-builder__name">
+        <Field label={t("pipeline.name")} description={t("pipeline.nameDescription")} required>
+          {({ describedBy, id, invalid }) => (
+            <Input
+              aria-describedby={describedBy}
+              aria-invalid={invalid}
+              id={id}
+              onChange={(event) => changeName(event.target.value)}
+              required
+              value={draft.name}
+            />
+          )}
+        </Field>
+      </div>
 
       <ol aria-label={t("pipeline.builder.progressLabel")} className="pipeline-builder__steps">
         {PIPELINE_BUILDER_STEPS.map((candidate, index) => {

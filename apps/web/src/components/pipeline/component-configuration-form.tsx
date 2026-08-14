@@ -5,6 +5,7 @@ import { Checkbox, Field, Input, Select, Textarea } from "@pantaetl/ui";
 
 import { useI18n } from "../../locale-provider.js";
 import type { TranslationKey } from "../../locales/en.js";
+import { ComponentSourceFileField } from "./component-source-file-field.js";
 
 type ConfigurationValues = ComponentConfiguration["values"];
 type ConfigurationValue = ConfigurationValues[string];
@@ -45,18 +46,36 @@ export function ComponentConfigurationForm({
   return (
     <div className="component-configuration-form">
       {metadata.configFields.filter((field) => !field.secret).map((field) => (
-        <ConfigurationField
-          disabled={disabled}
-          error={errors[field.key]}
-          field={field}
+        <div
+          className={`component-configuration-form__field component-configuration-form__field--${configFieldWidth(field)}`}
           key={field.key}
-          onChange={(value) => updateValue(field.key, value)}
-          t={t}
-          value={visibleValues[field.key]}
-        />
+        >
+          <ConfigurationField
+            disabled={disabled}
+            error={errors[field.key]}
+            field={field}
+            onChange={(value) => updateValue(field.key, value)}
+            t={t}
+            value={visibleValues[field.key]}
+          />
+        </div>
       ))}
     </div>
   );
+}
+
+/**
+ * Resolves how much horizontal room one control should occupy.
+ *
+ * A component may declare the width its value actually needs, so a
+ * single-character separator does not claim as much room as a file path.
+ * Without a declaration the control type is the only honest signal, so
+ * free-form multi-line values take a full row and everything else takes a
+ * readable single-line width.
+ */
+function configFieldWidth(field: ConfigField): "short" | "medium" | "full" {
+  if (field.width !== undefined) return field.width;
+  return field.type === "textarea" || field.type === "json" ? "full" : "medium";
 }
 
 /** Render one supported metadata field type through the shared design-system controls. */
@@ -83,7 +102,7 @@ function ConfigurationField({
   if (field.type === "boolean") {
     return (
       <Checkbox
-        checked={value === true}
+        checked={value === undefined ? field.defaultValue === true : value === true}
         description={description}
         disabled={disabled}
         label={label}
@@ -147,6 +166,7 @@ function renderFieldControl({
             const parsed = Number(nextValue);
             if (Number.isFinite(parsed)) onChange(parsed);
           }}
+          placeholder={unsetValuePlaceholder(field)}
           required={field.required}
           type="number"
           value={typeof value === "number" ? value : ""}
@@ -164,7 +184,7 @@ function renderFieldControl({
             label: translateMetadataKey(t, option.labelKey),
             value: option.value,
           }))}
-          placeholder={t("component.form.selectPlaceholder")}
+          placeholder={defaultOptionLabel(field, t) ?? t("component.form.selectPlaceholder")}
           value={typeof value === "string" ? value : undefined}
         />
       );
@@ -189,6 +209,20 @@ function renderFieldControl({
           disabled={disabled}
           id={id}
           onChange={(event) => onChange(optionalStringValue(event.target.value))}
+          placeholder={unsetValuePlaceholder(field)}
+          required={field.required}
+          value={typeof value === "string" ? value : ""}
+        />
+      );
+    case "file":
+      return (
+        <ComponentSourceFileField
+          describedBy={describedBy}
+          disabled={disabled}
+          id={id}
+          invalid={invalid}
+          onChange={(nextValue) => onChange(nextValue)}
+          placeholder={unsetValuePlaceholder(field)}
           required={field.required}
           value={typeof value === "string" ? value : ""}
         />
@@ -201,11 +235,30 @@ function renderFieldControl({
           disabled={disabled}
           id={id}
           onChange={(event) => onChange(optionalStringValue(event.target.value))}
+          placeholder={unsetValuePlaceholder(field)}
           required={field.required}
           value={typeof value === "string" ? value : ""}
         />
       );
   }
+}
+
+/**
+ * Shows the value an empty control will actually execute with.
+ *
+ * A declared default is applied by the executing component when the operator
+ * leaves the field alone, so surfacing it as placeholder text keeps the form
+ * from implying that an untouched field does nothing. Returns undefined when a
+ * component declares no default, leaving the control genuinely empty.
+ */
+function unsetValuePlaceholder(field: ConfigField): string | undefined {
+  return field.defaultValue === undefined ? undefined : String(field.defaultValue);
+}
+
+/** Names the option a select falls back to, so its resting state is not blank when a default exists. */
+function defaultOptionLabel(field: ConfigField, t: (key: TranslationKey) => string): string | undefined {
+  const defaultOption = (field.options ?? []).find((option) => option.value === field.defaultValue);
+  return defaultOption === undefined ? undefined : translateMetadataKey(t, defaultOption.labelKey);
 }
 
 /** Keeps unparsed JSON input local until it is valid enough to enter portable configuration values. */

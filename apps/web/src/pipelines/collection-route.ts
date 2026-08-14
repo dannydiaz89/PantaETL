@@ -12,6 +12,8 @@ import {
   type DatabaseClient,
 } from "@pantaetl/database";
 
+import { claimPipelineUploads } from "../uploads/pipeline-claims.js";
+
 /** Minimal authenticated identity required by the pipeline collection routes. */
 export interface PipelineCollectionSession {
   readonly user: {
@@ -29,6 +31,8 @@ export interface PipelineCollectionRouteDependencies {
   readonly listPipelinesByOwner: typeof listPipelinesByOwner;
   /** Shared control-plane database connection. */
   readonly database: DatabaseClient;
+  /** Stops retention from collecting files the saved pipeline now reads. */
+  readonly claimUploads?: typeof claimPipelineUploads;
 }
 
 /** Request context required by the collection route's server handlers. */
@@ -38,6 +42,8 @@ export interface PipelineCollectionRouteContext {
 
 /** Builds authenticated GET and POST handlers for the pipeline collection resource. */
 export function createPipelineCollectionRouteHandlers(dependencies: PipelineCollectionRouteDependencies) {
+  const claimUploads = dependencies.claimUploads ?? claimPipelineUploads;
+
   return {
     /** Returns every pipeline owned by the authenticated user. */
     GET: async ({ request }: PipelineCollectionRouteContext): Promise<Response> => {
@@ -69,6 +75,7 @@ export function createPipelineCollectionRouteHandlers(dependencies: PipelineColl
           ownerUserId: session.user.id,
           pipeline: parsedRequest.data as PipelineCreateRequest,
         });
+        await claimUploads(dependencies.database, session.user.id, created);
         const response = pipelineCreateResponseSchema.parse(created);
         return Response.json(response, { headers: { "cache-control": "no-store" }, status: 201 });
       } catch (error) {

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Canonical control-plane API contract definitions for files staged for file-backed Sources.",
+  "$id": "https://pantaetl.dev/schemas/upload-api.schema.json",
+  "title": "SourceUploadApiContracts",
+  "type": "object",
+  "properties": {
+    "sourceUploadResponse": { "$ref": "#/$defs/sourceUploadResponse" }
+  },
+  "required": [
+    "sourceUploadResponse"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "sourceUploadResponse": {
+      "$comment": "Describes where an accepted file came to rest and how long it survives unclaimed.",
+      "type": "object",
+      "properties": {
+        "sourcePath": {
+          "$comment": "The value a file-backed Source resolves, relative to the import directory.",
+          "type": "string",
+          "minLength": 1
+        },
+        "fileName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "byteSize": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expiresAt": {
+          "$comment": "When retention reclaims the file if no pipeline configuration has claimed it.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "sourcePath",
+        "fileName",
+        "byteSize",
+        "expiresAt"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

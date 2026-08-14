@@ -23,8 +23,10 @@ CSV_ARTIFACT_EXPORT_METADATA = ComponentMetadata.model_validate(
                 "key": "fileName",
                 "type": "text",
                 "labelKey": "components.exports.csv.fileName",
+                "descriptionKey": "components.exports.csv.fileNameDescription",
                 "required": True,
                 "secret": False,
+                "width": "medium",
             }
         ],
         "inputFamilies": ["tabular"],

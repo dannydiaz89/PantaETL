@@ -38,6 +38,7 @@
             "pattern": "^[a-z][a-zA-Z0-9_]*$"
           },
           "type": {
+            "$comment": "A file field holds the same relative path text as a text field; the control additionally offers to supply the file.",
             "type": "string",
             "enum": [
               "text",
@@ -45,7 +46,8 @@
               "number",
               "boolean",
               "select",
-              "json"
+              "json",
+              "file"
             ]
           },
           "labelKey": {
@@ -61,6 +63,29 @@
           },
           "secret": {
             "type": "boolean"
+          },
+          "width": {
+            "$comment": "How much horizontal room the value needs, so a renderer need not guess from the control type.",
+            "type": "string",
+            "enum": [
+              "short",
+              "medium",
+              "full"
+            ]
+          },
+          "defaultValue": {
+            "$comment": "The value the executing component applies when the field is left unset. Renderers show it so the form never contradicts execution.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
           },
           "options": {
             "type": "array",

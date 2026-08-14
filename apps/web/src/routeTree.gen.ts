@@ -24,6 +24,7 @@ import { Route as ApiDocsRouteImport } from './routes/api/docs'
 import { Route as ApiOpenapiDotjsonRouteImport } from './routes/api/openapi[.]json'
 import { Route as ApiPipelinesRouteImport } from './routes/api/pipelines'
 import { Route as ApiTokensRouteImport } from './routes/api/tokens'
+import { Route as ApiUploadsRouteImport } from './routes/api/uploads'
 import { Route as PipelinesNewRouteImport } from './routes/pipelines_.new'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPipelinesPipelineIdRouteImport } from './routes/api/pipelines/$pipelineId'
@@ -110,6 +111,11 @@ const ApiTokensRoute = ApiTokensRouteImport.update({
   path: '/api/tokens',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUploadsRoute = ApiUploadsRouteImport.update({
+  id: '/api/uploads',
+  path: '/api/uploads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PipelinesNewRoute = PipelinesNewRouteImport.update({
   id: '/pipelines_/new',
   path: '/pipelines/new',
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
   '/api/pipelines': typeof ApiPipelinesRouteWithChildren
   '/api/tokens': typeof ApiTokensRouteWithChildren
+  '/api/uploads': typeof ApiUploadsRoute
   '/pipelines/new': typeof PipelinesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRouteWithChildren
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
   '/api/pipelines': typeof ApiPipelinesRouteWithChildren
   '/api/tokens': typeof ApiTokensRouteWithChildren
+  '/api/uploads': typeof ApiUploadsRoute
   '/pipelines/new': typeof PipelinesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRouteWithChildren
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/api/openapi.json': typeof ApiOpenapiDotjsonRoute
   '/api/pipelines': typeof ApiPipelinesRouteWithChildren
   '/api/tokens': typeof ApiTokensRouteWithChildren
+  '/api/uploads': typeof ApiUploadsRoute
   '/pipelines_/new': typeof PipelinesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/pipelines/$pipelineId': typeof ApiPipelinesPipelineIdRouteWithChildren
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/api/openapi.json'
     | '/api/pipelines'
     | '/api/tokens'
+    | '/api/uploads'
     | '/pipelines/new'
     | '/api/auth/$'
     | '/api/pipelines/$pipelineId'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/api/openapi.json'
     | '/api/pipelines'
     | '/api/tokens'
+    | '/api/uploads'
     | '/pipelines/new'
     | '/api/auth/$'
     | '/api/pipelines/$pipelineId'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/api/openapi.json'
     | '/api/pipelines'
     | '/api/tokens'
+    | '/api/uploads'
     | '/pipelines_/new'
     | '/api/auth/$'
     | '/api/pipelines/$pipelineId'
@@ -348,6 +360,7 @@ export interface RootRouteChildren {
   ApiOpenapiDotjsonRoute: typeof ApiOpenapiDotjsonRoute
   ApiPipelinesRoute: typeof ApiPipelinesRouteWithChildren
   ApiTokensRoute: typeof ApiTokensRouteWithChildren
+  ApiUploadsRoute: typeof ApiUploadsRoute
   PipelinesNewRoute: typeof PipelinesNewRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiSystemHealthRoute: typeof ApiSystemHealthRoute
@@ -458,6 +471,13 @@ declare module '@tanstack/react-router' {
       path: '/api/tokens'
       fullPath: '/api/tokens'
       preLoaderRoute: typeof ApiTokensRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/uploads': {
+      id: '/api/uploads'
+      path: '/api/uploads'
+      fullPath: '/api/uploads'
+      preLoaderRoute: typeof ApiUploadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pipelines_/new': {
@@ -596,6 +616,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiOpenapiDotjsonRoute: ApiOpenapiDotjsonRoute,
   ApiPipelinesRoute: ApiPipelinesRouteWithChildren,
   ApiTokensRoute: ApiTokensRouteWithChildren,
+  ApiUploadsRoute: ApiUploadsRoute,
   PipelinesNewRoute: PipelinesNewRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiSystemHealthRoute: ApiSystemHealthRoute,

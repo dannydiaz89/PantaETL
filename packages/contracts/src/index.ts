@@ -29,6 +29,7 @@ export {
   pipelineStateActionResponseSchema,
   pipelineUpdateRequestSchema,
   pipelineUpdateResponseSchema,
+  sourceUploadResponseSchema,
 } from "./api/index.js";
 export type {
   ComponentCapabilityListRequest,
@@ -51,6 +52,7 @@ export type {
   PipelineStateActionResponse,
   PipelineUpdateRequest,
   PipelineUpdateResponse,
+  SourceUploadResponse,
   WritablePipelineTrigger,
 } from "./api/index.js";
 

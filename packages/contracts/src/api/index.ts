@@ -31,6 +31,8 @@ export {
   pipelineUpdateRequestSchema,
   pipelineUpdateResponseSchema,
 } from "./pipelines.js";
+export { sourceUploadResponseSchema } from "./uploads.js";
+export type { SourceUploadResponse } from "./uploads.js";
 export type {
   PipelineCreateRequest,
   PipelineCreateResponse,
