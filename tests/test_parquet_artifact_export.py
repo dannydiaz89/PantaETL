@@ -1,6 +1,6 @@
 """Tests for streaming Parquet artifact publication."""
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
 
@@ -40,7 +40,7 @@ def _dataset(storage: LocalDatasetStorage) -> DatasetDescriptor:
             pipeline_id=PIPELINE_ID,
             run_id=RUN_ID,
             step_id=STEP_ID,
-            expires_at=datetime(2026, 8, 14, tzinfo=UTC),
+            expires_at=datetime.now(UTC) + timedelta(days=1),
         ),
     )
 
