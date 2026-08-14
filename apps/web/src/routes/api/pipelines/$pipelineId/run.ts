@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { getActiveRunForPipeline, getPipeline } from "@pantaetl/database";
 
-import { auth, controlPlaneDatabase } from "../../../../auth/server.js";
+import { controlPlaneDatabase } from "../../../../auth/server.js";
+import { getApiSession } from "../../../../auth/api-session.js";
 import { createPipelineActionRouteHandlers } from "../../../../pipeline-api/actions.js";
 import { enqueuePipelineRun, loadPipelineSchedulerConfig } from "../../../../pipeline-api/scheduler.js";
 
@@ -16,7 +17,7 @@ const handlers = createPipelineActionRouteHandlers({
   enqueuePipelineRun: (input) => enqueuePipelineRun(schedulerConfig, input),
   getActiveRunForPipeline,
   getPipeline,
-  getSession: (headers) => auth.api.getSession({ headers }),
+  getSession: (headers) => getApiSession(headers),
 });
 
 /** Enqueues one authenticated owner's enabled pipeline through the scheduler service. */

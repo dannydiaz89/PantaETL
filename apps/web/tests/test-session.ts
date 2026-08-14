@@ -59,6 +59,12 @@ function createAuth(database: ReturnType<typeof createDatabaseConnection>["db"],
   });
 }
 
+/** Options for shaping a throwaway account to match the state under test. */
+export interface TestUserOptions {
+  /** Marks the account as still holding first-run credentials it must replace. */
+  readonly requiresPasswordChange?: boolean;
+}
+
 /**
  * Creates a throwaway local user directly in the database.
  *
@@ -66,7 +72,7 @@ function createAuth(database: ReturnType<typeof createDatabaseConnection>["db"],
  * out of any form, while still producing an account the real authentication library
  * will accept.
  */
-export async function createTestUser(): Promise<TestUser> {
+export async function createTestUser(options: TestUserOptions = {}): Promise<TestUser> {
   const connection = createDatabaseConnection(TEST_DATABASE_URL);
   try {
     const email = `e2e-${randomUUID()}@pantaetl.test`;
@@ -74,6 +80,7 @@ export async function createTestUser(): Promise<TestUser> {
     const [user] = await connection.db.insert(users).values({
       email,
       emailVerified: true,
+      requiresPasswordChange: options.requiresPasswordChange ?? false,
       username: `e2e-${randomUUID().slice(0, 8)}`,
     }).returning({ id: users.id });
     if (user === undefined) {

@@ -4,10 +4,12 @@ import { useState } from "react";
 import { Button, Field, Input } from "@pantaetl/ui";
 
 import { authClient } from "../auth/client.js";
+import { ensureDeploymentSeeded } from "../auth/deployment-setup.js";
 import { useI18n } from "../locale-provider.js";
 
 /** Guest route reserved for the local password sign-in form. */
 export const Route = createFileRoute("/login")({
+  beforeLoad: () => ensureDeploymentSeeded(),
   component: Login,
   validateSearch: (search: Record<string, unknown>): { readonly returnTo?: string } => (
     typeof search.returnTo === "string" && search.returnTo.startsWith("/") && !search.returnTo.startsWith("//")

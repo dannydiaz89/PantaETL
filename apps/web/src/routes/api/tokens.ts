@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { createApiToken, listApiTokens, parseApiTokenName } from "../../auth/api-token.js";
-import { auth, controlPlaneDatabase } from "../../auth/server.js";
+import { controlPlaneDatabase } from "../../auth/server.js";
+import { getApiSession } from "../../auth/api-session.js";
 
 /** Lists and creates credentials for the currently signed-in control-plane user. */
 export const Route = createFileRoute("/api/tokens")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const session = await auth.api.getSession({ headers: request.headers });
+        const session = await getApiSession(request.headers);
         if (session === null) {
           return new Response(null, { status: 401 });
         }
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/api/tokens")({
         return Response.json({ tokens: await listApiTokens(controlPlaneDatabase, session.user.id) });
       },
       POST: async ({ request }) => {
-        const session = await auth.api.getSession({ headers: request.headers });
+        const session = await getApiSession(request.headers);
         if (session === null) {
           return new Response(null, { status: 401 });
         }

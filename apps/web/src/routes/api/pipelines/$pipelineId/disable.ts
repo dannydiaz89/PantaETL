@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { disablePipelineForOwner, enablePipelineForOwner, getActiveRunForPipeline, getPipeline } from "@pantaetl/database";
 
-import { auth, controlPlaneDatabase } from "../../../../auth/server.js";
+import { controlPlaneDatabase } from "../../../../auth/server.js";
+import { getApiSession } from "../../../../auth/api-session.js";
 import { createPipelineActionRouteHandlers } from "../../../../pipeline-api/actions.js";
 
 const handlers = createPipelineActionRouteHandlers({
@@ -14,7 +15,7 @@ const handlers = createPipelineActionRouteHandlers({
   enqueuePipelineRun: async () => { throw new Error("Run action is not available from this route."); },
   getActiveRunForPipeline,
   getPipeline,
-  getSession: (headers) => auth.api.getSession({ headers }),
+  getSession: (headers) => getApiSession(headers),
 });
 
 /** Disables one authenticated owner's idle pipeline after its state transition is validated. */

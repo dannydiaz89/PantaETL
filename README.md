@@ -97,6 +97,34 @@ only on `127.0.0.1:5432`, matching the example `DATABASE_URL`. Press `Ctrl+C` to
 stop the local services while keeping PostgreSQL data available. Use these
 companion commands when needed:
 
+### Signing in for the first time
+
+A deployment with no accounts seeds one administrator the first time the sign-in
+page is served, so a new installation — or an existing one pointed at a fresh or
+restored database — is reachable without running anything:
+
+| Email | Password |
+| --- | --- |
+| `admin@admin.com` | `changeme` |
+
+Signing in with those credentials leads straight to a screen that replaces both.
+Until that is done the account can reach only that screen, and the API rejects it,
+so the published password cannot be used to operate a deployment. Self-registration
+is disabled, so this is the only route to a first account.
+
+To seed a different identity, run the command below before first sign-in, or use it
+to check the current state at any time:
+
+```bash
+PANTAETL_ADMIN_EMAIL=you@example.com PANTAETL_ADMIN_USERNAME=you pnpm --filter web admin:bootstrap
+```
+
+If an administrator is ever locked out, issue a fresh one-time password with:
+
+```bash
+PANTAETL_ADMIN_EMAIL=you@example.com pnpm --filter web admin:reset-password
+```
+
 ```bash
 pnpm stack:status
 pnpm stack:reset # deletes local Compose volumes, then starts a fresh stack

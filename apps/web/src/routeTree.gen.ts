@@ -17,6 +17,7 @@ import { Route as RunsRouteImport } from './routes/runs'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as UsersRouteImport } from './routes/users'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ApiAuthenticationRouteImport } from './routes/api/authentication'
 import { Route as ApiComponentsRouteImport } from './routes/api/components'
 import { Route as ApiDocsRouteImport } from './routes/api/docs'
@@ -72,6 +73,11 @@ const SystemRoute = SystemRouteImport.update({
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthenticationRoute = ApiAuthenticationRouteImport.update({
@@ -169,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/system': typeof SystemRoute
   '/users': typeof UsersRoute
+  '/welcome': typeof WelcomeRoute
   '/api/authentication': typeof ApiAuthenticationRoute
   '/api/components': typeof ApiComponentsRoute
   '/api/docs': typeof ApiDocsRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/system': typeof SystemRoute
   '/users': typeof UsersRoute
+  '/welcome': typeof WelcomeRoute
   '/api/authentication': typeof ApiAuthenticationRoute
   '/api/components': typeof ApiComponentsRoute
   '/api/docs': typeof ApiDocsRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/system': typeof SystemRoute
   '/users': typeof UsersRoute
+  '/welcome': typeof WelcomeRoute
   '/api/authentication': typeof ApiAuthenticationRoute
   '/api/components': typeof ApiComponentsRoute
   '/api/docs': typeof ApiDocsRoute
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/system'
     | '/users'
+    | '/welcome'
     | '/api/authentication'
     | '/api/components'
     | '/api/docs'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/system'
     | '/users'
+    | '/welcome'
     | '/api/authentication'
     | '/api/components'
     | '/api/docs'
@@ -302,6 +313,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/system'
     | '/users'
+    | '/welcome'
     | '/api/authentication'
     | '/api/components'
     | '/api/docs'
@@ -329,6 +341,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   SystemRoute: typeof SystemRoute
   UsersRoute: typeof UsersRoute
+  WelcomeRoute: typeof WelcomeRoute
   ApiAuthenticationRoute: typeof ApiAuthenticationRoute
   ApiComponentsRoute: typeof ApiComponentsRoute
   ApiDocsRoute: typeof ApiDocsRoute
@@ -396,6 +409,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/authentication': {
@@ -569,6 +589,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   SystemRoute: SystemRoute,
   UsersRoute: UsersRoute,
+  WelcomeRoute: WelcomeRoute,
   ApiAuthenticationRoute: ApiAuthenticationRoute,
   ApiComponentsRoute: ApiComponentsRoute,
   ApiDocsRoute: ApiDocsRoute,
