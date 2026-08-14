@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { ComponentConfiguration, ComponentMetadata } from "@pantaetl/contracts";
+import type { ComponentConfiguration, ComponentMetadata, Pipeline, PipelineCreateRequest, PipelineUpdateRequest } from "@pantaetl/contracts";
 import { Button, Check, Field, Icon, Input } from "@pantaetl/ui";
 
 import { useI18n } from "../../locale-provider.js";
@@ -10,6 +10,7 @@ import {
   addPipelineBuilderTransform,
   createEmptyPipelineBuilderDraft,
   isPipelineBuilderDraftComplete,
+  markPipelineBuilderDraftSaved,
   movePipelineBuilderTransform,
   nextPipelineBuilderStep,
   PIPELINE_BUILDER_STEPS,
@@ -24,6 +25,11 @@ import {
   type PipelineBuilderDraft,
   type PipelineBuilderStep,
 } from "./pipeline-builder-draft.js";
+import {
+  createPipelineCreateRequestFromDraft,
+  createPipelineUpdateRequestFromDraft,
+  isPipelineBuilderDraftPersistable,
+} from "./pipeline-builder-persistence.js";
 import { PipelineBuilderTransformsStep } from "./pipeline-builder-transforms-step.js";
 
 type StepStatus = "completed" | "current" | "upcoming";
@@ -56,10 +62,20 @@ const STEP_STATUS_KEYS: Readonly<Record<StepStatus, TranslationKey>> = {
 export interface PipelineBuilderWizardProps {
   /** Seeds the wizard with an existing draft, for example when resuming a saved draft. */
   readonly initialDraft?: PipelineBuilderDraft;
+  /** The id of a pipeline already saved from a previous session of this wizard, if any. */
+  readonly initialPipelineId?: string;
   /** Seeds the wizard at a specific stage instead of the first stage. */
   readonly initialStep?: PipelineBuilderStep;
+  /** True while a save requested through `onCreate`/`onUpdate` is in flight. */
+  readonly isSaving?: boolean;
+  /** Persists a draft that has never been saved before; resolves with the created pipeline. */
+  readonly onCreate?: (request: PipelineCreateRequest) => Promise<Pipeline>;
   /** Notified whenever the local draft changes, for callers that persist or preview it. */
   readonly onDraftChange?: (draft: PipelineBuilderDraft) => void;
+  /** Persists changes to a pipeline this wizard has already saved; resolves with the updated pipeline. */
+  readonly onUpdate?: (pipelineId: string, request: PipelineUpdateRequest) => Promise<Pipeline>;
+  /** Localized explanation shown when the most recent save attempt failed. */
+  readonly saveErrorMessage?: string;
 }
 
 /**
@@ -67,15 +83,45 @@ export interface PipelineBuilderWizardProps {
  *
  * Owns the local in-progress draft and step navigation. Each stage selects
  * and configures components from the capability catalog; the final stage
- * replaces Next with a readiness status once there is no further step.
+ * replaces Next with a readiness status once there is no further step. A
+ * draft can be saved as soon as the canonical contract can represent it
+ * (a name and at least one component), even if it is not yet complete;
+ * the first successful save creates the pipeline, and later saves update it.
  */
-export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange }: PipelineBuilderWizardProps) {
+export function PipelineBuilderWizard({
+  initialDraft,
+  initialPipelineId,
+  initialStep,
+  isSaving = false,
+  onCreate,
+  onDraftChange,
+  onUpdate,
+  saveErrorMessage,
+}: PipelineBuilderWizardProps) {
   const { t } = useI18n();
   const [draft, setDraft] = useState<PipelineBuilderDraft>(() => initialDraft ?? createEmptyPipelineBuilderDraft());
   const [step, setStep] = useState<PipelineBuilderStep>(initialStep ?? PIPELINE_BUILDER_STEPS[0]);
+  const [pipelineId, setPipelineId] = useState<string | undefined>(initialPipelineId);
   const currentIndex = PIPELINE_BUILDER_STEPS.indexOf(step);
   const nextStep = nextPipelineBuilderStep(step);
   const previousStep = previousPipelineBuilderStep(step);
+  const canSave = isPipelineBuilderDraftPersistable(draft) && (pipelineId === undefined ? onCreate : onUpdate) !== undefined;
+
+  async function save(): Promise<void> {
+    if (!canSave || isSaving) return;
+
+    try {
+      const pipeline = pipelineId === undefined
+        ? await onCreate?.(createPipelineCreateRequestFromDraft(draft))
+        : await onUpdate?.(pipelineId, createPipelineUpdateRequestFromDraft(draft));
+      if (pipeline === undefined) return;
+
+      setPipelineId(pipeline.id);
+      setDraft(markPipelineBuilderDraftSaved);
+    } catch {
+      // The caller surfaces the failure through `saveErrorMessage`; the draft is left untouched so no input is lost.
+    }
+  }
 
   function changeName(name: string): void {
     setDraft((current) => {
@@ -225,19 +271,30 @@ export function PipelineBuilderWizard({ initialDraft, initialStep, onDraftChange
         ) : null}
       </div>
 
+      {saveErrorMessage === undefined ? null : (
+        <p className="pipeline-builder__save-error" role="alert">{saveErrorMessage}</p>
+      )}
+
       <div className="pipeline-builder__actions">
-        {previousStep === undefined ? null : (
-          <Button onClick={() => setStep(previousStep)} type="button" variant="secondary">
-            {t("pipeline.builder.back")}
-          </Button>
-        )}
-        {nextStep === undefined ? (
-          <p aria-live="polite" className="pipeline-builder__readiness" role="status">
-            {t(isPipelineBuilderDraftComplete(draft) ? "pipeline.builder.readiness.complete" : "pipeline.builder.readiness.incomplete")}
-          </p>
-        ) : (
-          <Button onClick={() => setStep(nextStep)} type="button">
-            {t("pipeline.builder.next")}
+        <div className="pipeline-builder__actions-nav">
+          {previousStep === undefined ? null : (
+            <Button onClick={() => setStep(previousStep)} type="button" variant="secondary">
+              {t("pipeline.builder.back")}
+            </Button>
+          )}
+          {nextStep === undefined ? (
+            <p aria-live="polite" className="pipeline-builder__readiness" role="status">
+              {t(isPipelineBuilderDraftComplete(draft) ? "pipeline.builder.readiness.complete" : "pipeline.builder.readiness.incomplete")}
+            </p>
+          ) : (
+            <Button onClick={() => setStep(nextStep)} type="button">
+              {t("pipeline.builder.next")}
+            </Button>
+          )}
+        </div>
+        {onCreate === undefined && onUpdate === undefined ? null : (
+          <Button disabled={!canSave || isSaving} onClick={() => void save()} type="button" variant="secondary">
+            {isSaving ? t("pipeline.builder.saving") : t("pipeline.builder.save")}
           </Button>
         )}
       </div>

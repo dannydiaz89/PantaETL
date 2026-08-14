@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { AppShell } from "../components/app-shell.js";
-import { PipelineBuilderWizard } from "../components/pipeline/pipeline-builder-wizard.js";
+import { PipelineBuilderPage } from "../components/pipeline-builder-page.js";
 
 export const Route = createFileRoute("/pipelines_/new")({
   component: NewPipeline,
@@ -9,5 +9,5 @@ export const Route = createFileRoute("/pipelines_/new")({
 });
 
 function NewPipeline() {
-  return <AppShell><PipelineBuilderWizard /></AppShell>;
+  return <AppShell><PipelineBuilderPage /></AppShell>;
 }

@@ -18,8 +18,8 @@ Before work: read `AGENTS.md`, phase docs, verify dependencies, mark task/row IN
 | BUILDER-003 | Transform add/configure/remove/reorder step | COMPLETE | BUILDER-002 | Claude |
 | BUILDER-004 | Export selection and configuration step | COMPLETE | BUILDER-003 | Claude |
 | BUILDER-005 | Deterministic linear graph derivation | COMPLETE | BUILDER-002 | Claude |
-| BUILDER-006 | Draft persistence and resume | READY | BUILDER-004, BUILDER-005, FORM-002 | Unassigned |
-| BUILDER-007 | Reuse builder editors for existing pipelines | BLOCKED | BUILDER-006 | Unassigned |
+| BUILDER-006 | Draft persistence and resume | COMPLETE | BUILDER-004, BUILDER-005, FORM-002 | Claude |
+| BUILDER-007 | Reuse builder editors for existing pipelines | READY | BUILDER-006 | Unassigned |
 | VALID-001 | Compatibility-aware component selection | BLOCKED | CAP-004, BUILDER-003 | Unassigned |
 | VALID-002 | Separate draft validation from executable validation | BLOCKED | BUILDER-005 | Unassigned |
 | VALID-003 | Enforce executable validation on enable | BLOCKED | VALID-002 | Unassigned |

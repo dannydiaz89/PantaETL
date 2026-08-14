@@ -111,6 +111,11 @@ export function isPipelineBuilderDraftComplete(draft: PipelineBuilderDraft): boo
   return draft.source !== undefined && draft.export !== undefined;
 }
 
+/** Clears the dirty flag after a successful save without otherwise changing the draft. */
+export function markPipelineBuilderDraftSaved(draft: PipelineBuilderDraft): PipelineBuilderDraft {
+  return { ...draft, dirty: false };
+}
+
 /** Appends a new Transform after the existing ones with a fresh draft-local id and empty configuration. */
 export function addPipelineBuilderTransform(
   draft: PipelineBuilderDraft,
