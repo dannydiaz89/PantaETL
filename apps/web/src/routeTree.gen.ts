@@ -32,6 +32,7 @@ import { Route as ApiTokensTokenIdRouteImport } from './routes/api/tokens/$token
 import { Route as ApiPipelinesPipelineIdDisableRouteImport } from './routes/api/pipelines/$pipelineId/disable'
 import { Route as ApiPipelinesPipelineIdDuplicateRouteImport } from './routes/api/pipelines/$pipelineId/duplicate'
 import { Route as ApiPipelinesPipelineIdEnableRouteImport } from './routes/api/pipelines/$pipelineId/enable'
+import { Route as ApiPipelinesPipelineIdExecutionStateRouteImport } from './routes/api/pipelines/$pipelineId/execution-state'
 import { Route as ApiPipelinesPipelineIdRunRouteImport } from './routes/api/pipelines/$pipelineId/run'
 
 const IndexRoute = IndexRouteImport.update({
@@ -152,6 +153,12 @@ const ApiPipelinesPipelineIdEnableRoute =
     path: '/enable',
     getParentRoute: () => ApiPipelinesPipelineIdRoute,
   } as any)
+const ApiPipelinesPipelineIdExecutionStateRoute =
+  ApiPipelinesPipelineIdExecutionStateRouteImport.update({
+    id: '/execution-state',
+    path: '/execution-state',
+    getParentRoute: () => ApiPipelinesPipelineIdRoute,
+  } as any)
 const ApiPipelinesPipelineIdRunRoute =
   ApiPipelinesPipelineIdRunRouteImport.update({
     id: '/run',
@@ -183,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/api/pipelines/$pipelineId/disable': typeof ApiPipelinesPipelineIdDisableRoute
   '/api/pipelines/$pipelineId/duplicate': typeof ApiPipelinesPipelineIdDuplicateRoute
   '/api/pipelines/$pipelineId/enable': typeof ApiPipelinesPipelineIdEnableRoute
+  '/api/pipelines/$pipelineId/execution-state': typeof ApiPipelinesPipelineIdExecutionStateRoute
   '/api/pipelines/$pipelineId/run': typeof ApiPipelinesPipelineIdRunRoute
 }
 export interface FileRoutesByTo {
@@ -209,6 +217,7 @@ export interface FileRoutesByTo {
   '/api/pipelines/$pipelineId/disable': typeof ApiPipelinesPipelineIdDisableRoute
   '/api/pipelines/$pipelineId/duplicate': typeof ApiPipelinesPipelineIdDuplicateRoute
   '/api/pipelines/$pipelineId/enable': typeof ApiPipelinesPipelineIdEnableRoute
+  '/api/pipelines/$pipelineId/execution-state': typeof ApiPipelinesPipelineIdExecutionStateRoute
   '/api/pipelines/$pipelineId/run': typeof ApiPipelinesPipelineIdRunRoute
 }
 export interface FileRoutesById {
@@ -236,6 +245,7 @@ export interface FileRoutesById {
   '/api/pipelines/$pipelineId/disable': typeof ApiPipelinesPipelineIdDisableRoute
   '/api/pipelines/$pipelineId/duplicate': typeof ApiPipelinesPipelineIdDuplicateRoute
   '/api/pipelines/$pipelineId/enable': typeof ApiPipelinesPipelineIdEnableRoute
+  '/api/pipelines/$pipelineId/execution-state': typeof ApiPipelinesPipelineIdExecutionStateRoute
   '/api/pipelines/$pipelineId/run': typeof ApiPipelinesPipelineIdRunRoute
 }
 export interface FileRouteTypes {
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | '/api/pipelines/$pipelineId/disable'
     | '/api/pipelines/$pipelineId/duplicate'
     | '/api/pipelines/$pipelineId/enable'
+    | '/api/pipelines/$pipelineId/execution-state'
     | '/api/pipelines/$pipelineId/run'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/api/pipelines/$pipelineId/disable'
     | '/api/pipelines/$pipelineId/duplicate'
     | '/api/pipelines/$pipelineId/enable'
+    | '/api/pipelines/$pipelineId/execution-state'
     | '/api/pipelines/$pipelineId/run'
   id:
     | '__root__'
@@ -316,6 +328,7 @@ export interface FileRouteTypes {
     | '/api/pipelines/$pipelineId/disable'
     | '/api/pipelines/$pipelineId/duplicate'
     | '/api/pipelines/$pipelineId/enable'
+    | '/api/pipelines/$pipelineId/execution-state'
     | '/api/pipelines/$pipelineId/run'
   fileRoutesById: FileRoutesById
 }
@@ -503,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPipelinesPipelineIdEnableRouteImport
       parentRoute: typeof ApiPipelinesPipelineIdRoute
     }
+    '/api/pipelines/$pipelineId/execution-state': {
+      id: '/api/pipelines/$pipelineId/execution-state'
+      path: '/execution-state'
+      fullPath: '/api/pipelines/$pipelineId/execution-state'
+      preLoaderRoute: typeof ApiPipelinesPipelineIdExecutionStateRouteImport
+      parentRoute: typeof ApiPipelinesPipelineIdRoute
+    }
     '/api/pipelines/$pipelineId/run': {
       id: '/api/pipelines/$pipelineId/run'
       path: '/run'
@@ -517,6 +537,7 @@ interface ApiPipelinesPipelineIdRouteChildren {
   ApiPipelinesPipelineIdDisableRoute: typeof ApiPipelinesPipelineIdDisableRoute
   ApiPipelinesPipelineIdDuplicateRoute: typeof ApiPipelinesPipelineIdDuplicateRoute
   ApiPipelinesPipelineIdEnableRoute: typeof ApiPipelinesPipelineIdEnableRoute
+  ApiPipelinesPipelineIdExecutionStateRoute: typeof ApiPipelinesPipelineIdExecutionStateRoute
   ApiPipelinesPipelineIdRunRoute: typeof ApiPipelinesPipelineIdRunRoute
 }
 
@@ -525,6 +546,8 @@ const ApiPipelinesPipelineIdRouteChildren: ApiPipelinesPipelineIdRouteChildren =
     ApiPipelinesPipelineIdDisableRoute: ApiPipelinesPipelineIdDisableRoute,
     ApiPipelinesPipelineIdDuplicateRoute: ApiPipelinesPipelineIdDuplicateRoute,
     ApiPipelinesPipelineIdEnableRoute: ApiPipelinesPipelineIdEnableRoute,
+    ApiPipelinesPipelineIdExecutionStateRoute:
+      ApiPipelinesPipelineIdExecutionStateRoute,
     ApiPipelinesPipelineIdRunRoute: ApiPipelinesPipelineIdRunRoute,
   }
 

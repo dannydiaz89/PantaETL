@@ -160,6 +160,7 @@ function createDependencies(options: {
     return { pipelineId: ids.pipeline, state: "disabled" };
   });
   const getPipeline = vi.fn(async () => options.getPipelineResult ?? pipeline);
+  const getActiveRunForPipeline = vi.fn(async () => undefined);
 
   return {
     availableComponents,
@@ -168,6 +169,7 @@ function createDependencies(options: {
     duplicatePipeline: duplicatePipeline as never,
     enablePipelineForOwner: enablePipelineForOwner as never,
     enqueuePipelineRun: enqueuePipelineRun as never,
+    getActiveRunForPipeline: getActiveRunForPipeline as never,
     getPipeline: getPipeline as never,
     getSession: async () => options.session === undefined ? { user: { id: ids.user } } : options.session,
   };

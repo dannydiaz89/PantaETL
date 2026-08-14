@@ -66,6 +66,8 @@ export function createOpenApiDocument(): OpenApiDocument {
         PipelineDuplicateRequest: pipelineApiComponent("pipelineDuplicateRequest"),
         PipelineDuplicateResponse: pipelineApiComponent("pipelineDuplicateResponse"),
         PipelineEdges: propertySchema(canonicalSchemas.pipeline, "edges"),
+        PipelineExecutionStateRequest: pipelineApiComponent("pipelineExecutionStateRequest"),
+        PipelineExecutionStateResponse: pipelineApiComponent("pipelineExecutionStateResponse"),
         PipelineIdentifier: propertySchema(canonicalSchemas.common, "identifier"),
         PipelineListRequest: pipelineApiComponent("pipelineListRequest"),
         PipelineListResponse: pipelineApiComponent("pipelineListResponse"),
@@ -243,6 +245,21 @@ export function createOpenApiDocument(): OpenApiDocument {
         },
       },
       "/api/pipelines/{pipelineId}/enable": pipelineStateActionPath("enablePipeline", "Enable a pipeline"),
+      "/api/pipelines/{pipelineId}/execution-state": {
+        get: {
+          operationId: "getPipelineExecutionState",
+          parameters: [pipelineIdentifierParameter],
+          responses: {
+            200: jsonResponse("The pipeline's current queued or running run, if any.", "PipelineExecutionStateResponse"),
+            400: invalidRequestResponse(),
+            401: unauthenticatedResponse(),
+            404: pipelineNotFoundResponse(),
+          },
+          security: [sessionSecurityRequirement],
+          summary: "Get a pipeline's execution state",
+          tags: ["pipelines"],
+        },
+      },
       "/api/pipelines/{pipelineId}/run": {
         post: {
           operationId: "runPipeline",

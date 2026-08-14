@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { getPipeline } from "@pantaetl/database";
+import { getActiveRunForPipeline, getPipeline } from "@pantaetl/database";
 
 import { auth, controlPlaneDatabase } from "../../../../auth/server.js";
 import { createPipelineActionRouteHandlers } from "../../../../pipeline-api/actions.js";
@@ -14,6 +14,7 @@ const handlers = createPipelineActionRouteHandlers({
   duplicatePipeline: async () => { throw new Error("Duplicate action is not available from this route."); },
   enablePipelineForOwner: async () => { throw new Error("Enable action is not available from this route."); },
   enqueuePipelineRun: (input) => enqueuePipelineRun(schedulerConfig, input),
+  getActiveRunForPipeline,
   getPipeline,
   getSession: (headers) => auth.api.getSession({ headers }),
 });

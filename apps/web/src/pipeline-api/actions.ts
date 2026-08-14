@@ -2,6 +2,8 @@ import {
   pipelineDuplicateRequestSchema,
   pipelineDuplicateBodyRequestSchema,
   pipelineDuplicateResponseSchema,
+  pipelineExecutionStateRequestSchema,
+  pipelineExecutionStateResponseSchema,
   pipelineRunRequestSchema,
   pipelineRunResponseSchema,
   pipelineStateActionRequestSchema,
@@ -13,6 +15,7 @@ import {
   disablePipelineForOwner,
   duplicatePipeline,
   enablePipelineForOwner,
+  getActiveRunForPipeline,
   getPipeline,
   PipelineActionConflictError,
   type DatabaseClient,
@@ -48,6 +51,7 @@ export interface PipelineActionRouteDependencies {
   readonly enqueuePipelineRun: (
     input: { readonly ownerUserId: string; readonly pipelineId: string },
   ) => Promise<ReturnType<typeof pipelineRunResponseSchema.parse>>;
+  readonly getActiveRunForPipeline: typeof getActiveRunForPipeline;
   readonly getPipeline: typeof getPipeline;
   readonly getSession: (headers: Headers) => Promise<PipelineActionSession | null>;
 }
@@ -84,6 +88,24 @@ export function createPipelineActionRouteHandlers(dependencies: PipelineActionRo
       input,
       (db, actionInput) => dependencies.enablePipelineForOwner(db, actionInput, dependencies.availableComponents),
     ),
+    EXECUTION_STATE: async (input: PipelineActionRouteInput): Promise<Response> => {
+      const session = await dependencies.getSession(input.request.headers);
+      if (session === null) return unauthenticatedResponse();
+
+      const parsed = pipelineExecutionStateRequestSchema.safeParse({ pipelineId: input.params.pipelineId });
+      if (!parsed.success) return invalidRequestResponse();
+
+      const pipeline = await dependencies.getPipeline(dependencies.database, {
+        ownerUserId: session.user.id,
+        pipelineId: parsed.data.pipelineId,
+      });
+      if (!pipeline) return notFoundResponse();
+
+      const activeRun = await dependencies.getActiveRunForPipeline(dependencies.database, pipeline.id);
+      return Response.json(pipelineExecutionStateResponseSchema.parse({ activeRun }), {
+        headers: { "cache-control": "no-store" },
+      });
+    },
     RUN: async (input: PipelineActionRouteInput): Promise<Response> => {
       const session = await dependencies.getSession(input.request.headers);
       if (session === null) return unauthenticatedResponse();

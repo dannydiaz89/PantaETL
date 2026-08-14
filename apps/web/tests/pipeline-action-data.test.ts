@@ -48,6 +48,7 @@ describe("pipeline action data layer", () => {
       disable: async () => ({ ...pipeline, state: "disabled" as const }),
       duplicate: async () => copy,
       enable: async () => ({ ...pipeline, state: "enabled" as const }),
+      getExecutionState: async () => ({}),
       run: async () => ({ initialJobCount: 1, pipelineId: ids.pipeline, queuedBehindActiveRun: false, runId: ids.run }),
     };
     queryClient.setQueryData(pipelineQueryKeys.detail({ pipelineId: ids.pipeline }), pipeline);

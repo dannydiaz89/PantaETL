@@ -3,11 +3,15 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { hashPassword } from "better-auth/crypto";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import {
   accounts,
   createDatabaseConnection,
+  jobs,
+  operationalEvents,
   pipelines,
+  runs,
+  runSteps,
   sessions,
   users,
   verifications,
@@ -94,6 +98,21 @@ export async function createRealBackendSession(browser: Browser, baseUrl: string
   return {
     context,
     cleanup: async () => {
+      const ownedPipelines = await db.select({ id: pipelines.id }).from(pipelines).where(eq(pipelines.ownerUserId, user.id));
+      const ownedPipelineIds = ownedPipelines.map((pipeline) => pipeline.id);
+
+      if (ownedPipelineIds.length > 0) {
+        const ownedRuns = await db.select({ id: runs.id }).from(runs).where(inArray(runs.pipelineId, ownedPipelineIds));
+        const ownedRunIds = ownedRuns.map((run) => run.id);
+
+        await db.delete(operationalEvents).where(inArray(operationalEvents.pipelineId, ownedPipelineIds));
+        await db.delete(jobs).where(inArray(jobs.pipelineId, ownedPipelineIds));
+        if (ownedRunIds.length > 0) {
+          await db.delete(runSteps).where(inArray(runSteps.runId, ownedRunIds));
+        }
+        await db.delete(runs).where(inArray(runs.pipelineId, ownedPipelineIds));
+      }
+
       await db.delete(pipelines).where(eq(pipelines.ownerUserId, user.id));
       await db.delete(users).where(eq(users.id, user.id));
       await connection.close();

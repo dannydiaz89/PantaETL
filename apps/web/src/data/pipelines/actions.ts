@@ -3,11 +3,13 @@ import {
   pipelineDuplicateBodyRequestSchema,
   pipelineDuplicateRequestSchema,
   pipelineDuplicateResponseSchema,
+  pipelineExecutionStateResponseSchema,
   pipelineRunResponseSchema,
   pipelineStateActionResponseSchema,
   type Pipeline,
   type PipelineDetailRequest,
   type PipelineDuplicateRequest,
+  type PipelineExecutionStateResponse,
   type PipelineRunResponse,
 } from "@pantaetl/contracts";
 
@@ -18,6 +20,7 @@ export interface PipelineActionApiClient {
   readonly disable: (request: PipelineDetailRequest) => Promise<Pipeline>;
   readonly duplicate: (request: PipelineDuplicateRequest) => Promise<Pipeline>;
   readonly enable: (request: PipelineDetailRequest) => Promise<Pipeline>;
+  readonly getExecutionState: (request: PipelineDetailRequest) => Promise<PipelineExecutionStateResponse>;
   readonly run: (request: PipelineDetailRequest) => Promise<PipelineRunResponse>;
 }
 
@@ -34,6 +37,12 @@ export function createPipelineActionApiClient(requestFetch: PipelineApiFetch = f
       }, pipelineDuplicateResponseSchema);
     },
     enable: (request) => requestPipelineAction(requestFetch, request, "enable"),
+    getExecutionState: async (request) => {
+      const parsed = parseRequest(pipelineDetailRequestSchema, request);
+      return requestJson(requestFetch, `/api/pipelines/${encodeURIComponent(parsed.pipelineId)}/execution-state`, {
+        method: "GET",
+      }, pipelineExecutionStateResponseSchema);
+    },
     run: async (request) => {
       const parsed = parseRequest(pipelineDetailRequestSchema, request);
       return requestJson(requestFetch, `/api/pipelines/${encodeURIComponent(parsed.pipelineId)}/run`, {

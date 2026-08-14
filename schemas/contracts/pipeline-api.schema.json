@@ -20,7 +20,9 @@
     "pipelineRunRequest": { "$ref": "#/$defs/pipelineRunRequest" },
     "pipelineRunResponse": { "$ref": "#/$defs/pipelineRunResponse" },
     "pipelineStateActionRequest": { "$ref": "#/$defs/pipelineStateActionRequest" },
-    "pipelineStateActionResponse": { "$ref": "#/$defs/pipelineStateActionResponse" }
+    "pipelineStateActionResponse": { "$ref": "#/$defs/pipelineStateActionResponse" },
+    "pipelineExecutionStateRequest": { "$ref": "#/$defs/pipelineExecutionStateRequest" },
+    "pipelineExecutionStateResponse": { "$ref": "#/$defs/pipelineExecutionStateResponse" }
   },
   "required": [
     "pipelineListRequest",
@@ -38,7 +40,9 @@
     "pipelineRunRequest",
     "pipelineRunResponse",
     "pipelineStateActionRequest",
-    "pipelineStateActionResponse"
+    "pipelineStateActionResponse",
+    "pipelineExecutionStateRequest",
+    "pipelineExecutionStateResponse"
   ],
   "additionalProperties": false,
   "$defs": {
@@ -183,6 +187,23 @@
       "additionalProperties": false
     },
     "pipelineStateActionRequest": { "$ref": "#/$defs/pipelineDetailRequest" },
-    "pipelineStateActionResponse": { "$ref": "#/$defs/pipeline" }
+    "pipelineStateActionResponse": { "$ref": "#/$defs/pipeline" },
+    "pipelineExecutionStateRequest": { "$ref": "#/$defs/pipelineDetailRequest" },
+    "activeRun": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/$defs/pipelineIdentifier" },
+        "state": { "enum": ["queued", "running"] }
+      },
+      "required": ["id", "state"],
+      "additionalProperties": false
+    },
+    "pipelineExecutionStateResponse": {
+      "type": "object",
+      "properties": {
+        "activeRun": { "$ref": "#/$defs/activeRun" }
+      },
+      "additionalProperties": false
+    }
   }
 }

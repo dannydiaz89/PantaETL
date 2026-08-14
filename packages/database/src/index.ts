@@ -49,6 +49,8 @@ export type {
   PipelineRunEnqueuer,
   PipelineStateActionResult,
 } from "./pipelines/actions.js";
+export { getActiveRunForPipeline } from "./pipelines/execution-state.js";
+export type { ActiveRunSummary } from "./pipelines/execution-state.js";
 export {
   DEFAULT_RETENTION_BATCH_SIZE,
   listExpiredArtifacts,

@@ -117,6 +117,17 @@ export type PipelineStateActionRequest = PipelineDetailRequest;
 /** Canonical persisted pipeline returned after an allowed state transition. */
 export type PipelineStateActionResponse = Pipeline;
 
+/** Owner-scoped request for one pipeline's current execution state. */
+export type PipelineExecutionStateRequest = PipelineDetailRequest;
+
+/** The single queued or running run currently blocking configuration edits, if any. */
+export interface PipelineExecutionStateResponse {
+  readonly activeRun?: {
+    readonly id: RunId;
+    readonly state: "queued" | "running";
+  };
+}
+
 /** Validate an owner-scoped list request. */
 export const pipelineListRequestSchema = z.strictObject({}) as z.ZodType<PipelineListRequest>;
 
@@ -192,3 +203,14 @@ export const pipelineStateActionRequestSchema = pipelineDetailRequestSchema;
 
 /** Validate the canonical pipeline returned after an enable or disable action. */
 export const pipelineStateActionResponseSchema = pipelineSchema as z.ZodType<PipelineStateActionResponse>;
+
+/** Validate a request for one owner-scoped pipeline's current execution state. */
+export const pipelineExecutionStateRequestSchema = pipelineDetailRequestSchema;
+
+/** Validate the safe execution-state summary returned for one pipeline. */
+export const pipelineExecutionStateResponseSchema = z.strictObject({
+  activeRun: z.strictObject({
+    id: runIdSchema,
+    state: z.enum(["queued", "running"]),
+  }).optional(),
+}) as z.ZodType<PipelineExecutionStateResponse>;

@@ -1,6 +1,7 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { PipelineDetailRequest } from "@pantaetl/contracts";
 
+import { pipelineActionApiClient, type PipelineActionApiClient } from "./actions.js";
 import { pipelineApiClient, type PipelineApiClient } from "./api.js";
 import { pipelineQueryKeys } from "./keys.js";
 
@@ -36,4 +37,24 @@ export function usePipelineDetailQuery(
   client: PipelineApiClient = pipelineApiClient,
 ) {
   return useQuery(pipelineDetailQueryOptions(request, client));
+}
+
+/** Returns reusable options for one pipeline's current queued-or-running run, if any. */
+export function pipelineExecutionStateQueryOptions(
+  request: PipelineDetailRequest,
+  client: PipelineActionApiClient = pipelineActionApiClient,
+) {
+  return queryOptions({
+    queryFn: () => client.getExecutionState(request),
+    queryKey: pipelineQueryKeys.executionState(request),
+    retry: false,
+  });
+}
+
+/** Reads whether one pipeline belonging to the authenticated user currently has an active run. */
+export function usePipelineExecutionStateQuery(
+  request: PipelineDetailRequest,
+  client: PipelineActionApiClient = pipelineActionApiClient,
+) {
+  return useQuery(pipelineExecutionStateQueryOptions(request, client));
 }

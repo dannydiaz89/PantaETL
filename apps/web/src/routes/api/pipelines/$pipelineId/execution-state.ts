@@ -1,24 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { builtInComponentCapabilities } from "@pantaetl/contracts";
-import { disablePipelineForOwner, enablePipelineForOwner, getActiveRunForPipeline, getPipeline } from "@pantaetl/database";
+import { getActiveRunForPipeline, getPipeline } from "@pantaetl/database";
 
 import { auth, controlPlaneDatabase } from "../../../../auth/server.js";
 import { createPipelineActionRouteHandlers } from "../../../../pipeline-api/actions.js";
 
 const handlers = createPipelineActionRouteHandlers({
-  availableComponents: builtInComponentCapabilities,
+  availableComponents: [],
   database: controlPlaneDatabase,
-  disablePipelineForOwner,
+  disablePipelineForOwner: async () => { throw new Error("Disable action is not available from this route."); },
   duplicatePipeline: async () => { throw new Error("Duplicate action is not available from this route."); },
-  enablePipelineForOwner,
+  enablePipelineForOwner: async () => { throw new Error("Enable action is not available from this route."); },
   enqueuePipelineRun: async () => { throw new Error("Run action is not available from this route."); },
   getActiveRunForPipeline,
   getPipeline,
   getSession: (headers) => auth.api.getSession({ headers }),
 });
 
-/** Enables one authenticated owner's idle pipeline after its state transition is validated. */
-export const Route = createFileRoute("/api/pipelines/$pipelineId/enable")({
-  server: { handlers: { POST: handlers.ENABLE } },
+/** Reports whether one authenticated owner's pipeline currently has a queued or running run. */
+export const Route = createFileRoute("/api/pipelines/$pipelineId/execution-state")({
+  server: { handlers: { GET: handlers.EXECUTION_STATE } },
 });

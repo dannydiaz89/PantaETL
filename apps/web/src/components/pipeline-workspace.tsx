@@ -13,6 +13,7 @@ import {
   useCreatePipelineMutation,
   useDeletePipelineMutation,
   usePipelineDetailQuery,
+  usePipelineExecutionStateQuery,
   usePipelineListQuery,
   useUpdatePipelineMutation,
 } from "../data/pipelines/index.js";
@@ -131,6 +132,7 @@ function SelectedPipeline({
 }) {
   const { t } = useI18n();
   const detailQuery = usePipelineDetailQuery({ pipelineId });
+  const executionStateQuery = usePipelineExecutionStateQuery({ pipelineId });
 
   if (detailQuery.isPending) {
     return <PipelineQueryState message={t("pipeline.editor.loading")} />;
@@ -149,7 +151,7 @@ function SelectedPipeline({
   return (
     <PipelineEditor
       deleteErrorMessage={deleteErrorMessage}
-      editable={isPipelineEditable(getPipelineExecutionState(detailQuery.data))}
+      editable={isPipelineEditable(getPipelineExecutionState(detailQuery.data, executionStateQuery.data))}
       isDeleting={isDeleting}
       isSaving={isSaving}
       onDelete={() => onDelete(detailQuery.data.id)}
