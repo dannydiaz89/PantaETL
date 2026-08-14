@@ -21,8 +21,8 @@ Before work: read `AGENTS.md`, phase docs, verify dependencies, mark task/row IN
 | BUILDER-006 | Draft persistence and resume | COMPLETE | BUILDER-004, BUILDER-005, FORM-002 | Claude |
 | BUILDER-007 | Reuse builder editors for existing pipelines | COMPLETE | BUILDER-006 | Claude |
 | VALID-001 | Compatibility-aware component selection | COMPLETE | CAP-004, BUILDER-003 | Claude |
-| VALID-002 | Separate draft validation from executable validation | IN PROGRESS | BUILDER-005 | Claude |
-| VALID-003 | Enforce executable validation on enable | BLOCKED | VALID-002 | Unassigned |
+| VALID-002 | Separate draft validation from executable validation | COMPLETE | BUILDER-005 | Claude |
+| VALID-003 | Enforce executable validation on enable | READY | VALID-002 | Unassigned |
 | VALID-004 | Preserve unsaved builder state on lock conflicts | READY | BUILDER-006 | Unassigned |
 | TRIGGER-001 | Replace read-only trigger panel with pipeline trigger editor | READY | BUILDER-007 | Unassigned |
 | E2E-001 | Real create/configure/save/reload browser workflow | BLOCKED | BUILDER-007, VALID-003 | Unassigned |

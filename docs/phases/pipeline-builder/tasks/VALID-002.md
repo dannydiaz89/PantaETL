@@ -1,7 +1,7 @@
 # VALID-002 — Separate Draft Validation From Executable Validation
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** Claude
 **Depends on:** BUILDER-005
 
 ## Scope
@@ -10,13 +10,13 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Acceptance criteria
 
-- [ ] Draft validation permits supported incomplete states.
-- [ ] Executable requires one Source and one Export.
-- [ ] Executable checks connected linear chain.
-- [ ] Verify component availability.
-- [ ] Verify required config/secret bindings.
-- [ ] Verify adjacent family compatibility.
-- [ ] Validation is UI/persistence independent.
+- [x] Draft validation permits supported incomplete states.
+- [x] Executable requires one Source and one Export.
+- [x] Executable checks connected linear chain.
+- [x] Verify component availability.
+- [x] Verify required config/secret bindings.
+- [x] Verify adjacent family compatibility.
+- [x] Validation is UI/persistence independent.
 
 ## Required checks
 
@@ -31,4 +31,4 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Notes / blockers
 
-None.
+`checkPipelineExecutable`/`assertPipelineExecutable` in `@pantaetl/pipeline` are a second, independent validation pass a caller runs only when deciding whether a pipeline may be enabled; the existing create/update contract schemas are untouched and continue to permit an incomplete graph. The check collects every violation in one pass (missing/duplicate Source or Export, a branching or disconnected step, an unavailable component, a missing required config value or secret binding reference, an incompatible adjacent pair) rather than stopping at the first, reusing `buildPipelineTopology` and `checkComponentCompatibility` instead of reimplementing graph or family logic. It only checks that a required secret has a binding *reference*, never inspecting binding contents. Not yet wired into the enable API route — that is VALID-003's job.

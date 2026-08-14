@@ -21,6 +21,15 @@ export type {
   RequiredPipelineCapability,
 } from "./portability.js";
 export {
+  assertPipelineExecutable,
+  checkPipelineExecutable,
+  PipelineNotExecutableError,
+} from "./executable-validation.js";
+export type {
+  PipelineExecutableResult,
+  PipelineExecutableViolation,
+} from "./executable-validation.js";
+export {
   completeActiveRun,
   createPipelineExecutionState,
   enqueuePipelineRun,
