@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, test, type APIRequestContext } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 
 import { en } from "../src/locales/en.js";
 import { createRealBackendSession } from "./real-backend-session.js";
@@ -38,6 +38,99 @@ async function createRealPipeline(request: APIRequestContext, baseUrl: string, n
   return pipeline.id;
 }
 
+/** Enqueues a real run through the same endpoint the UI calls. */
+async function enqueueRun(request: APIRequestContext, baseUrl: string, pipelineId: string): Promise<void> {
+  const runResponse = await request.post(`${baseUrl}/api/pipelines/${pipelineId}/run`);
+  expect(runResponse.status()).toBe(200);
+  const run: { initialJobCount: number; pipelineId: string } = await runResponse.json();
+  expect(run.pipelineId).toBe(pipelineId);
+  expect(run.initialJobCount).toBeGreaterThan(0);
+}
+
+/**
+ * Waits until the pipeline has no queued or running run, so a retry never piles a fresh
+ * run on top of one a worker attached to this deployment hasn't finished yet.
+ */
+async function waitUntilNoActiveRun(request: APIRequestContext, baseUrl: string, pipelineId: string): Promise<void> {
+  await expect(async () => {
+    const response = await request.get(`${baseUrl}/api/pipelines/${pipelineId}/execution-state`);
+    const state: { activeRun?: unknown } = await response.json();
+    expect(state.activeRun).toBeUndefined();
+  }).toPass({ timeout: 10_000 });
+}
+
+/**
+ * Attempts to save a stale-but-unsaved edit while a real run is active and confirms the
+ * server rejects it without discarding the edit.
+ *
+ * A worker attached to this deployment can claim and finish a trivial run before the save
+ * request reaches the server, so this retries with a fresh run whenever the save
+ * unexpectedly succeeds instead of hitting the real lock.
+ */
+async function verifyConflictPreservesUnsavedEdit(
+  page: Page,
+  request: APIRequestContext,
+  baseUrl: string,
+  pipelineId: string,
+): Promise<void> {
+  const nameField = page.locator(".pipeline-editor").getByLabel(en["pipeline.name"]);
+  const saveButton = page.getByRole("button", { name: en["pipeline.save"] });
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    await waitUntilNoActiveRun(request, baseUrl, pipelineId);
+
+    const unsavedName = `Lifecycle orders sync (unsaved ${attempt})`;
+    await nameField.fill(unsavedName);
+    await enqueueRun(request, baseUrl, pipelineId);
+
+    const [patchResponse] = await Promise.all([
+      page.waitForResponse((response) => response.url().endsWith(`/api/pipelines/${pipelineId}`) && response.request().method() === "PATCH"),
+      saveButton.dispatchEvent("click"),
+    ]);
+
+    if (patchResponse.status() === 409) {
+      await expect(page.getByRole("alert")).toContainText(en["pipeline.mutation.locked"]);
+      await expect(nameField).toHaveValue(unsavedName);
+      return;
+    }
+
+    // The save succeeded because the run already finished before the request landed;
+    // reload for a clean, editable pipeline before retrying with a fresh unsaved edit.
+    expect(patchResponse.status()).toBe(200);
+    await page.reload();
+    await expect(page.locator(".app-shell")).toHaveAttribute("data-hydrated", "true");
+  }
+
+  throw new Error("A save attempt never raced a still-active run.");
+}
+
+/**
+ * Enqueues a real run and confirms the pipeline editor reports it as locked after a reload.
+ *
+ * A worker attached to this deployment can claim and finish a trivial run before the
+ * reload's request reaches the server, so this retries with a fresh run rather than
+ * assuming the one just queued is still active by the time the check runs.
+ */
+async function enqueueRunAndVerifyLocked(
+  page: Page,
+  request: APIRequestContext,
+  baseUrl: string,
+  pipelineId: string,
+): Promise<void> {
+  const nameField = page.locator(".pipeline-editor").getByLabel(en["pipeline.name"]);
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    await waitUntilNoActiveRun(request, baseUrl, pipelineId);
+    await enqueueRun(request, baseUrl, pipelineId);
+
+    await page.reload();
+    await expect(page.locator(".app-shell")).toHaveAttribute("data-hydrated", "true");
+    if (await nameField.isDisabled()) return;
+  }
+
+  throw new Error("The pipeline never appeared locked after queuing a run.");
+}
+
 test("pipeline lifecycle actions use real endpoints against a genuine active-run lock, with no pipeline mocking", async ({ browser, baseURL }) => {
   if (baseURL === undefined) {
     throw new Error("Playwright baseURL is required for a real-backend test.");
@@ -63,25 +156,8 @@ test("pipeline lifecycle actions use real endpoints against a genuine active-run
     await expect(page.locator(".app-shell")).toHaveAttribute("data-hydrated", "true");
     await expect(page.locator(".pipeline-editor").getByText(en["pipeline.state.enabled"])).toBeVisible();
 
-    const nameField = page.locator(".pipeline-editor").getByLabel(en["pipeline.name"]);
-    await nameField.fill("Lifecycle orders sync (unsaved)");
-
-    const runResponse = await request.post(`${baseURL}/api/pipelines/${lifecyclePipelineId}/run`);
-    expect(runResponse.status()).toBe(200);
-    const run: { initialJobCount: number; pipelineId: string; queuedBehindActiveRun: boolean; runId: string } = await runResponse.json();
-    expect(run.pipelineId).toBe(lifecyclePipelineId);
-    expect(run.queuedBehindActiveRun).toBe(false);
-    expect(run.initialJobCount).toBeGreaterThan(0);
-
-    // The client's execution-state cache is now stale (no active run), matching a real race
-    // where another actor queues a run between page load and this save attempt.
-    await expect(nameField).toHaveValue("Lifecycle orders sync (unsaved)");
-    await page.getByRole("button", { name: en["pipeline.save"] }).dispatchEvent("click");
-    await expect(page.getByRole("alert")).toContainText(en["pipeline.mutation.locked"]);
-    await expect(nameField).toHaveValue("Lifecycle orders sync (unsaved)");
-
-    await page.reload();
-    await expect(page.locator(".app-shell")).toHaveAttribute("data-hydrated", "true");
+    await verifyConflictPreservesUnsavedEdit(page, request, baseURL, lifecyclePipelineId);
+    await enqueueRunAndVerifyLocked(page, request, baseURL, lifecyclePipelineId);
     await expect(page.locator(".pipeline-editor").getByLabel(en["pipeline.name"])).toBeDisabled();
     await expect(page.getByRole("button", { name: en["pipeline.save"] })).toBeDisabled();
 

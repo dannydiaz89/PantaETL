@@ -10,7 +10,6 @@ import { PipelineEditor } from "./pipeline/pipeline-editor.js";
 import { PipelineList } from "./pipeline/pipeline-list.js";
 import { getPipelineMutationErrorMessage } from "./pipeline/pipeline-mutation-feedback.js";
 import {
-  useCreatePipelineMutation,
   useDeletePipelineMutation,
   usePipelineDetailQuery,
   usePipelineExecutionStateQuery,
@@ -24,10 +23,8 @@ import { useI18n } from "../locale-provider.js";
 export function PipelineWorkspace() {
   const { t } = useI18n();
   const listQuery = usePipelineListQuery();
-  const createMutation = useCreatePipelineMutation();
   const updateMutation = useUpdatePipelineMutation();
   const deleteMutation = useDeletePipelineMutation();
-  const createInFlight = useRef(false);
   const deleteInFlight = useRef(false);
   const updateInFlight = useRef(false);
   const [selectedId, setSelectedId] = useState<string | undefined>();
@@ -38,23 +35,6 @@ export function PipelineWorkspace() {
   const selectPipeline = useCallback((pipeline: Pipeline) => {
     setSelectedId(pipeline.id);
   }, []);
-
-  const createPipeline = useCallback((
-    request: Parameters<typeof createMutation.mutate>[0],
-    onSuccess: () => void,
-  ) => {
-    if (createInFlight.current) return;
-    createInFlight.current = true;
-    createMutation.mutate(request, {
-      onSuccess: (pipeline) => {
-        setSelectedId(pipeline.id);
-        onSuccess();
-      },
-      onSettled: () => {
-        createInFlight.current = false;
-      },
-    });
-  }, [createMutation]);
 
   const deletePipeline = useCallback((pipelineId: string) => {
     if (deleteInFlight.current) return;
@@ -84,12 +64,9 @@ export function PipelineWorkspace() {
   return (
     <section className="pipeline-workspace" data-hydrated={listQuery.isSuccess ? "true" : "false"}>
       <PipelineList
-        createErrorMessage={getPipelineMutationErrorMessage(createMutation.error, t)}
-        isCreating={createMutation.isPending}
         isError={listQuery.isError}
         isLoading={listQuery.isPending}
         isRetrying={listQuery.isFetching}
-        onCreate={createPipeline}
         onRetry={() => void listQuery.refetch()}
         onSelect={selectPipeline}
         pipelines={pipelines}

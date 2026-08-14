@@ -1,6 +1,5 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import {
-  pipelineCreateRequestSchema,
   pipelineCreateResponseSchema,
   type ComponentMetadata,
   type Pipeline,
@@ -159,9 +158,9 @@ test("pipeline collection announces loading and gives an empty workspace a focus
   releaseListResponse();
 
   await expect(page.getByText(en["pipeline.table.emptyDescription"])).toBeVisible();
-  await page.getByRole("button", { name: en["pipeline.create.open"] }).click();
-  const dialog = page.getByRole("dialog", { name: en["pipeline.create.title"] });
-  await expect(dialog.getByLabel(en["pipeline.name"])).toBeFocused();
+  await page.getByRole("link", { name: en["pipeline.create.open"] }).click();
+  await expect(page).toHaveURL(/\/pipelines\/new$/);
+  await expect(page.getByLabel(en["pipeline.name"])).toBeVisible();
   await expectNoAccessibilityViolations(page);
 });
 
@@ -574,9 +573,9 @@ test("pipeline editor edits manual and scheduled triggers with friendly controls
   await expectNoAccessibilityViolations(page);
 });
 
-test("pipeline create and deletion keep controls accessible and reconcile the workspace", async ({ page }) => {
+test("pipeline deletion keeps controls accessible and reconciles the workspace", async ({ page }) => {
   let pipelines: Pipeline[] = [persistedPipeline];
-  let pipeline = persistedPipeline;
+  const pipeline = persistedPipeline;
 
   await page.route("**/api/pipelines**", async (route) => {
     const request = route.request();
@@ -587,22 +586,7 @@ test("pipeline create and deletion keep controls accessible and reconcile the wo
       return;
     }
 
-    if (path === "/api/pipelines" && request.method() === "POST") {
-      const created = persistedPipelineFromCreateRequest(pipelineCreateRequestSchema.parse(request.postDataJSON()));
-      pipelines = [...pipelines, created];
-      pipeline = created;
-      await route.fulfill({ body: JSON.stringify(created), contentType: "application/json", status: 201 });
-      return;
-    }
-
     if (path === `/api/pipelines/${pipeline.id}` && request.method() === "GET") {
-      await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
-      return;
-    }
-
-    if (path === `/api/pipelines/${pipeline.id}` && request.method() === "PATCH") {
-      pipeline = applyPipelinePatch(pipeline, { ...(request.postDataJSON() as object), updatedAt: "2026-08-13T12:30:00.000Z" });
-      pipelines = pipelines.map((candidate) => candidate.id === pipeline.id ? pipeline : candidate);
       await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
       return;
     }
@@ -618,21 +602,15 @@ test("pipeline create and deletion keep controls accessible and reconcile the wo
 
   await page.goto("/pipelines");
   await waitForApplication(page);
-  await page.getByRole("button", { name: en["pipeline.create.open"] }).click();
-  const createDialog = page.getByRole("dialog", { name: en["pipeline.create.title"] });
-  await createDialog.getByLabel(en["pipeline.name"]).fill("New orders");
-  await createDialog.getByLabel(en["pipeline.create.input"]).fill("imports/new-orders.csv");
-  await createDialog.getByLabel(en["pipeline.create.artifact"]).fill("new-orders.csv");
-  await createDialog.getByRole("button", { name: en["pipeline.create.submit"] }).click();
-  await expect(createDialog).toBeHidden();
-  await expect(page.locator(".pipeline-editor").getByLabel(en["pipeline.name"])).toHaveValue("New orders");
+  await expect(page.getByRole("link", { name: en["pipeline.create.open"] })).toHaveAttribute("href", "/pipelines/new");
+  await expect(page.locator(".pipeline-editor").getByLabel(en["pipeline.name"])).toHaveValue(persistedPipeline.name);
 
   const deleteTrigger = page.getByRole("button", { name: en["pipeline.delete.open"] });
   await deleteTrigger.dispatchEvent("click");
   const deleteConfirmation = page.getByRole("alertdialog", { name: en["pipeline.delete.title"] });
   await deleteConfirmation.getByRole("button", { name: en["pipeline.delete.confirm"] }).dispatchEvent("click");
   await expect(deleteConfirmation).toBeHidden();
-  await expect(page.locator(".pipeline-editor").getByLabel(en["pipeline.name"])).toHaveValue(persistedPipeline.name);
+  await expect(page.getByText(en["pipeline.table.empty"])).toBeVisible();
   await expectNoAccessibilityViolations(page);
 });
 
@@ -1087,22 +1065,3 @@ const persistedPipeline: Pipeline = {
   triggers: [],
   updatedAt: "2026-08-13T12:00:00.000Z",
 };
-
-/** Gives a successful create response server-owned identifiers and timestamps. */
-function persistedPipelineFromCreateRequest(request: PipelineCreateRequest): Pipeline {
-  const id = "433e4567-e89b-12d3-a456-426614174010";
-
-  return pipelineCreateResponseSchema.parse({
-    ...request,
-    createdAt: "2026-08-13T12:20:00.000Z",
-    id,
-    ownerUserId: "433e4567-e89b-12d3-a456-426614174004",
-    state: "draft",
-    triggers: request.triggers.map((trigger, index) => ({
-      ...trigger,
-      id: `433e4567-e89b-12d3-a456-42661417401${index + 1}`,
-      pipelineId: id,
-    })),
-    updatedAt: "2026-08-13T12:20:00.000Z",
-  });
-}

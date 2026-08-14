@@ -1,7 +1,7 @@
 # CLEAN-001 — Remove Obsolete CSV-Specific Creation and Pipeline Fixtures
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** Claude
 **Depends on:** E2E-002
 
 ## Scope
@@ -10,11 +10,11 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Acceptance criteria
 
-- [ ] Remove CSV-specific create assumptions.
-- [ ] Remove obsolete pipeline fixtures/IDs/mappings.
-- [ ] Remove dead translations/imports safely.
-- [ ] Keep CRUD E2E green.
-- [ ] Do not remove unrelated reusable test fixtures.
+- [x] Remove CSV-specific create assumptions.
+- [x] Remove obsolete pipeline fixtures/IDs/mappings.
+- [x] Remove dead translations/imports safely.
+- [x] Keep CRUD E2E green.
+- [x] Do not remove unrelated reusable test fixtures.
 
 ## Required checks
 
@@ -29,4 +29,9 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Notes / blockers
 
-None.
+Removed the standalone CSV-only quick-create dialog and its draft fixture, now that the
+wizard is the sole, fully general creation path. The pipeline library's "Create pipeline"
+control is a real navigation link to the wizard instead of opening a dialog. The pipeline
+lifecycle browser test also uncovered that a worker attached to this deployment can claim
+and finish a trivial run before a UI check reaches the server; the affected assertions now
+retry with a fresh run rather than assume one just queued is still active moments later.

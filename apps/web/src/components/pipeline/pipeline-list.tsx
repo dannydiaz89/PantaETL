@@ -1,30 +1,24 @@
 import { memo, useCallback, useMemo } from "react";
 
+import { Link } from "@tanstack/react-router";
 import type { Pipeline } from "@pantaetl/contracts";
 import { Button, DataTable, type DataTableColumn } from "@pantaetl/ui";
 
 import { useI18n } from "../../locale-provider.js";
-import { PipelineCreateDialog } from "./pipeline-create-dialog.js";
 import { PipelineStateBadge } from "./pipeline-state-badge.js";
 
 /** Renders the selectable pipeline library without coupling it to editor state. */
 export const PipelineList = memo(function PipelineList({
-  createErrorMessage,
-  isCreating,
   isError,
   isLoading,
   isRetrying,
-  onCreate,
   onRetry,
   onSelect,
   pipelines,
 }: {
-  readonly createErrorMessage: string | undefined;
-  readonly isCreating: boolean;
   readonly isError: boolean;
   readonly isLoading: boolean;
   readonly isRetrying: boolean;
-  readonly onCreate: Parameters<typeof PipelineCreateDialog>[0]["onCreate"];
   readonly onRetry: () => void;
   readonly onSelect: (pipeline: Pipeline) => void;
   readonly pipelines: readonly Pipeline[];
@@ -71,7 +65,9 @@ export const PipelineList = memo(function PipelineList({
           <p>{t("pipeline.list.description")}</p>
         </div>
         {pipelines.length > 0 || isLoading || isError ? (
-          <PipelineCreateDialog errorMessage={createErrorMessage} isCreating={isCreating} onCreate={onCreate} />
+          <Button asChild>
+            <Link to="/pipelines/new">{t("pipeline.create.open")}</Link>
+          </Button>
         ) : null}
       </div>
       {isError ? (
@@ -84,13 +80,7 @@ export const PipelineList = memo(function PipelineList({
           caption={t("pipeline.table.caption")}
           columns={columns}
           data={pipelines}
-          emptyState={(
-            <PipelineEmptyState
-              createErrorMessage={createErrorMessage}
-              isCreating={isCreating}
-              onCreate={onCreate}
-            />
-          )}
+          emptyState={<PipelineEmptyState />}
           getColumnLabel={getColumnLabel}
           isLoading={isLoading}
           loadingState={t("pipeline.table.loading")}
@@ -102,22 +92,16 @@ export const PipelineList = memo(function PipelineList({
 });
 
 /** Gives an empty library a clear next step without relying on the toolbar action. */
-function PipelineEmptyState({
-  createErrorMessage,
-  isCreating,
-  onCreate,
-}: {
-  readonly createErrorMessage: string | undefined;
-  readonly isCreating: boolean;
-  readonly onCreate: Parameters<typeof PipelineCreateDialog>[0]["onCreate"];
-}) {
+function PipelineEmptyState() {
   const { t } = useI18n();
 
   return (
     <div className="pipeline-empty-state">
       <p>{t("pipeline.table.empty")}</p>
       <p>{t("pipeline.table.emptyDescription")}</p>
-      <PipelineCreateDialog errorMessage={createErrorMessage} isCreating={isCreating} onCreate={onCreate} />
+      <Button asChild>
+        <Link to="/pipelines/new">{t("pipeline.create.open")}</Link>
+      </Button>
     </div>
   );
 }

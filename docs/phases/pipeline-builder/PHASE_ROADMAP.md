@@ -27,6 +27,6 @@ Before work: read `AGENTS.md`, phase docs, verify dependencies, mark task/row IN
 | TRIGGER-001 | Replace read-only trigger panel with pipeline trigger editor | COMPLETE | BUILDER-007 | Claude |
 | E2E-001 | Real create/configure/save/reload browser workflow | COMPLETE | BUILDER-007, VALID-003 | Claude |
 | E2E-002 | Enable/run/lock/duplicate/delete browser workflow | COMPLETE | E2E-001, VALID-004 | Claude |
-| CLEAN-001 | Remove obsolete CSV-specific creation and fixtures | READY | E2E-002 | Unassigned |
+| CLEAN-001 | Remove obsolete CSV-specific creation and fixtures | COMPLETE | E2E-002 | Claude |
 
 After CAP-002, CAP-003 and FORM-001 can proceed in parallel. Avoid multiple agents heavily editing the wizard component tree simultaneously.

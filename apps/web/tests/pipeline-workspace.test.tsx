@@ -1,4 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  createMemoryHistory,
+  createRootRoute,
+  createRoute,
+  createRouter,
+  RouterContextProvider,
+} from "@tanstack/react-router";
 import type { Pipeline } from "@pantaetl/contracts";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -8,16 +15,32 @@ import { pipelineQueryKeys } from "../src/data/pipelines/keys.js";
 import { LocaleProvider } from "../src/locale-provider.js";
 import { en } from "../src/locales/en.js";
 
+const rootRoute = createRootRoute();
+const testRouteTree = rootRoute.addChildren([
+  createRoute({ getParentRoute: () => rootRoute, path: "/pipelines" }),
+  createRoute({ getParentRoute: () => rootRoute, path: "/pipelines/new" }),
+]);
+
+/** Renders a tree that includes router-aware links, using a minimal route tree local to this test. */
+async function renderWithProviders(queryClient: QueryClient, children: React.ReactNode): Promise<string> {
+  const router = createRouter({ history: createMemoryHistory({ initialEntries: ["/pipelines"] }), routeTree: testRouteTree });
+  await router.load();
+
+  return renderToStaticMarkup(
+    <RouterContextProvider router={router}>
+      <QueryClientProvider client={queryClient}>
+        <LocaleProvider>{children}</LocaleProvider>
+      </QueryClientProvider>
+    </RouterContextProvider>,
+  );
+}
+
 describe("PipelineWorkspace", () => {
-  it("composes cached pipeline queries with localized editor panels", () => {
+  it("composes cached pipeline queries with localized editor panels", async () => {
     const queryClient = new QueryClient();
     queryClient.setQueryData(pipelineQueryKeys.list(), { pipelines: [pipeline] });
     queryClient.setQueryData(pipelineQueryKeys.detail({ pipelineId: pipeline.id }), pipeline);
-    const markup = renderToStaticMarkup(
-      <QueryClientProvider client={queryClient}>
-        <LocaleProvider><PipelineWorkspace /></LocaleProvider>
-      </QueryClientProvider>,
-    );
+    const markup = await renderWithProviders(queryClient, <PipelineWorkspace />);
 
     expect(markup).toContain(en["pipeline.list.title"]);
     expect(markup).toContain(en["pipeline.editor.title"]);
@@ -26,12 +49,8 @@ describe("PipelineWorkspace", () => {
     expect(markup).toContain('data-hydrated="true"');
   });
 
-  it("shows a localized collection loading state before the API query resolves", () => {
-    const markup = renderToStaticMarkup(
-      <QueryClientProvider client={new QueryClient()}>
-        <LocaleProvider><PipelineWorkspace /></LocaleProvider>
-      </QueryClientProvider>,
-    );
+  it("shows a localized collection loading state before the API query resolves", async () => {
+    const markup = await renderWithProviders(new QueryClient(), <PipelineWorkspace />);
 
     expect(markup).toContain(en["pipeline.table.loading"]);
     expect(markup).toContain('aria-busy="true"');
@@ -39,18 +58,15 @@ describe("PipelineWorkspace", () => {
     expect(markup).not.toContain(en["pipeline.editor.title"]);
   });
 
-  it("gives an empty library a localized creation path", () => {
+  it("gives an empty library a localized creation path", async () => {
     const queryClient = new QueryClient();
     queryClient.setQueryData(pipelineQueryKeys.list(), { pipelines: [] });
-    const markup = renderToStaticMarkup(
-      <QueryClientProvider client={queryClient}>
-        <LocaleProvider><PipelineWorkspace /></LocaleProvider>
-      </QueryClientProvider>,
-    );
+    const markup = await renderWithProviders(queryClient, <PipelineWorkspace />);
 
     expect(markup).toContain(en["pipeline.table.empty"]);
     expect(markup).toContain(en["pipeline.table.emptyDescription"]);
     expect(markup).toContain(en["pipeline.create.open"]);
+    expect(markup).toContain('href="/pipelines/new"');
   });
 });
 
