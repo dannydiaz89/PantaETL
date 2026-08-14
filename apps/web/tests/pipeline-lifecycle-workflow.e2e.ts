@@ -48,24 +48,13 @@ async function enqueueRun(request: APIRequestContext, baseUrl: string, pipelineI
 }
 
 /**
- * Waits until the pipeline has no queued or running run, so a retry never piles a fresh
- * run on top of one a worker attached to this deployment hasn't finished yet.
- */
-async function waitUntilNoActiveRun(request: APIRequestContext, baseUrl: string, pipelineId: string): Promise<void> {
-  await expect(async () => {
-    const response = await request.get(`${baseUrl}/api/pipelines/${pipelineId}/execution-state`);
-    const state: { activeRun?: unknown } = await response.json();
-    expect(state.activeRun).toBeUndefined();
-  }).toPass({ timeout: 10_000 });
-}
-
-/**
  * Attempts to save a stale-but-unsaved edit while a real run is active and confirms the
  * server rejects it without discarding the edit.
  *
  * A worker attached to this deployment can claim and finish a trivial run before the save
  * request reaches the server, so this retries with a fresh run whenever the save
- * unexpectedly succeeds instead of hitting the real lock.
+ * unexpectedly succeeds instead of hitting the real lock. Deployments with no worker at
+ * all (queued runs never resolve) succeed on the first attempt.
  */
 async function verifyConflictPreservesUnsavedEdit(
   page: Page,
@@ -77,8 +66,6 @@ async function verifyConflictPreservesUnsavedEdit(
   const saveButton = page.getByRole("button", { name: en["pipeline.save"] });
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
-    await waitUntilNoActiveRun(request, baseUrl, pipelineId);
-
     const unsavedName = `Lifecycle orders sync (unsaved ${attempt})`;
     await nameField.fill(unsavedName);
     await enqueueRun(request, baseUrl, pipelineId);
@@ -105,13 +92,14 @@ async function verifyConflictPreservesUnsavedEdit(
 }
 
 /**
- * Enqueues a real run and confirms the pipeline editor reports it as locked after a reload.
+ * Confirms the pipeline editor reports the pipeline as locked after a reload, queuing a
+ * fresh run only if the one already active has already resolved.
  *
- * A worker attached to this deployment can claim and finish a trivial run before the
- * reload's request reaches the server, so this retries with a fresh run rather than
- * assuming the one just queued is still active by the time the check runs.
+ * A deployment with no worker attached leaves every queued run active forever, so the
+ * lock from `verifyConflictPreservesUnsavedEdit`'s run is normally still in effect; a
+ * worker that finished it already is handled by queuing and checking again.
  */
-async function enqueueRunAndVerifyLocked(
+async function verifyPipelineIsLocked(
   page: Page,
   request: APIRequestContext,
   baseUrl: string,
@@ -120,12 +108,11 @@ async function enqueueRunAndVerifyLocked(
   const nameField = page.locator(".pipeline-editor").getByLabel(en["pipeline.name"]);
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
-    await waitUntilNoActiveRun(request, baseUrl, pipelineId);
-    await enqueueRun(request, baseUrl, pipelineId);
-
     await page.reload();
     await expect(page.locator(".app-shell")).toHaveAttribute("data-hydrated", "true");
     if (await nameField.isDisabled()) return;
+
+    await enqueueRun(request, baseUrl, pipelineId);
   }
 
   throw new Error("The pipeline never appeared locked after queuing a run.");
@@ -157,7 +144,7 @@ test("pipeline lifecycle actions use real endpoints against a genuine active-run
     await expect(page.locator(".pipeline-editor").getByText(en["pipeline.state.enabled"])).toBeVisible();
 
     await verifyConflictPreservesUnsavedEdit(page, request, baseURL, lifecyclePipelineId);
-    await enqueueRunAndVerifyLocked(page, request, baseURL, lifecyclePipelineId);
+    await verifyPipelineIsLocked(page, request, baseURL, lifecyclePipelineId);
     await expect(page.locator(".pipeline-editor").getByLabel(en["pipeline.name"])).toBeDisabled();
     await expect(page.getByRole("button", { name: en["pipeline.save"] })).toBeDisabled();
 
