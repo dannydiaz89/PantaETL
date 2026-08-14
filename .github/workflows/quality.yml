@@ -27,6 +27,14 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Install Chromium for accessibility checks
         run: pnpm --filter web exec playwright install --with-deps chromium
+      - name: Copy local environment defaults
+        run: cp .env.example .env
+      - name: Start PostgreSQL
+        run: docker compose --env-file .env up -d --wait postgres
+      - name: Apply committed database migrations
+        run: pnpm --filter @pantaetl/database migrate:apply
+        env:
+          DATABASE_URL: postgresql://pantaetl:pantaetl-dev@127.0.0.1:5432/pantaetl
       - name: Run quality checks
         run: pnpm check
 
