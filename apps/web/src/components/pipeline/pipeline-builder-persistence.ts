@@ -1,4 +1,5 @@
 import type {
+  ComponentKind,
   ComponentMetadata,
   Pipeline,
   PipelineCreateRequest,
@@ -85,4 +86,13 @@ export function createPipelineBuilderDraftFromPipeline(
     source: selections.find((selection) => selection.metadata.kind === "source"),
     transforms: selections.filter((selection) => selection.metadata.kind === "transform"),
   };
+}
+
+/** Builds a `resolveMetadata` function for `createPipelineBuilderDraftFromPipeline` from capability lists grouped by kind. */
+export function createPipelineBuilderMetadataResolver(
+  capabilitiesByKind: Partial<Record<ComponentKind, readonly ComponentMetadata[]>>,
+): (step: PipelineStep) => ComponentMetadata | undefined {
+  return (step) => capabilitiesByKind[step.kind]?.find(
+    (component) => component.type === step.componentType && component.version === step.componentVersion,
+  );
 }

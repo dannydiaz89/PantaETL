@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import type { ComponentKind, ComponentMetadata, Pipeline, PipelineStep } from "@pantaetl/contracts";
+import type { ComponentKind, ComponentMetadata, Pipeline } from "@pantaetl/contracts";
 
 import { componentCapabilityListQueryOptions } from "../data/components/index.js";
 import {
@@ -12,7 +12,7 @@ import {
   useUpdatePipelineMutation,
 } from "../data/pipelines/index.js";
 import { useI18n } from "../locale-provider.js";
-import { createPipelineBuilderDraftFromPipeline } from "./pipeline/pipeline-builder-persistence.js";
+import { createPipelineBuilderDraftFromPipeline, createPipelineBuilderMetadataResolver } from "./pipeline/pipeline-builder-persistence.js";
 import { getPipelineMutationErrorMessage } from "./pipeline/pipeline-mutation-feedback.js";
 import { PipelineBuilderWizard } from "./pipeline/pipeline-builder-wizard.js";
 
@@ -70,7 +70,7 @@ export function PipelineBuilderPage() {
   const resumeFailed = sourceQuery.isError || transformQuery.isError || exportQuery.isError;
   const resumedDraft = !resuming || detailQuery.data === undefined || resumeFailed
     ? undefined
-    : createPipelineBuilderDraftFromPipeline(detailQuery.data, (step) => resolveMetadata(step, capabilitiesByKind));
+    : createPipelineBuilderDraftFromPipeline(detailQuery.data, createPipelineBuilderMetadataResolver(capabilitiesByKind));
 
   if (resuming && resumedDraft === undefined) {
     window.localStorage.removeItem(DRAFT_PIPELINE_ID_STORAGE_KEY);
@@ -85,15 +85,5 @@ export function PipelineBuilderPage() {
       onUpdate={updatePipeline}
       saveErrorMessage={getPipelineMutationErrorMessage(createMutation.error, t) ?? getPipelineMutationErrorMessage(updateMutation.error, t)}
     />
-  );
-}
-
-/** Finds one persisted step's full metadata in whichever preloaded capability list matches its kind. */
-function resolveMetadata(
-  step: PipelineStep,
-  capabilitiesByKind: Partial<Record<ComponentKind, readonly ComponentMetadata[]>>,
-): ComponentMetadata | undefined {
-  return capabilitiesByKind[step.kind]?.find(
-    (component) => component.type === step.componentType && component.version === step.componentVersion,
   );
 }

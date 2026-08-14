@@ -7,6 +7,7 @@ import {
 } from "../src/components/pipeline/pipeline-builder-draft.js";
 import {
   createPipelineBuilderDraftFromPipeline,
+  createPipelineBuilderMetadataResolver,
   createPipelineCreateRequestFromDraft,
   createPipelineUpdateRequestFromDraft,
   isPipelineBuilderDraftPersistable,
@@ -106,6 +107,15 @@ describe("pipeline builder persistence", () => {
     const draft = createPipelineBuilderDraftFromPipeline(pipeline, () => undefined);
 
     expect(draft).toBeUndefined();
+  });
+
+  it("resolves a step's metadata from capability lists grouped by kind, or undefined when its type or version is missing", () => {
+    const resolve = createPipelineBuilderMetadataResolver({ export: [jsonExportMetadata], source: [csvSourceMetadata] });
+    const configuration = { secretBindings: [], values: {} };
+
+    expect(resolve({ componentType: "source.csv", componentVersion: "v1", configuration, id: "step-1", kind: "source" })).toEqual(csvSourceMetadata);
+    expect(resolve({ componentType: "source.csv", componentVersion: "v2", configuration, id: "step-1", kind: "source" })).toBeUndefined();
+    expect(resolve({ componentType: "transform.limit", componentVersion: "v1", configuration, id: "step-1", kind: "transform" })).toBeUndefined();
   });
 });
 

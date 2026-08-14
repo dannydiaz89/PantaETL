@@ -238,6 +238,133 @@ test("pipeline update conflicts are announced without exposing backend details",
   await expectNoAccessibilityViolations(page);
 });
 
+test("pipeline editor reuses the wizard's Source, Transforms, and Export editors for an idle pipeline", async ({ page }) => {
+  const csvSource: ComponentMetadata = {
+    configFields: [{ key: "path", labelKey: "components.sources.csv.sourcePath", required: true, secret: false, type: "text" }],
+    descriptionKey: "components.sources.csv.description",
+    displayNameKey: "components.sources.csv.name",
+    inputFamilies: [],
+    kind: "source",
+    outputFamilies: ["tabular"],
+    type: "source.csv",
+    version: "v1",
+  };
+  const limitTransform: ComponentMetadata = {
+    configFields: [{ key: "count", labelKey: "components.transforms.rows.limit.count", required: true, secret: false, type: "number" }],
+    descriptionKey: "components.transforms.rows.limit.description",
+    displayNameKey: "components.transforms.rows.limit.name",
+    inputFamilies: ["tabular"],
+    kind: "transform",
+    outputFamilies: ["tabular"],
+    type: "transform.limit",
+    version: "v1",
+  };
+  const jsonExport: ComponentMetadata = {
+    configFields: [{ key: "fileName", labelKey: "components.exports.json.fileName", required: true, secret: false, type: "text" }],
+    descriptionKey: "components.exports.json.description",
+    displayNameKey: "components.exports.json.name",
+    inputFamilies: ["tabular"],
+    kind: "export",
+    outputFamilies: [],
+    type: "export.json",
+    version: "v1",
+  };
+  let pipeline: Pipeline = {
+    contractVersion: "v1",
+    createdAt: "2026-08-13T12:00:00.000Z",
+    edges: [
+      { fromStepId: "c33e4567-e89b-12d3-a456-426614174002", toStepId: "c33e4567-e89b-12d3-a456-426614174005" },
+      { fromStepId: "c33e4567-e89b-12d3-a456-426614174005", toStepId: "c33e4567-e89b-12d3-a456-426614174003" },
+    ],
+    id: "c33e4567-e89b-12d3-a456-426614174001",
+    name: "Idle pipeline",
+    ownerUserId: "c33e4567-e89b-12d3-a456-426614174004",
+    state: "enabled",
+    steps: [
+      {
+        componentType: "source.csv",
+        componentVersion: "v1",
+        configuration: { secretBindings: [], values: { path: "orders.csv" } },
+        id: "c33e4567-e89b-12d3-a456-426614174002",
+        kind: "source",
+      },
+      {
+        componentType: "export.json",
+        componentVersion: "v1",
+        configuration: { secretBindings: [], values: { fileName: "orders.json" } },
+        id: "c33e4567-e89b-12d3-a456-426614174003",
+        kind: "export",
+      },
+      {
+        componentType: "transform.limit",
+        componentVersion: "v1",
+        configuration: { secretBindings: [], values: { count: 50 } },
+        id: "c33e4567-e89b-12d3-a456-426614174005",
+        kind: "transform",
+      },
+    ],
+    triggers: [],
+    updatedAt: "2026-08-13T12:00:00.000Z",
+  };
+  let updateCount = 0;
+
+  await page.route("**/api/components**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path !== "/api/components") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({ body: JSON.stringify({ components: [csvSource, limitTransform, jsonExport] }), contentType: "application/json" });
+  });
+
+  await page.route("**/api/pipelines**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    if (path === "/api/pipelines" && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify({ pipelines: [pipeline] }), contentType: "application/json" });
+      return;
+    }
+    if (path === `/api/pipelines/${pipeline.id}` && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
+      return;
+    }
+    if (path === `/api/pipelines/${pipeline.id}` && request.method() === "PATCH") {
+      updateCount += 1;
+      pipeline = { ...pipeline, ...(request.postDataJSON() as object), updatedAt: "2026-08-13T13:00:00.000Z" };
+      await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/pipelines");
+  await waitForApplication(page);
+
+  await page.getByRole("tab", { name: en["pipeline.tab.source"] }).click();
+  const sourceButton = page.getByRole("button", { name: en["components.sources.csv.name"] });
+  await expect(sourceButton).toHaveAttribute("aria-pressed", "true");
+  await page.getByLabel(en["components.sources.csv.sourcePath"]).fill("imports/orders-v2.csv");
+
+  await page.getByRole("tab", { name: en["pipeline.tab.transforms"] }).click();
+  const transformList = page.locator(".pipeline-builder-transforms__list");
+  await expect(transformList.getByRole("listitem")).toHaveCount(1);
+  await page.getByRole("button", { name: en["components.transforms.rows.limit.name"] }).click();
+  await expect(transformList.getByRole("listitem")).toHaveCount(2);
+
+  await page.getByRole("tab", { name: en["pipeline.tab.export"] }).click();
+  await expect(page.getByRole("button", { name: en["components.exports.json.name"] })).toHaveAttribute("aria-pressed", "true");
+  await page.getByLabel(en["components.exports.json.fileName"]).fill("orders-v2.json");
+
+  await page.getByRole("tab", { name: en["pipeline.tab.overview"] }).click();
+  await page.getByRole("button", { name: en["pipeline.save"] }).click();
+  await expect(page.getByText(en["pipeline.saveSuccess"])).toBeVisible();
+  expect(updateCount).toBe(1);
+  expect(pipeline.steps.find((step) => step.kind === "source")?.configuration.values.path).toBe("imports/orders-v2.csv");
+  expect(pipeline.steps.find((step) => step.kind === "export")?.configuration.values.fileName).toBe("orders-v2.json");
+  expect(pipeline.steps.filter((step) => step.kind === "transform")).toHaveLength(2);
+  await expectNoAccessibilityViolations(page);
+});
+
 test("pipeline create and deletion keep controls accessible and reconcile the workspace", async ({ page }) => {
   let pipelines: Pipeline[] = [persistedPipeline];
   let pipeline = persistedPipeline;

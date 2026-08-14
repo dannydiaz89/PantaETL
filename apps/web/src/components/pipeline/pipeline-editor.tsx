@@ -3,10 +3,25 @@ import { useEffect, useState } from "react";
 import type { Pipeline, PipelineUpdateRequest } from "@pantaetl/contracts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@pantaetl/ui";
 
+import { useComponentCapabilityListQuery } from "../../data/components/index.js";
 import { useI18n } from "../../locale-provider.js";
+import { ComponentPickerConfiguration } from "./component-picker.js";
 import { PipelineDeleteConfirmation } from "./pipeline-delete-confirmation.js";
 import { PipelineHistoryPanel } from "./pipeline-history-panel.js";
 import { PipelineOverviewPanel } from "./pipeline-overview-panel.js";
+import {
+  addPipelineBuilderTransform,
+  movePipelineBuilderTransform,
+  removePipelineBuilderTransform,
+  setPipelineBuilderExport,
+  setPipelineBuilderExportValues,
+  setPipelineBuilderSource,
+  setPipelineBuilderSourceValues,
+  setPipelineBuilderTransformValues,
+  type PipelineBuilderDraft,
+} from "./pipeline-builder-draft.js";
+import { createPipelineBuilderDraftFromPipeline, createPipelineBuilderMetadataResolver, createPipelineUpdateRequestFromDraft } from "./pipeline-builder-persistence.js";
+import { PipelineBuilderTransformsStep } from "./pipeline-builder-transforms-step.js";
 import { PipelineSettingsPanel } from "./pipeline-settings-panel.js";
 import { PipelineStateBadge } from "./pipeline-state-badge.js";
 import { PipelineStepPanel } from "./pipeline-step-panel.js";
@@ -39,16 +54,39 @@ export function PipelineEditor({
   const [submitted, setSubmitted] = useState(false);
   const nameError = submitted && draftName.trim().length === 0 ? t("pipeline.nameRequired") : undefined;
 
+  const sourceCapabilities = useComponentCapabilityListQuery({ kind: "source" });
+  const transformCapabilities = useComponentCapabilityListQuery({ kind: "transform" });
+  const exportCapabilities = useComponentCapabilityListQuery({ kind: "export" });
+  const capabilitiesReady = sourceCapabilities.isSuccess && transformCapabilities.isSuccess && exportCapabilities.isSuccess;
+  const [graphDraft, setGraphDraft] = useState<PipelineBuilderDraft | undefined>(undefined);
+
   useEffect(() => {
     setDraftName(pipeline.name);
     setSubmitted(false);
   }, [pipeline.id, pipeline.name]);
 
+  useEffect(() => {
+    if (!capabilitiesReady) return;
+
+    const resolveMetadata = createPipelineBuilderMetadataResolver({
+      export: exportCapabilities.data?.components,
+      source: sourceCapabilities.data?.components,
+      transform: transformCapabilities.data?.components,
+    });
+    setGraphDraft(createPipelineBuilderDraftFromPipeline(pipeline, resolveMetadata));
+    // Capability lists are stable once loaded; only a change of pipeline identity should re-seed local edits.
+  }, [pipeline.id, capabilitiesReady]);
+
+  function updateGraphDraft(updater: (draft: PipelineBuilderDraft) => PipelineBuilderDraft): void {
+    setGraphDraft((current) => (current === undefined ? current : updater(current)));
+  }
+
   function saveDraft(): void {
     setSubmitted(true);
     if (!editable || draftName.trim().length === 0) return;
 
-    onSave({ name: draftName.trim() });
+    const graphUpdate = editable && graphDraft !== undefined ? createPipelineUpdateRequestFromDraft(graphDraft) : {};
+    onSave({ ...graphUpdate, name: draftName.trim() });
   }
 
   return (
@@ -96,13 +134,52 @@ export function PipelineEditor({
           />
         </TabsContent>
         <TabsContent value="source">
-          <PipelineStepPanel description={t("pipeline.source.description")} kind="source" pipeline={pipeline} />
+          {editable && graphDraft !== undefined ? (
+            <div className="pipeline-tab-panel">
+              <p>{t("pipeline.source.description")}</p>
+              <ComponentPickerConfiguration
+                kind="source"
+                onSelect={(metadata) => updateGraphDraft((draft) => setPipelineBuilderSource(draft, metadata))}
+                onValuesChange={(values) => updateGraphDraft((draft) => setPipelineBuilderSourceValues(draft, values))}
+                selected={graphDraft.source?.metadata}
+                values={graphDraft.source?.values ?? {}}
+              />
+            </div>
+          ) : (
+            <PipelineStepPanel description={t("pipeline.source.description")} kind="source" pipeline={pipeline} />
+          )}
         </TabsContent>
         <TabsContent value="transforms">
-          <PipelineStepPanel description={t("pipeline.transforms.description")} kind="transform" pipeline={pipeline} />
+          {editable && graphDraft !== undefined ? (
+            <div className="pipeline-tab-panel">
+              <p>{t("pipeline.transforms.description")}</p>
+              <PipelineBuilderTransformsStep
+                onAdd={(metadata) => updateGraphDraft((draft) => addPipelineBuilderTransform(draft, metadata))}
+                onMove={(id, direction) => updateGraphDraft((draft) => movePipelineBuilderTransform(draft, id, direction))}
+                onRemove={(id) => updateGraphDraft((draft) => removePipelineBuilderTransform(draft, id))}
+                onValuesChange={(id, values) => updateGraphDraft((draft) => setPipelineBuilderTransformValues(draft, id, values))}
+                transforms={graphDraft.transforms}
+              />
+            </div>
+          ) : (
+            <PipelineStepPanel description={t("pipeline.transforms.description")} kind="transform" pipeline={pipeline} />
+          )}
         </TabsContent>
         <TabsContent value="export">
-          <PipelineStepPanel description={t("pipeline.export.description")} kind="export" pipeline={pipeline} />
+          {editable && graphDraft !== undefined ? (
+            <div className="pipeline-tab-panel">
+              <p>{t("pipeline.export.description")}</p>
+              <ComponentPickerConfiguration
+                kind="export"
+                onSelect={(metadata) => updateGraphDraft((draft) => setPipelineBuilderExport(draft, metadata))}
+                onValuesChange={(values) => updateGraphDraft((draft) => setPipelineBuilderExportValues(draft, values))}
+                selected={graphDraft.export?.metadata}
+                values={graphDraft.export?.values ?? {}}
+              />
+            </div>
+          ) : (
+            <PipelineStepPanel description={t("pipeline.export.description")} kind="export" pipeline={pipeline} />
+          )}
         </TabsContent>
         <TabsContent value="trigger"><PipelineTriggerPanel triggers={pipeline.triggers} /></TabsContent>
         <TabsContent value="history"><PipelineHistoryPanel editable={editable} /></TabsContent>
