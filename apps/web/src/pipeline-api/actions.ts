@@ -6,6 +6,7 @@ import {
   pipelineRunResponseSchema,
   pipelineStateActionRequestSchema,
   pipelineStateActionResponseSchema,
+  type ComponentMetadata,
   type PipelineDuplicateRequest,
 } from "@pantaetl/contracts";
 import {
@@ -15,6 +16,8 @@ import {
   getPipeline,
   PipelineActionConflictError,
   type DatabaseClient,
+  type PipelineActionInput,
+  type PipelineStateActionResult,
 } from "@pantaetl/database";
 
 import { PipelineSchedulerConflictError } from "./scheduler.js";
@@ -36,6 +39,8 @@ export interface PipelineActionRouteInput {
 
 /** Dependencies used by the authenticated pipeline action HTTP boundary. */
 export interface PipelineActionRouteDependencies {
+  /** Component metadata the deployment can currently execute, checked before a pipeline may enable. */
+  readonly availableComponents: readonly ComponentMetadata[];
   readonly database: DatabaseClient;
   readonly disablePipelineForOwner: typeof disablePipelineForOwner;
   readonly duplicatePipeline: typeof duplicatePipeline;
@@ -77,7 +82,7 @@ export function createPipelineActionRouteHandlers(dependencies: PipelineActionRo
     ENABLE: async (input: PipelineActionRouteInput): Promise<Response> => stateActionResponse(
       dependencies,
       input,
-      dependencies.enablePipelineForOwner,
+      (db, actionInput) => dependencies.enablePipelineForOwner(db, actionInput, dependencies.availableComponents),
     ),
     RUN: async (input: PipelineActionRouteInput): Promise<Response> => {
       const session = await dependencies.getSession(input.request.headers);
@@ -103,7 +108,7 @@ export function createPipelineActionRouteHandlers(dependencies: PipelineActionRo
 async function stateActionResponse(
   dependencies: PipelineActionRouteDependencies,
   input: PipelineActionRouteInput,
-  action: typeof enablePipelineForOwner | typeof disablePipelineForOwner,
+  action: (db: DatabaseClient, actionInput: PipelineActionInput) => Promise<PipelineStateActionResult>,
 ): Promise<Response> {
   const session = await dependencies.getSession(input.request.headers);
   if (session === null) return unauthenticatedResponse();
@@ -172,7 +177,7 @@ function unauthenticatedResponse(): Response {
 /** Map structured ownership, state, and scheduler conflicts without exposing domain details. */
 function actionErrorResponse(error: unknown): Response {
   if (error instanceof PipelineActionConflictError) {
-    return pipelineActionConflictResponse(error.reason);
+    return pipelineActionConflictResponse(error);
   }
   if (error instanceof PipelineSchedulerConflictError) {
     return schedulerConflictResponse(error.code);
@@ -181,10 +186,20 @@ function actionErrorResponse(error: unknown): Response {
   throw error;
 }
 
-/** Return the documented status for a database action conflict. */
-function pipelineActionConflictResponse(reason: PipelineActionConflictError["reason"]): Response {
-  if (reason === "not_found") return notFoundResponse();
-  return Response.json({ code: reason === "locked" ? "pipeline_locked" : "pipeline_not_enabled" }, { status: 409 });
+/** Return the documented status for a database action conflict, carrying violations for a failed enable. */
+function pipelineActionConflictResponse(error: PipelineActionConflictError): Response {
+  if (error.reason === "not_found") return notFoundResponse();
+  if (error.reason === "not_executable") {
+    return Response.json(
+      { code: "pipeline_not_executable", violations: error.violations ?? [] },
+      { status: 409 },
+    );
+  }
+
+  return Response.json(
+    { code: error.reason === "locked" ? "pipeline_locked" : "pipeline_not_enabled" },
+    { status: 409 },
+  );
 }
 
 /** Map scheduler-side responses to the equivalent public API action result. */

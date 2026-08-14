@@ -14,6 +14,8 @@ export function getPipelineMutationErrorMessage(
       return t("pipeline.mutation.locked");
     case "pipeline_has_run_history":
       return t("pipeline.mutation.hasRunHistory");
+    case "pipeline_not_executable":
+      return t("pipeline.mutation.notExecutable");
     case "unauthenticated":
       return t("pipeline.mutation.unauthenticated");
     case "network_error":

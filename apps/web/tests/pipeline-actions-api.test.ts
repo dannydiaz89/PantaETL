@@ -5,7 +5,7 @@ import {
   type DatabaseClient,
   type EnqueuedPipelineRun,
 } from "@pantaetl/database";
-import { pipelineCreateResponseSchema, type Pipeline } from "@pantaetl/contracts";
+import { pipelineCreateResponseSchema, type ComponentMetadata, type Pipeline } from "@pantaetl/contracts";
 
 import { createPipelineActionRouteHandlers } from "../src/pipeline-api/actions.js";
 import { PipelineSchedulerConflictError } from "../src/pipeline-api/scheduler.js";
@@ -94,10 +94,27 @@ describe("pipeline action API routes", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual(enabled);
-    expect(dependencies.enablePipelineForOwner).toHaveBeenCalledWith(dependencies.database, {
-      ownerUserId: ids.user,
-      pipelineId: ids.pipeline,
+    expect(dependencies.enablePipelineForOwner).toHaveBeenCalledWith(
+      dependencies.database,
+      { ownerUserId: ids.user, pipelineId: ids.pipeline },
+      dependencies.availableComponents,
+    );
+  });
+
+  it("returns a structured conflict with violations when a pipeline fails executable validation", async () => {
+    const violations = [{ kind: "missing-export" as const }];
+    const dependencies = createDependencies({
+      enableError: new PipelineActionConflictError(
+        "not_executable",
+        "The pipeline is not executable and cannot be enabled.",
+        violations,
+      ),
     });
+
+    const response = await createPipelineActionRouteHandlers(dependencies).ENABLE(routeInput());
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toEqual({ code: "pipeline_not_executable", violations });
   });
 
   it("returns a safe conflict when queued work prevents disabling", async () => {
@@ -116,12 +133,14 @@ describe("pipeline action API routes", () => {
 function createDependencies(options: {
   readonly disableError?: Error;
   readonly duplicated?: Pipeline;
+  readonly enableError?: Error;
   readonly getPipelineResult?: Pipeline;
   readonly run?: EnqueuedPipelineRun;
   readonly runError?: Error;
   readonly session?: { readonly user: { readonly id: string } } | null;
 } = {}) {
   const database = {} as DatabaseClient;
+  const availableComponents: readonly ComponentMetadata[] = [];
   const duplicatePipeline = vi.fn(async () => options.duplicated ?? pipeline);
   const enqueuePipelineRun = vi.fn(async () => {
     if (options.runError) throw options.runError;
@@ -132,7 +151,10 @@ function createDependencies(options: {
       runId: ids.run,
     };
   });
-  const enablePipelineForOwner = vi.fn(async () => ({ pipelineId: ids.pipeline, state: "enabled" }));
+  const enablePipelineForOwner = vi.fn(async () => {
+    if (options.enableError) throw options.enableError;
+    return { pipelineId: ids.pipeline, state: "enabled" };
+  });
   const disablePipelineForOwner = vi.fn(async () => {
     if (options.disableError) throw options.disableError;
     return { pipelineId: ids.pipeline, state: "disabled" };
@@ -140,6 +162,7 @@ function createDependencies(options: {
   const getPipeline = vi.fn(async () => options.getPipelineResult ?? pipeline);
 
   return {
+    availableComponents,
     database,
     disablePipelineForOwner: disablePipelineForOwner as never,
     duplicatePipeline: duplicatePipeline as never,

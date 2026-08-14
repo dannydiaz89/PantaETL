@@ -8,6 +8,7 @@ import { enqueuePipelineRun, loadPipelineSchedulerConfig } from "../../../../pip
 
 const schedulerConfig = loadPipelineSchedulerConfig();
 const handlers = createPipelineActionRouteHandlers({
+  availableComponents: [],
   database: controlPlaneDatabase,
   disablePipelineForOwner: async () => { throw new Error("Disable action is not available from this route."); },
   duplicatePipeline,

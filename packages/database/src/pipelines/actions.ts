@@ -4,36 +4,45 @@ import {
   pipelineIdSchema,
   pipelineStateSchema,
   userIdSchema,
+  type ComponentMetadata,
   type PipelineId,
   type PipelineState,
   type UserId,
 } from "@pantaetl/contracts";
 import {
+  PipelineNotExecutableError,
   PipelineStateTransitionError,
+  assertPipelineExecutable,
   createPipelineExecutionState,
   enqueuePipelineRun,
   setPipelineState,
+  type PipelineExecutableViolation,
+  type PipelineTopologyInput,
 } from "@pantaetl/pipeline";
 
 import type { DatabaseClient } from "../client.js";
 import { runs } from "../schema/execution.js";
-import { pipelines } from "../schema/pipelines.js";
+import { pipelineComponents, pipelineEdges, pipelines } from "../schema/pipelines.js";
 
 const activeRunStates = ["queued", "running"] as const;
 
 /** A reason an owner-scoped pipeline action cannot proceed. */
-export type PipelineActionConflictReason = "locked" | "not_enabled" | "not_found";
+export type PipelineActionConflictReason = "locked" | "not_enabled" | "not_executable" | "not_found";
 
 /** A safe, structured action failure that HTTP routes can map without parsing messages. */
 export class PipelineActionConflictError extends Error {
   /** Machine-readable reason for the rejected action. */
   readonly reason: PipelineActionConflictReason;
 
+  /** Every reason a pipeline failed executable validation, present only for `"not_executable"`. */
+  readonly violations?: readonly PipelineExecutableViolation[] | undefined;
+
   /** Creates a safe conflict error for an owner-scoped pipeline action. */
-  constructor(reason: PipelineActionConflictReason, message: string) {
+  constructor(reason: PipelineActionConflictReason, message: string, violations?: readonly PipelineExecutableViolation[]) {
     super(message);
     this.name = "PipelineActionConflictError";
     this.reason = reason;
+    this.violations = violations;
   }
 }
 
@@ -103,13 +112,20 @@ export async function runPipelineForOwner(
   }
 }
 
-/** Enable one idle pipeline after confirming it belongs to the authenticated owner. */
+/**
+ * Enable one idle pipeline after confirming it belongs to the authenticated owner.
+ *
+ * The supplied catalog is the deployment's currently available component metadata,
+ * checked against the persisted graph so a pipeline can never be enabled with a
+ * component, configuration, or secret binding the running deployment cannot execute.
+ */
 export async function enablePipelineForOwner(
   db: DatabaseClient,
   input: PipelineActionInput,
+  availableComponents: readonly ComponentMetadata[],
   now: Date = new Date(),
 ): Promise<PipelineStateActionResult> {
-  return setPipelineStateForOwner(db, input, "enabled", now);
+  return setPipelineStateForOwner(db, input, "enabled", now, availableComponents);
 }
 
 /** Disable one idle pipeline after confirming it belongs to the authenticated owner. */
@@ -121,12 +137,19 @@ export async function disablePipelineForOwner(
   return setPipelineStateForOwner(db, input, "disabled", now);
 }
 
-/** Atomically apply a user-facing availability state after enforcing the execution lock. */
+/**
+ * Atomically apply a user-facing availability state after enforcing the execution lock.
+ *
+ * Enabling additionally requires the persisted graph to pass executable validation
+ * against `availableComponents` before the state column is written, so a pipeline
+ * is never left half-transitioned by a rejected enable attempt.
+ */
 async function setPipelineStateForOwner(
   db: DatabaseClient,
   input: PipelineActionInput,
   state: Extract<PipelineState, "enabled" | "disabled">,
   now: Date,
+  availableComponents?: readonly ComponentMetadata[],
 ): Promise<PipelineStateActionResult> {
   const identifiers = parseActionInput(input);
 
@@ -171,6 +194,20 @@ async function setPipelineStateForOwner(
       throw error;
     }
 
+    if (state === "enabled") {
+      const topology = await readPipelineTopologyForExecutableCheck(transaction, identifiers.pipelineId);
+
+      try {
+        assertPipelineExecutable(topology, availableComponents ?? []);
+      } catch (error) {
+        if (error instanceof PipelineNotExecutableError) {
+          throw notExecutableConflict(error.violations);
+        }
+
+        throw error;
+      }
+    }
+
     await transaction
       .update(pipelines)
       .set({ state, updatedAt: now })
@@ -178,6 +215,34 @@ async function setPipelineStateForOwner(
 
     return { pipelineId: identifiers.pipelineId, state };
   });
+}
+
+/** Reads one pipeline's persisted graph, shaped for the pure executable-validation domain check. */
+async function readPipelineTopologyForExecutableCheck(
+  transaction: DatabaseClient,
+  pipelineId: PipelineId,
+): Promise<PipelineTopologyInput> {
+  const [components, edges] = await Promise.all([
+    transaction.select().from(pipelineComponents).where(eq(pipelineComponents.pipelineId, pipelineId)),
+    transaction.select().from(pipelineEdges).where(eq(pipelineEdges.pipelineId, pipelineId)),
+  ]);
+
+  return {
+    edges: edges.map((edge) => ({
+      fromStepId: edge.fromComponentId,
+      toStepId: edge.toComponentId,
+    })) as PipelineTopologyInput["edges"],
+    steps: components.map((component) => ({
+      componentType: component.componentType,
+      componentVersion: component.componentVersion,
+      configuration: {
+        secretBindings: component.secretBindings,
+        values: component.configurationValues,
+      },
+      id: component.id,
+      kind: component.kind,
+    })) as PipelineTopologyInput["steps"],
+  };
 }
 
 /** Parse route-boundary identifiers before they are used in owner-scoped queries. */
@@ -240,4 +305,13 @@ function notEnabledConflict(): PipelineActionConflictError {
 /** Return a route-safe conflict when queued or executing work locks a pipeline. */
 function lockedConflict(): PipelineActionConflictError {
   return new PipelineActionConflictError("locked", "The pipeline is locked while a run is queued or active.");
+}
+
+/** Return a route-safe conflict, carrying every violation, when a pipeline fails executable validation. */
+function notExecutableConflict(violations: readonly PipelineExecutableViolation[]): PipelineActionConflictError {
+  return new PipelineActionConflictError(
+    "not_executable",
+    "The pipeline is not executable and cannot be enabled.",
+    violations,
+  );
 }

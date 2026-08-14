@@ -6,6 +6,7 @@ import { auth, controlPlaneDatabase } from "../../../../auth/server.js";
 import { createPipelineActionRouteHandlers } from "../../../../pipeline-api/actions.js";
 
 const handlers = createPipelineActionRouteHandlers({
+  availableComponents: [],
   database: controlPlaneDatabase,
   disablePipelineForOwner,
   duplicatePipeline: async () => { throw new Error("Duplicate action is not available from this route."); },

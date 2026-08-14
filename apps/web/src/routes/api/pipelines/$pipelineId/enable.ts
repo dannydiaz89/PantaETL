@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { builtInComponentCapabilities } from "@pantaetl/contracts";
 import { disablePipelineForOwner, enablePipelineForOwner, getPipeline } from "@pantaetl/database";
 
 import { auth, controlPlaneDatabase } from "../../../../auth/server.js";
 import { createPipelineActionRouteHandlers } from "../../../../pipeline-api/actions.js";
 
 const handlers = createPipelineActionRouteHandlers({
+  availableComponents: builtInComponentCapabilities,
   database: controlPlaneDatabase,
   disablePipelineForOwner,
   duplicatePipeline: async () => { throw new Error("Duplicate action is not available from this route."); },

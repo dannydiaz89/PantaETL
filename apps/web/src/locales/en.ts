@@ -151,6 +151,7 @@ export const en = {
   "pipeline.delete.deleting": "Deleting pipeline",
   "pipeline.mutation.locked": "This pipeline now has a queued or active run. Wait for it to finish or cancel it before changing the configuration.",
   "pipeline.mutation.hasRunHistory": "This pipeline has retained run history and cannot be deleted.",
+  "pipeline.mutation.notExecutable": "This pipeline cannot be enabled yet because its configuration is incomplete or invalid. Review the Source, Transform, and Export steps and try again.",
   "pipeline.mutation.unauthenticated": "Your session has ended. Sign in again before changing pipelines.",
   "pipeline.mutation.network": "The pipeline service is unavailable. Check your connection and try again.",
   "pipeline.mutation.failed": "The pipeline change could not be saved. Try again.",

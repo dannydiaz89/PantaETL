@@ -43,4 +43,12 @@ describe("pipeline mutation UI", () => {
       "This pipeline now has a queued or active run. Wait for it to finish or cancel it before changing the configuration.",
     );
   });
+
+  it("maps a failed server-side executable check to an accessible localized message", () => {
+    const { t } = createI18n("en-US");
+
+    expect(getPipelineMutationErrorMessage(new PipelineApiError("pipeline_not_executable", 409), t)).toBe(
+      "This pipeline cannot be enabled yet because its configuration is incomplete or invalid. Review the Source, Transform, and Export steps and try again.",
+    );
+  });
 });

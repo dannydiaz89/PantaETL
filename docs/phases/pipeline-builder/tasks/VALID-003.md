@@ -1,7 +1,7 @@
 # VALID-003 — Enforce Executable Validation on Enable
 
-**Status:** BLOCKED
-**Owner:** Unassigned
+**Status:** COMPLETE
+**Owner:** Claude
 **Depends on:** VALID-002
 
 ## Scope
@@ -10,12 +10,12 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Acceptance criteria
 
-- [ ] Incomplete draft cannot enable.
-- [ ] Incompatible pipeline cannot enable.
-- [ ] Missing config cannot enable.
-- [ ] Missing required secret binding cannot enable.
-- [ ] Structured actionable API errors.
-- [ ] Frontend cannot bypass server validation.
+- [x] Incomplete draft cannot enable.
+- [x] Incompatible pipeline cannot enable.
+- [x] Missing config cannot enable.
+- [x] Missing required secret binding cannot enable.
+- [x] Structured actionable API errors.
+- [x] Frontend cannot bypass server validation.
 
 ## Required checks
 
@@ -30,4 +30,4 @@ Implement only this task. Inspect current code before adding abstractions; prese
 
 ## Notes / blockers
 
-None.
+`enablePipelineForOwner` now reads the pipeline's persisted graph inside the same transaction as the state check and runs `assertPipelineExecutable` (VALID-002) against the deployment's real component catalog before writing the new state, so a rejected enable never leaves the pipeline half-transitioned. `disablePipelineForOwner` is unchanged and never runs this check. A new `PipelineActionConflictReason` ("not_executable") carries the full violation list through to the HTTP boundary as `{ code: "pipeline_not_executable", violations: [...] }` with a 409, giving callers structured detail without this task designing a per-violation UI; the frontend message stays generic ("configuration is incomplete or invalid, review the steps and try again"). This is enforced entirely server-side in the database layer, so no frontend code path can bypass it.

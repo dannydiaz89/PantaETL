@@ -22,9 +22,9 @@ Before work: read `AGENTS.md`, phase docs, verify dependencies, mark task/row IN
 | BUILDER-007 | Reuse builder editors for existing pipelines | COMPLETE | BUILDER-006 | Claude |
 | VALID-001 | Compatibility-aware component selection | COMPLETE | CAP-004, BUILDER-003 | Claude |
 | VALID-002 | Separate draft validation from executable validation | COMPLETE | BUILDER-005 | Claude |
-| VALID-003 | Enforce executable validation on enable | IN PROGRESS | VALID-002 | Claude |
+| VALID-003 | Enforce executable validation on enable | COMPLETE | VALID-002 | Claude |
 | VALID-004 | Preserve unsaved builder state on lock conflicts | COMPLETE | BUILDER-006 | Claude |
-| TRIGGER-001 | Replace read-only trigger panel with pipeline trigger editor | READY | BUILDER-007 | Unassigned |
+| TRIGGER-001 | Replace read-only trigger panel with pipeline trigger editor | IN PROGRESS | BUILDER-007 | Claude |
 | E2E-001 | Real create/configure/save/reload browser workflow | BLOCKED | BUILDER-007, VALID-003 | Unassigned |
 | E2E-002 | Enable/run/lock/duplicate/delete browser workflow | BLOCKED | E2E-001, VALID-004 | Unassigned |
 | CLEAN-001 | Remove obsolete CSV-specific creation and fixtures | BLOCKED | E2E-002 | Unassigned |

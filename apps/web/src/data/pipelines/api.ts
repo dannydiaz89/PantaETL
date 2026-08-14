@@ -21,6 +21,7 @@ export type PipelineApiErrorCode =
   | "pipeline_has_run_history"
   | "pipeline_locked"
   | "pipeline_not_enabled"
+  | "pipeline_not_executable"
   | "pipeline_not_found"
   | "unauthenticated"
   | "unknown_error";
@@ -177,6 +178,7 @@ function isPipelineApiErrorCode(value: unknown): value is { readonly code: Pipel
     "pipeline_has_run_history",
     "pipeline_locked",
     "pipeline_not_enabled",
+    "pipeline_not_executable",
     "pipeline_not_found",
   ].includes(value.code);
 }
