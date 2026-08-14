@@ -114,6 +114,16 @@ export function PipelineBuilderWizard({
   );
   const saveInFlight = useRef(false);
 
+  /** Names what a step has collected so the progress list reads as a summary of the pipeline so far. */
+  function stepSummary(candidate: PipelineBuilderStep): string | undefined {
+    if (candidate === "transforms") {
+      return draft.transforms.length === 0 ? undefined : String(draft.transforms.length);
+    }
+
+    const selection = candidate === "source" ? draft.source : draft.export;
+    return selection === undefined ? undefined : t(selection.metadata.displayNameKey as TranslationKey);
+  }
+
   async function save(): Promise<void> {
     if (!canSave || isSaving || saveInFlight.current) return;
     saveInFlight.current = true;
@@ -230,6 +240,7 @@ export function PipelineBuilderWizard({
       <ol aria-label={t("pipeline.builder.progressLabel")} className="pipeline-builder__steps">
         {PIPELINE_BUILDER_STEPS.map((candidate, index) => {
           const status: StepStatus = candidate === step ? "current" : index < currentIndex ? "completed" : "upcoming";
+          const summary = stepSummary(candidate);
 
           return (
             <li
@@ -242,7 +253,7 @@ export function PipelineBuilderWizard({
               </span>
               <span className="pipeline-builder__step-label">
                 {t(STEP_LABEL_KEYS[candidate])}
-                <small className="pipeline-builder__step-status">{t(STEP_STATUS_KEYS[status])}</small>
+                <small className="pipeline-builder__step-status">{summary ?? t(STEP_STATUS_KEYS[status])}</small>
               </span>
             </li>
           );
@@ -255,6 +266,7 @@ export function PipelineBuilderWizard({
         {step === "source" ? (
           <ComponentPickerConfiguration
             kind="source"
+            sectionLabels={{ configure: "pipeline.builder.section.source.configure", select: "pipeline.builder.section.source.select" }}
             onSelect={changeSource}
             onValuesChange={changeSourceValues}
             selected={draft.source?.metadata}
@@ -275,6 +287,7 @@ export function PipelineBuilderWizard({
           <ComponentPickerConfiguration
             getOptionState={compatibilityOptionState}
             kind="export"
+            sectionLabels={{ configure: "pipeline.builder.section.export.configure", select: "pipeline.builder.section.export.select" }}
             onSelect={changeExport}
             onValuesChange={changeExportValues}
             selected={draft.export?.metadata}
@@ -288,27 +301,28 @@ export function PipelineBuilderWizard({
       )}
 
       <div className="pipeline-builder__actions">
+        {previousStep === undefined ? null : (
+          <Button onClick={() => setStep(previousStep)} type="button" variant="secondary">
+            {t("pipeline.builder.back")}
+          </Button>
+        )}
+        {nextStep !== undefined ? null : (
+          <p aria-live="polite" className="pipeline-builder__readiness" role="status">
+            {t(isPipelineBuilderDraftComplete(draft) ? "pipeline.builder.readiness.complete" : "pipeline.builder.readiness.incomplete")}
+          </p>
+        )}
         <div className="pipeline-builder__actions-nav">
-          {previousStep === undefined ? null : (
-            <Button onClick={() => setStep(previousStep)} type="button" variant="secondary">
-              {t("pipeline.builder.back")}
+          {onCreate === undefined && onUpdate === undefined ? null : (
+            <Button disabled={!canSave || isSaving} onClick={() => void save()} type="button" variant="secondary">
+              {isSaving ? t("pipeline.builder.saving") : t("pipeline.builder.save")}
             </Button>
           )}
-          {nextStep === undefined ? (
-            <p aria-live="polite" className="pipeline-builder__readiness" role="status">
-              {t(isPipelineBuilderDraftComplete(draft) ? "pipeline.builder.readiness.complete" : "pipeline.builder.readiness.incomplete")}
-            </p>
-          ) : (
+          {nextStep === undefined ? null : (
             <Button onClick={() => setStep(nextStep)} type="button">
               {t("pipeline.builder.next")}
             </Button>
           )}
         </div>
-        {onCreate === undefined && onUpdate === undefined ? null : (
-          <Button disabled={!canSave || isSaving} onClick={() => void save()} type="button" variant="secondary">
-            {isSaving ? t("pipeline.builder.saving") : t("pipeline.builder.save")}
-          </Button>
-        )}
       </div>
     </section>
   );

@@ -7,6 +7,7 @@ import { useComponentCapabilityListQuery } from "../../data/components/index.js"
 import { useI18n } from "../../locale-provider.js";
 import type { TranslationKey } from "../../locales/en.js";
 import { ComponentConfigurationForm } from "./component-configuration-form.js";
+import { ComponentLogo } from "./component-logo.js";
 
 /** Safe presentation state for one capability that the caller has determined cannot be selected. */
 export interface ComponentPickerOptionState {
@@ -66,6 +67,11 @@ export function ComponentCapabilityPicker({
 export interface ComponentPickerConfigurationProps extends ComponentCapabilityPickerProps {
   /** Prevents configuration edits while retaining the selected metadata details. */
   readonly disabled?: boolean;
+  /** Numbers and titles the two sections when the surrounding step presents them as an ordered sequence. */
+  readonly sectionLabels?: {
+    readonly configure: TranslationKey;
+    readonly select: TranslationKey;
+  };
   /** Current selected component's ordinary configuration values. */
   readonly values: ComponentConfiguration["values"];
   /** Receives generic configuration values for the current selected component. */
@@ -79,24 +85,46 @@ export function ComponentPickerConfiguration({
   kind,
   onSelect,
   onValuesChange,
+  sectionLabels,
   selected,
   values,
 }: ComponentPickerConfigurationProps) {
+  const { t } = useI18n();
+  const picker = (
+    <ComponentCapabilityPicker
+      getOptionState={getOptionState}
+      kind={kind}
+      onSelect={onSelect}
+      selected={selected}
+    />
+  );
+  const configuration = selected?.kind !== kind ? null : (
+    <ComponentConfigurationForm
+      disabled={disabled}
+      metadata={selected}
+      onChange={onValuesChange}
+      values={values}
+    />
+  );
+
+  if (sectionLabels === undefined) {
+    return <div className="component-picker-configuration">{picker}{configuration}</div>;
+  }
+
   return (
     <div className="component-picker-configuration">
-      <ComponentCapabilityPicker
-        getOptionState={getOptionState}
-        kind={kind}
-        onSelect={onSelect}
-        selected={selected}
-      />
-      {selected?.kind !== kind ? null : (
-        <ComponentConfigurationForm
-          disabled={disabled}
-          metadata={selected}
-          onChange={onValuesChange}
-          values={values}
-        />
+      <section className="pipeline-builder__section">
+        <h2 className="pipeline-builder__section-title">{t(sectionLabels.select)}</h2>
+        {picker}
+      </section>
+      {configuration === null || selected === undefined ? null : (
+        <section className="pipeline-builder__section">
+          <h2 className="pipeline-builder__section-title">
+            {t(sectionLabels.configure)}
+            <span className="pipeline-builder__section-subject">{translateMetadataKey(t, selected.displayNameKey)}</span>
+          </h2>
+          {configuration}
+        </section>
       )}
     </div>
   );
@@ -131,7 +159,7 @@ export function ComponentPicker({
         )}
       </Field>
       {filtered.length === 0 ? <p className="component-picker__status" role="status">{t("component.picker.noMatches")}</p> : (
-        <ul className="component-picker__list">
+        <ul className="component-picker__grid">
           {filtered.map((component) => {
             const optionState = getOptionState(component);
             const reasonId = `component-reason-${component.type.replaceAll(".", "-")}`;
@@ -148,6 +176,7 @@ export function ComponentPicker({
                   type="button"
                   variant="secondary"
                 >
+                  <ComponentLogo component={component} />
                   <span className="component-picker__option-copy">
                     <strong>{translateMetadataKey(t, component.displayNameKey)}</strong>
                     <span>{translateMetadataKey(t, component.descriptionKey)}</span>
