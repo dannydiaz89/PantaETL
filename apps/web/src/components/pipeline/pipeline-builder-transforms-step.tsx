@@ -4,11 +4,13 @@ import { Button } from "@pantaetl/ui";
 import { useI18n } from "../../locale-provider.js";
 import type { TranslationKey } from "../../locales/en.js";
 import { ComponentConfigurationForm } from "./component-configuration-form.js";
-import { ComponentCapabilityPicker } from "./component-picker.js";
+import { ComponentCapabilityPicker, type ComponentPickerOptionState } from "./component-picker.js";
 import type { PipelineBuilderComponentSelection } from "./pipeline-builder-draft.js";
 
 /** Properties accepted by the Transforms wizard step. */
 export interface PipelineBuilderTransformsStepProps {
+  /** Determines whether a candidate next Transform is compatible with the current chain, and why not. */
+  readonly getOptionState?: (component: ComponentMetadata) => ComponentPickerOptionState;
   /** Adds a new Transform instance at the end of the list. */
   readonly onAdd: (metadata: ComponentMetadata) => void;
   /** Moves one existing Transform earlier or later without changing its identity. */
@@ -26,7 +28,7 @@ export interface PipelineBuilderTransformsStepProps {
  * configuration, remove control, and keyboard-operable reorder controls, followed by
  * a picker for adding another Transform from the capability catalog.
  */
-export function PipelineBuilderTransformsStep({ onAdd, onMove, onRemove, onValuesChange, transforms }: PipelineBuilderTransformsStepProps) {
+export function PipelineBuilderTransformsStep({ getOptionState, onAdd, onMove, onRemove, onValuesChange, transforms }: PipelineBuilderTransformsStepProps) {
   const { t } = useI18n();
 
   return (
@@ -74,7 +76,7 @@ export function PipelineBuilderTransformsStep({ onAdd, onMove, onRemove, onValue
 
       <div className="pipeline-builder-transforms__add">
         <h2>{t("pipeline.builder.transform.addLabel")}</h2>
-        <ComponentCapabilityPicker kind="transform" onSelect={onAdd} selected={undefined} />
+        <ComponentCapabilityPicker getOptionState={getOptionState} kind="transform" onSelect={onAdd} selected={undefined} />
       </div>
     </div>
   );

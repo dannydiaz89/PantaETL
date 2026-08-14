@@ -6,6 +6,7 @@ import { Button, Check, Field, Icon, Input } from "@pantaetl/ui";
 import { useI18n } from "../../locale-provider.js";
 import type { TranslationKey } from "../../locales/en.js";
 import { ComponentPickerConfiguration } from "./component-picker.js";
+import { createPipelineBuilderCompatibilityResolver } from "./pipeline-builder-compatibility.js";
 import {
   addPipelineBuilderTransform,
   createEmptyPipelineBuilderDraft,
@@ -13,6 +14,7 @@ import {
   markPipelineBuilderDraftSaved,
   movePipelineBuilderTransform,
   nextPipelineBuilderStep,
+  pipelineBuilderChainTail,
   PIPELINE_BUILDER_STEPS,
   previousPipelineBuilderStep,
   removePipelineBuilderTransform,
@@ -106,6 +108,10 @@ export function PipelineBuilderWizard({
   const nextStep = nextPipelineBuilderStep(step);
   const previousStep = previousPipelineBuilderStep(step);
   const canSave = isPipelineBuilderDraftPersistable(draft) && (pipelineId === undefined ? onCreate : onUpdate) !== undefined;
+  const compatibilityOptionState = createPipelineBuilderCompatibilityResolver(
+    pipelineBuilderChainTail(draft),
+    t("pipeline.builder.compatibility.incompatible"),
+  );
 
   async function save(): Promise<void> {
     if (!canSave || isSaving) return;
@@ -253,6 +259,7 @@ export function PipelineBuilderWizard({
         ) : null}
         {step === "transforms" ? (
           <PipelineBuilderTransformsStep
+            getOptionState={compatibilityOptionState}
             onAdd={addTransform}
             onMove={moveTransform}
             onRemove={removeTransform}
@@ -262,6 +269,7 @@ export function PipelineBuilderWizard({
         ) : null}
         {step === "export" ? (
           <ComponentPickerConfiguration
+            getOptionState={compatibilityOptionState}
             kind="export"
             onSelect={changeExport}
             onValuesChange={changeExportValues}

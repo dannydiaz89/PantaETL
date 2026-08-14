@@ -13,8 +13,8 @@ import { en } from "../src/locales/en.js";
 function renderWizard(props: Omit<PipelineBuilderWizardProps, "onDraftChange"> = {}): string {
   const queryClient = new QueryClient();
   queryClient.setQueryData(componentCapabilityQueryKeys.list({ kind: "source" }), { components: [csvSource, restSource] });
-  queryClient.setQueryData(componentCapabilityQueryKeys.list({ kind: "transform" }), { components: [limitTransform] });
-  queryClient.setQueryData(componentCapabilityQueryKeys.list({ kind: "export" }), { components: [jsonExport] });
+  queryClient.setQueryData(componentCapabilityQueryKeys.list({ kind: "transform" }), { components: [limitTransform, documentTransform] });
+  queryClient.setQueryData(componentCapabilityQueryKeys.list({ kind: "export" }), { components: [jsonExport, documentExport] });
 
   return renderToStaticMarkup(
     <QueryClientProvider client={queryClient}>
@@ -185,6 +185,39 @@ describe("PipelineBuilderWizard", () => {
     expect(markup).toContain("Could not save this pipeline.");
     expect(markup).toContain('value="Orders sync"');
   });
+
+  it("leaves every Transform option enabled before a Source is selected", () => {
+    const markup = renderWizard({ initialStep: "transforms" });
+
+    expect(markup).not.toContain(en["pipeline.builder.compatibility.incompatible"]);
+    expect(markup).not.toContain("disabled=\"\"");
+  });
+
+  it("disables only the Transform option incompatible with the selected Source, with a localized reason", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = setPipelineBuilderSource(draft, csvSource, () => "source-id");
+
+    const markup = renderWizard({ initialDraft: draft, initialStep: "transforms" });
+
+    expect(markup).toContain(en["components.transforms.rows.limit.name"]);
+    expect(markup).toContain(en["components.transforms.document.flatten.name"]);
+    expect(markup).toContain(en["pipeline.builder.compatibility.incompatible"]);
+    expect(markup.split("disabled=\"\"").length - 1).toBe(1);
+  });
+
+  it("re-evaluates Export compatibility against the chain tail after a Transform changes it", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = setPipelineBuilderSource(draft, csvSource, () => "source-id");
+
+    const beforeTransform = renderWizard({ initialDraft: draft, initialStep: "export" });
+    expect(beforeTransform).toContain('aria-describedby="component-reason-export-postgres"');
+    expect(beforeTransform).not.toContain('aria-describedby="component-reason-export-json"');
+
+    draft = addPipelineBuilderTransform(draft, tabularToDocumentTransform, () => "t1");
+    const afterTransform = renderWizard({ initialDraft: draft, initialStep: "export" });
+    expect(afterTransform).toContain('aria-describedby="component-reason-export-json"');
+    expect(afterTransform).not.toContain('aria-describedby="component-reason-export-postgres"');
+  });
 });
 
 const persistedPipeline: Pipeline = {
@@ -249,5 +282,38 @@ const jsonExport: ComponentMetadata = {
   kind: "export",
   outputFamilies: [],
   type: "export.json",
+  version: "v1",
+};
+
+const documentTransform: ComponentMetadata = {
+  configFields: [],
+  descriptionKey: "components.transforms.document.flatten.description",
+  displayNameKey: "components.transforms.document.flatten.name",
+  inputFamilies: ["document"],
+  kind: "transform",
+  outputFamilies: ["tabular"],
+  type: "transform.document.flatten",
+  version: "v1",
+};
+
+const tabularToDocumentTransform: ComponentMetadata = {
+  configFields: [],
+  descriptionKey: "components.transforms.document.flatten.description",
+  displayNameKey: "components.transforms.document.flatten.name",
+  inputFamilies: ["tabular"],
+  kind: "transform",
+  outputFamilies: ["document"],
+  type: "transform.tabular-to-document",
+  version: "v1",
+};
+
+const documentExport: ComponentMetadata = {
+  configFields: [{ key: "connectionUrl", labelKey: "components.exports.postgres.connectionUrl", required: true, secret: true, type: "text" }],
+  descriptionKey: "components.exports.postgres.description",
+  displayNameKey: "components.exports.postgres.name",
+  inputFamilies: ["document"],
+  kind: "export",
+  outputFamilies: [],
+  type: "export.postgres",
   version: "v1",
 };

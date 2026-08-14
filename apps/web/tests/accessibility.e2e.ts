@@ -365,6 +365,109 @@ test("pipeline editor reuses the wizard's Source, Transforms, and Export editors
   await expectNoAccessibilityViolations(page);
 });
 
+test("pipeline editor disables Transform and Export options incompatible with the current chain, with a reason", async ({ page }) => {
+  const csvSource: ComponentMetadata = {
+    configFields: [{ key: "path", labelKey: "components.sources.csv.sourcePath", required: true, secret: false, type: "text" }],
+    descriptionKey: "components.sources.csv.description",
+    displayNameKey: "components.sources.csv.name",
+    inputFamilies: [],
+    kind: "source",
+    outputFamilies: ["tabular"],
+    type: "source.csv",
+    version: "v1",
+  };
+  const limitTransform: ComponentMetadata = {
+    configFields: [],
+    descriptionKey: "components.transforms.rows.limit.description",
+    displayNameKey: "components.transforms.rows.limit.name",
+    inputFamilies: ["tabular"],
+    kind: "transform",
+    outputFamilies: ["tabular"],
+    type: "transform.limit",
+    version: "v1",
+  };
+  const documentTransform: ComponentMetadata = {
+    configFields: [],
+    descriptionKey: "components.transforms.document.flatten.description",
+    displayNameKey: "components.transforms.document.flatten.name",
+    inputFamilies: ["document"],
+    kind: "transform",
+    outputFamilies: ["tabular"],
+    type: "transform.document.flatten",
+    version: "v1",
+  };
+  const jsonExport: ComponentMetadata = {
+    configFields: [{ key: "fileName", labelKey: "components.exports.json.fileName", required: true, secret: false, type: "text" }],
+    descriptionKey: "components.exports.json.description",
+    displayNameKey: "components.exports.json.name",
+    inputFamilies: ["tabular"],
+    kind: "export",
+    outputFamilies: [],
+    type: "export.json",
+    version: "v1",
+  };
+  const pipeline: Pipeline = {
+    contractVersion: "v1",
+    createdAt: "2026-08-13T12:00:00.000Z",
+    edges: [{ fromStepId: "d33e4567-e89b-12d3-a456-426614174002", toStepId: "d33e4567-e89b-12d3-a456-426614174003" }],
+    id: "d33e4567-e89b-12d3-a456-426614174001",
+    name: "Idle pipeline",
+    ownerUserId: "d33e4567-e89b-12d3-a456-426614174004",
+    state: "enabled",
+    steps: [
+      {
+        componentType: "source.csv",
+        componentVersion: "v1",
+        configuration: { secretBindings: [], values: { path: "orders.csv" } },
+        id: "d33e4567-e89b-12d3-a456-426614174002",
+        kind: "source",
+      },
+      {
+        componentType: "export.json",
+        componentVersion: "v1",
+        configuration: { secretBindings: [], values: { fileName: "orders.json" } },
+        id: "d33e4567-e89b-12d3-a456-426614174003",
+        kind: "export",
+      },
+    ],
+    triggers: [],
+    updatedAt: "2026-08-13T12:00:00.000Z",
+  };
+
+  await page.route("**/api/components**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path !== "/api/components") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({ body: JSON.stringify({ components: [csvSource, limitTransform, documentTransform, jsonExport] }), contentType: "application/json" });
+  });
+
+  await page.route("**/api/pipelines**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    if (path === "/api/pipelines" && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify({ pipelines: [pipeline] }), contentType: "application/json" });
+      return;
+    }
+    if (path === `/api/pipelines/${pipeline.id}` && request.method() === "GET") {
+      await route.fulfill({ body: JSON.stringify(pipeline), contentType: "application/json" });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/pipelines");
+  await waitForApplication(page);
+
+  await page.getByRole("tab", { name: en["pipeline.tab.transforms"] }).click();
+  const incompatibleOption = page.getByRole("button", { name: en["components.transforms.document.flatten.name"] });
+  await expect(incompatibleOption).toBeDisabled();
+  await expect(page.getByText(en["pipeline.builder.compatibility.incompatible"])).toBeVisible();
+  await expect(page.getByRole("button", { name: en["components.transforms.rows.limit.name"] })).toBeEnabled();
+  await expectNoAccessibilityViolations(page);
+});
+
 test("pipeline create and deletion keep controls accessible and reconcile the workspace", async ({ page }) => {
   let pipelines: Pipeline[] = [persistedPipeline];
   let pipeline = persistedPipeline;

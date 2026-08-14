@@ -142,6 +142,7 @@ export const en = {
   "pipeline.builder.save": "Save draft",
   "pipeline.builder.saving": "Saving draft",
   "pipeline.builder.resume.loading": "Loading your in-progress pipeline draft.",
+  "pipeline.builder.compatibility.incompatible": "This component cannot receive data from the previous step in this pipeline.",
   "pipeline.delete.open": "Delete pipeline",
   "pipeline.delete.title": "Delete this pipeline?",
   "pipeline.delete.description": "This permanently removes the pipeline configuration. Pipelines with active runs or retained run history cannot be deleted.",

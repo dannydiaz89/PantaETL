@@ -6,12 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@pantaetl/ui";
 import { useComponentCapabilityListQuery } from "../../data/components/index.js";
 import { useI18n } from "../../locale-provider.js";
 import { ComponentPickerConfiguration } from "./component-picker.js";
+import { createPipelineBuilderCompatibilityResolver } from "./pipeline-builder-compatibility.js";
 import { PipelineDeleteConfirmation } from "./pipeline-delete-confirmation.js";
 import { PipelineHistoryPanel } from "./pipeline-history-panel.js";
 import { PipelineOverviewPanel } from "./pipeline-overview-panel.js";
 import {
   addPipelineBuilderTransform,
   movePipelineBuilderTransform,
+  pipelineBuilderChainTail,
   removePipelineBuilderTransform,
   setPipelineBuilderExport,
   setPipelineBuilderExportValues,
@@ -80,6 +82,11 @@ export function PipelineEditor({
   function updateGraphDraft(updater: (draft: PipelineBuilderDraft) => PipelineBuilderDraft): void {
     setGraphDraft((current) => (current === undefined ? current : updater(current)));
   }
+
+  const compatibilityOptionState = createPipelineBuilderCompatibilityResolver(
+    graphDraft === undefined ? undefined : pipelineBuilderChainTail(graphDraft),
+    t("pipeline.builder.compatibility.incompatible"),
+  );
 
   function saveDraft(): void {
     setSubmitted(true);
@@ -154,6 +161,7 @@ export function PipelineEditor({
             <div className="pipeline-tab-panel">
               <p>{t("pipeline.transforms.description")}</p>
               <PipelineBuilderTransformsStep
+                getOptionState={compatibilityOptionState}
                 onAdd={(metadata) => updateGraphDraft((draft) => addPipelineBuilderTransform(draft, metadata))}
                 onMove={(id, direction) => updateGraphDraft((draft) => movePipelineBuilderTransform(draft, id, direction))}
                 onRemove={(id) => updateGraphDraft((draft) => removePipelineBuilderTransform(draft, id))}
@@ -170,6 +178,7 @@ export function PipelineEditor({
             <div className="pipeline-tab-panel">
               <p>{t("pipeline.export.description")}</p>
               <ComponentPickerConfiguration
+                getOptionState={compatibilityOptionState}
                 kind="export"
                 onSelect={(metadata) => updateGraphDraft((draft) => setPipelineBuilderExport(draft, metadata))}
                 onValuesChange={(values) => updateGraphDraft((draft) => setPipelineBuilderExportValues(draft, values))}

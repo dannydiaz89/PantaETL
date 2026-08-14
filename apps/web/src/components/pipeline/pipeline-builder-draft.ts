@@ -111,6 +111,11 @@ export function isPipelineBuilderDraftComplete(draft: PipelineBuilderDraft): boo
   return draft.source !== undefined && draft.export !== undefined;
 }
 
+/** The last component currently in the linear chain (the last Transform, else the Source), the upstream compatibility boundary for whatever is chosen next. */
+export function pipelineBuilderChainTail(draft: PipelineBuilderDraft): ComponentMetadata | undefined {
+  return draft.transforms.at(-1)?.metadata ?? draft.source?.metadata;
+}
+
 /** Clears the dirty flag after a successful save without otherwise changing the draft. */
 export function markPipelineBuilderDraftSaved(draft: PipelineBuilderDraft): PipelineBuilderDraft {
   return { ...draft, dirty: false };

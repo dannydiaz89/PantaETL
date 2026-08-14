@@ -8,6 +8,7 @@ import {
   movePipelineBuilderTransform,
   nextPipelineBuilderComponentSelection,
   nextPipelineBuilderStep,
+  pipelineBuilderChainTail,
   PIPELINE_BUILDER_STEPS,
   previousPipelineBuilderStep,
   removePipelineBuilderTransform,
@@ -188,6 +189,26 @@ describe("pipeline builder draft model", () => {
 
     draft = setPipelineBuilderExport(draft, jsonExport, () => "export-id");
     expect(isPipelineBuilderDraftComplete(draft)).toBe(true);
+  });
+
+  it("has no chain tail for an empty draft", () => {
+    expect(pipelineBuilderChainTail(createEmptyPipelineBuilderDraft())).toBeUndefined();
+  });
+
+  it("uses the Source as the chain tail until a Transform is added", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = setPipelineBuilderSource(draft, csvSource, () => "source-id");
+
+    expect(pipelineBuilderChainTail(draft)).toEqual(csvSource);
+  });
+
+  it("uses the last added Transform as the chain tail", () => {
+    let draft = createEmptyPipelineBuilderDraft();
+    draft = setPipelineBuilderSource(draft, csvSource, () => "source-id");
+    draft = addPipelineBuilderTransform(draft, limitTransform, () => "t1");
+    draft = addPipelineBuilderTransform(draft, fillNullTransform, () => "t2");
+
+    expect(pipelineBuilderChainTail(draft)).toEqual(fillNullTransform);
   });
 });
 
