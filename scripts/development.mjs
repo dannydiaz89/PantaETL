@@ -16,6 +16,7 @@ const repositoryRoot = path.resolve(
 );
 const localRuntimeDirectory = path.join(repositoryRoot, ".pantaetl");
 const stackStatePath = path.join(localRuntimeDirectory, "local-stack.json");
+const localStorageRoot = path.join(localRuntimeDirectory, "storage");
 const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 const docker = process.platform === "win32" ? "docker.exe" : "docker";
 
@@ -413,6 +414,24 @@ async function checkGeneratedArtifacts() {
   await run("uv", ["run", "python", "scripts/generate_component_capability_catalog.py", "--check"]);
 }
 
+/**
+ * Point locally supervised services at a storage root this machine can write.
+ *
+ * The packaged default lives under /var/lib, which a developer account cannot
+ * create. Every service reads and writes the same tree, so they must agree: the
+ * uploads one service accepts are the files another service later reads. An
+ * explicit STORAGE_ROOT is left alone, so pointing the stack at a shared or
+ * pre-seeded location stays possible.
+ */
+async function useLocalStorageRoot() {
+  if (process.env.STORAGE_ROOT?.trim()) {
+    return;
+  }
+
+  await mkdir(path.join(localStorageRoot, "imports"), { recursive: true });
+  process.env.STORAGE_ROOT = localStorageRoot;
+}
+
 /** Start Docker PostgreSQL, migrate it, then supervise all local services. */
 async function startStack() {
   await requireLocalDatabaseEnvironment();
@@ -439,6 +458,8 @@ async function startStack() {
       { cause: error },
     );
   }
+
+  await useLocalStorageRoot();
 
   const children = services.map(startService);
   await mkdir(localRuntimeDirectory, { recursive: true });

@@ -14,6 +14,15 @@ export const Route = createFileRoute("/api/uploads")({
       createStagedUpload,
       database: controlPlaneDatabase,
       getSession: (request) => getApiSession(request.headers),
+      onStorageFailure: (error) => {
+        // The response deliberately withholds the cause, so the operator needs it here.
+        console.log(JSON.stringify({
+          level: "error",
+          message: "Internal storage rejected an upload.",
+          reason: error instanceof Error ? error.message : "unknown",
+          storageRoot: resolveStorageRoot(),
+        }));
+      },
       storage: new LocalImportStorage(resolveStorageRoot()),
     }),
   },

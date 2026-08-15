@@ -289,6 +289,7 @@ export const en = {
   "component.form.upload.error.tooLarge": "The file is larger than this deployment accepts.",
   "component.form.upload.error.unauthenticated": "Your session has ended. Sign in again to upload.",
   "component.form.upload.error.unsupportedType": "No source can read this file type. Supported types are CSV, TSV, JSON, and Excel workbooks.",
+  "component.form.upload.error.storageUnavailable": "This deployment's internal storage is not writable, so the file was not kept. An administrator needs to check the configured storage location.",
   "component.form.upload.error.unknown": "The file could not be uploaded.",
   "component.secret.configured": "A secret is configured. Enter a replacement only if it needs to change.",
   "component.secret.notConfigured": "No secret is configured yet.",

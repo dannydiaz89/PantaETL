@@ -1,7 +1,7 @@
 import { sourceUploadResponseSchema } from "@pantaetl/contracts";
 import { createStagedUpload, type DatabaseClient } from "@pantaetl/database";
 
-import type { LocalImportStorage } from "./import-storage.js";
+import type { LocalImportStorage, StoredImport } from "./import-storage.js";
 
 /** The largest file the control plane will accept in one upload. */
 export const MAXIMUM_UPLOAD_BYTES = 100 * 1024 * 1024;
@@ -39,6 +39,8 @@ export interface SourceUploadRouteDependencies {
   readonly storage: Pick<LocalImportStorage, "store">;
   /** Supplies the current time, so expiry is testable. */
   readonly now?: () => Date;
+  /** Records why internal storage rejected a write, which the response deliberately omits. */
+  readonly onStorageFailure?: (error: unknown) => void;
 }
 
 /** Request context required by the upload route's server handler. */
@@ -53,6 +55,11 @@ export interface SourceUploadRouteContext {
  * nothing would be indistinguishable from one whose file retention already
  * collected. Every accepted file carries an owner and an expiry, so a staged
  * file that no pipeline ever references is reclaimed rather than accumulating.
+ *
+ * A storage root the deployment cannot write is a configuration fault, not a
+ * bad request, and is reported as its own condition so the operator is not left
+ * blaming the file. No metadata row is written when the file was not, so
+ * retention never points at something that does not exist.
  */
 export function createSourceUploadRouteHandlers(dependencies: SourceUploadRouteDependencies) {
   const now = dependencies.now ?? (() => new Date());
@@ -83,7 +90,14 @@ export function createSourceUploadRouteHandlers(dependencies: SourceUploadRouteD
         return uploadRejectedResponse("upload_too_large", 413);
       }
 
-      const stored = await dependencies.storage.store(file.name, contents);
+      let stored: StoredImport;
+      try {
+        stored = await dependencies.storage.store(file.name, contents);
+      } catch (error) {
+        dependencies.onStorageFailure?.(error);
+        return uploadRejectedResponse("upload_storage_unavailable", 503);
+      }
+
       const expiresAt = new Date(now().getTime() + UPLOAD_RETENTION_HOURS * 60 * 60 * 1000);
 
       await dependencies.createStagedUpload(dependencies.database, {

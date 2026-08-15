@@ -7,6 +7,7 @@ export type SourceUploadApiErrorCode =
   | "unauthenticated"
   | "unknown_error"
   | "unsupported_upload_type"
+  | "upload_storage_unavailable"
   | "upload_too_large";
 
 /** Structured HTTP failure that lets feature UI select a localized message. */
@@ -77,6 +78,7 @@ function uploadErrorCode(status: number): SourceUploadApiErrorCode {
   if (status === 401) return "unauthenticated";
   if (status === 413) return "upload_too_large";
   if (status === 415) return "unsupported_upload_type";
+  if (status === 503) return "upload_storage_unavailable";
   return "unknown_error";
 }
 

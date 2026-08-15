@@ -17,6 +17,7 @@ const UPLOAD_ERROR_KEYS: Readonly<Record<SourceUploadApiErrorCode, TranslationKe
   unauthenticated: "component.form.upload.error.unauthenticated",
   unknown_error: "component.form.upload.error.unknown",
   unsupported_upload_type: "component.form.upload.error.unsupportedType",
+  upload_storage_unavailable: "component.form.upload.error.storageUnavailable",
   upload_too_large: "component.form.upload.error.tooLarge",
 };
 

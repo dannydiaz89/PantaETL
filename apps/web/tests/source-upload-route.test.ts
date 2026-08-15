@@ -95,6 +95,30 @@ describe("source upload route", () => {
     await expect(readdir(join(storageRoot, IMPORT_DIRECTORY, "uploads"))).rejects.toThrow();
   });
 
+  it("reports an unwritable storage root as its own fault, not a bad file", async () => {
+    const dependencies = await createDependencies();
+    const failure = new Error("EACCES: permission denied, mkdir '/var/lib/pantaetl'");
+    dependencies.storage.store.mockRejectedValueOnce(failure);
+    const onStorageFailure = vi.fn();
+
+    const response = await createSourceUploadRouteHandlers({ ...dependencies, onStorageFailure })
+      .POST({ request: uploadRequest("orders.csv", "id,total\n1,2\n") });
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({ code: "upload_storage_unavailable" });
+    expect(onStorageFailure).toHaveBeenCalledWith(failure);
+  });
+
+  it("records no metadata for a file that was never written", async () => {
+    const dependencies = await createDependencies();
+    dependencies.storage.store.mockRejectedValueOnce(new Error("storage is full"));
+
+    await createSourceUploadRouteHandlers(dependencies)
+      .POST({ request: uploadRequest("orders.csv", "id,total\n1,2\n") });
+
+    expect(dependencies.createStagedUpload).not.toHaveBeenCalled();
+  });
+
   it("treats a request carrying no file as invalid input", async () => {
     const dependencies = await createDependencies();
     const handlers = createSourceUploadRouteHandlers(dependencies);
