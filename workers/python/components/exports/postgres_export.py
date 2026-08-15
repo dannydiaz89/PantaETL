@@ -25,6 +25,8 @@ POSTGRES_EXPORT_METADATA = ComponentMetadata.model_validate(
                 "key": "targetTable",
                 "type": "text",
                 "labelKey": "components.exports.postgres.targetTable",
+                "descriptionKey": "components.exports.postgres.targetTableDescription",
+                "placeholderKey": "components.exports.postgres.targetTableExample",
                 "required": True,
                 "secret": False,
             },
@@ -32,6 +34,7 @@ POSTGRES_EXPORT_METADATA = ComponentMetadata.model_validate(
                 "key": "writeMode",
                 "type": "select",
                 "labelKey": "components.exports.postgres.writeMode",
+                "descriptionKey": "components.exports.postgres.writeModeDescription",
                 "required": False,
                 "secret": False,
                 "options": [

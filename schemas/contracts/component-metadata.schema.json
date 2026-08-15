@@ -58,6 +58,11 @@
             "type": "string",
             "minLength": 1
           },
+          "placeholderKey": {
+            "$comment": "An example of a well-formed value, shown inside an empty control. Structured fields need to demonstrate their shape, which prose cannot do as directly.",
+            "type": "string",
+            "minLength": 1
+          },
           "required": {
             "type": "boolean"
           },

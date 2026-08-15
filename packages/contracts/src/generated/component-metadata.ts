@@ -11,6 +11,7 @@ key: string
 type: ("text" | "textarea" | "number" | "boolean" | "select" | "json" | "file")
 labelKey: string
 descriptionKey?: string
+placeholderKey?: string
 required: boolean
 secret: boolean
 width?: ("short" | "medium" | "full")

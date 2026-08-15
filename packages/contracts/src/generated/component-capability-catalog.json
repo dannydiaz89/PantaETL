@@ -24,8 +24,10 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.exports.json.fileNameDescription",
         "key": "fileName",
         "labelKey": "components.exports.json.fileName",
+        "placeholderKey": "components.exports.json.fileNameExample",
         "required": true,
         "secret": false,
         "type": "text"
@@ -44,8 +46,10 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.exports.parquet.fileNameDescription",
         "key": "fileName",
         "labelKey": "components.exports.parquet.fileName",
+        "placeholderKey": "components.exports.parquet.fileNameExample",
         "required": true,
         "secret": false,
         "type": "text"
@@ -64,13 +68,16 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.exports.postgres.targetTableDescription",
         "key": "targetTable",
         "labelKey": "components.exports.postgres.targetTable",
+        "placeholderKey": "components.exports.postgres.targetTableExample",
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
+        "descriptionKey": "components.exports.postgres.writeModeDescription",
         "key": "writeMode",
         "labelKey": "components.exports.postgres.writeMode",
         "options": [
@@ -179,20 +186,26 @@
         "type": "text"
       },
       {
+        "descriptionKey": "components.sources.postgres.tableDescription",
         "key": "table",
         "labelKey": "components.sources.postgres.table",
+        "placeholderKey": "components.sources.postgres.tableExample",
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
+        "descriptionKey": "components.sources.postgres.queryDescription",
         "key": "query",
         "labelKey": "components.sources.postgres.query",
+        "placeholderKey": "components.sources.postgres.queryExample",
         "required": false,
         "secret": false,
         "type": "textarea"
       },
       {
+        "defaultValue": 1000.0,
+        "descriptionKey": "components.sources.postgres.chunkSizeDescription",
         "key": "chunkSize",
         "labelKey": "components.sources.postgres.chunkSize",
         "required": false,
@@ -200,8 +213,10 @@
         "type": "number"
       },
       {
+        "descriptionKey": "components.sources.postgres.checkpointColumnDescription",
         "key": "checkpointColumn",
         "labelKey": "components.sources.postgres.checkpointColumn",
+        "placeholderKey": "components.sources.postgres.checkpointColumnExample",
         "required": false,
         "secret": false,
         "type": "text"
@@ -220,29 +235,37 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.sources.rest.urlDescription",
         "key": "url",
         "labelKey": "components.sources.rest.url",
+        "placeholderKey": "components.sources.rest.urlExample",
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
+        "descriptionKey": "components.sources.rest.pathDescription",
         "key": "path",
         "labelKey": "components.sources.rest.path",
+        "placeholderKey": "components.sources.rest.pathExample",
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
+        "descriptionKey": "components.sources.rest.queryParamsDescription",
         "key": "queryParams",
         "labelKey": "components.sources.rest.queryParams",
+        "placeholderKey": "components.sources.rest.queryParamsExample",
         "required": false,
         "secret": false,
         "type": "json"
       },
       {
+        "descriptionKey": "components.sources.rest.headersDescription",
         "key": "headers",
         "labelKey": "components.sources.rest.headers",
+        "placeholderKey": "components.sources.rest.headersExample",
         "required": false,
         "secret": false,
         "type": "json"
@@ -255,6 +278,8 @@
         "type": "text"
       },
       {
+        "defaultValue": "Authorization",
+        "descriptionKey": "components.sources.rest.authHeaderDescription",
         "key": "authHeader",
         "labelKey": "components.sources.rest.authHeader",
         "required": false,
@@ -262,6 +287,8 @@
         "type": "text"
       },
       {
+        "defaultValue": "Bearer",
+        "descriptionKey": "components.sources.rest.authSchemeDescription",
         "key": "authScheme",
         "labelKey": "components.sources.rest.authScheme",
         "required": false,
@@ -269,13 +296,17 @@
         "type": "text"
       },
       {
+        "descriptionKey": "components.sources.rest.nextPagePathDescription",
         "key": "nextPagePath",
         "labelKey": "components.sources.rest.nextPagePath",
+        "placeholderKey": "components.sources.rest.nextPagePathExample",
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
+        "defaultValue": "page",
+        "descriptionKey": "components.sources.rest.pageParameterDescription",
         "key": "pageParameter",
         "labelKey": "components.sources.rest.pageParameter",
         "required": false,
@@ -283,20 +314,25 @@
         "type": "text"
       },
       {
+        "descriptionKey": "components.sources.rest.checkpointPathDescription",
         "key": "checkpointPath",
         "labelKey": "components.sources.rest.checkpointPath",
+        "placeholderKey": "components.sources.rest.checkpointPathExample",
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
+        "descriptionKey": "components.sources.rest.checkpointParameterDescription",
         "key": "checkpointParameter",
         "labelKey": "components.sources.rest.checkpointParameter",
+        "placeholderKey": "components.sources.rest.checkpointParameterExample",
         "required": false,
         "secret": false,
         "type": "text"
       },
       {
+        "descriptionKey": "components.sources.rest.maxPagesDescription",
         "key": "maxPages",
         "labelKey": "components.sources.rest.maxPages",
         "required": false,
@@ -358,8 +394,10 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.columns.drop.columnsDescription",
         "key": "columns",
         "labelKey": "components.transforms.columns.drop.columns",
+        "placeholderKey": "components.transforms.columns.drop.columnsExample",
         "required": true,
         "secret": false,
         "type": "json"
@@ -380,8 +418,10 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.columns.rename.renamesDescription",
         "key": "renames",
         "labelKey": "components.transforms.columns.rename.renames",
+        "placeholderKey": "components.transforms.columns.rename.renamesExample",
         "required": true,
         "secret": false,
         "type": "json"
@@ -402,8 +442,10 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.columns.reorder.columnsDescription",
         "key": "columns",
         "labelKey": "components.transforms.columns.reorder.columns",
+        "placeholderKey": "components.transforms.columns.reorder.columnsExample",
         "required": true,
         "secret": false,
         "type": "json"
@@ -424,8 +466,10 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.columns.select.columnsDescription",
         "key": "columns",
         "labelKey": "components.transforms.columns.select.columns",
+        "placeholderKey": "components.transforms.columns.select.columnsExample",
         "required": true,
         "secret": false,
         "type": "json"
@@ -446,13 +490,16 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.document.flatten.recordPathDescription",
         "key": "record_path",
         "labelKey": "components.transforms.document.flatten.recordPath",
+        "placeholderKey": "components.transforms.document.flatten.recordPathExample",
         "required": false,
         "secret": false,
         "type": "json"
       },
       {
+        "descriptionKey": "components.transforms.document.flatten.arrayModeDescription",
         "key": "array_mode",
         "labelKey": "components.transforms.document.flatten.arrayMode",
         "options": [
@@ -470,8 +517,10 @@
         "type": "select"
       },
       {
+        "descriptionKey": "components.transforms.document.flatten.separatorDescription",
         "key": "separator",
         "labelKey": "components.transforms.document.flatten.separator",
+        "placeholderKey": "components.transforms.document.flatten.separatorExample",
         "required": false,
         "secret": false,
         "type": "text"
@@ -492,13 +541,16 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.rows.deduplicate.columnsDescription",
         "key": "columns",
         "labelKey": "components.transforms.rows.deduplicate.columns",
+        "placeholderKey": "components.transforms.rows.deduplicate.columnsExample",
         "required": false,
         "secret": false,
         "type": "json"
       },
       {
+        "descriptionKey": "components.transforms.rows.deduplicate.keepDescription",
         "key": "keep",
         "labelKey": "components.transforms.rows.deduplicate.keep",
         "options": [
@@ -535,13 +587,16 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.rows.filter.columnDescription",
         "key": "column",
         "labelKey": "components.transforms.rows.filter.column",
+        "placeholderKey": "components.transforms.rows.filter.columnExample",
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
+        "descriptionKey": "components.transforms.rows.filter.operatorDescription",
         "key": "operator",
         "labelKey": "components.transforms.rows.filter.operator",
         "options": [
@@ -583,8 +638,10 @@
         "type": "select"
       },
       {
+        "descriptionKey": "components.transforms.rows.filter.valueDescription",
         "key": "value",
         "labelKey": "components.transforms.rows.filter.value",
+        "placeholderKey": "components.transforms.rows.filter.valueExample",
         "required": false,
         "secret": false,
         "type": "json"
@@ -605,8 +662,10 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.rows.limit.countDescription",
         "key": "count",
         "labelKey": "components.transforms.rows.limit.count",
+        "placeholderKey": "components.transforms.rows.limit.countExample",
         "required": true,
         "secret": false,
         "type": "number"
@@ -627,8 +686,10 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.rows.sort.columnsDescription",
         "key": "columns",
         "labelKey": "components.transforms.rows.sort.columns",
+        "placeholderKey": "components.transforms.rows.sort.columnsExample",
         "required": true,
         "secret": false,
         "type": "json"
@@ -649,13 +710,16 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.values.cast.columnDescription",
         "key": "column",
         "labelKey": "components.transforms.values.cast.column",
+        "placeholderKey": "components.transforms.values.cast.columnExample",
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
+        "descriptionKey": "components.transforms.values.cast.dataTypeDescription",
         "key": "data_type",
         "labelKey": "components.transforms.values.cast.dataType",
         "options": [
@@ -689,6 +753,7 @@
         "type": "select"
       },
       {
+        "descriptionKey": "components.transforms.values.cast.strictDescription",
         "key": "strict",
         "labelKey": "components.transforms.values.cast.strict",
         "required": false,
@@ -711,15 +776,19 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.values.fillNull.columnDescription",
         "key": "column",
         "labelKey": "components.transforms.values.fillNull.column",
+        "placeholderKey": "components.transforms.values.fillNull.columnExample",
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
+        "descriptionKey": "components.transforms.values.fillNull.valueDescription",
         "key": "value",
         "labelKey": "components.transforms.values.fillNull.value",
+        "placeholderKey": "components.transforms.values.fillNull.valueExample",
         "required": true,
         "secret": false,
         "type": "json"
@@ -740,13 +809,16 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.values.normalizeString.columnDescription",
         "key": "column",
         "labelKey": "components.transforms.values.normalizeString.column",
+        "placeholderKey": "components.transforms.values.normalizeString.columnExample",
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
+        "descriptionKey": "components.transforms.values.normalizeString.operationDescription",
         "key": "operation",
         "labelKey": "components.transforms.values.normalizeString.operation",
         "options": [
@@ -787,15 +859,19 @@
   {
     "configFields": [
       {
+        "descriptionKey": "components.transforms.values.replace.columnDescription",
         "key": "column",
         "labelKey": "components.transforms.values.replace.column",
+        "placeholderKey": "components.transforms.values.replace.columnExample",
         "required": true,
         "secret": false,
         "type": "text"
       },
       {
+        "descriptionKey": "components.transforms.values.replace.replacementsDescription",
         "key": "replacements",
         "labelKey": "components.transforms.values.replace.replacements",
+        "placeholderKey": "components.transforms.values.replace.replacementsExample",
         "required": true,
         "secret": false,
         "type": "json"

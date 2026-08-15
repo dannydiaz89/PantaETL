@@ -47,6 +47,7 @@ class ConfigField(BaseModel):
     type: Type
     labelKey: Annotated[str, Field(min_length=1)]
     descriptionKey: Annotated[str | None, Field(min_length=1)] = None
+    placeholderKey: Annotated[str | None, Field(min_length=1)] = None
     required: bool
     secret: bool
     width: Width | None = None

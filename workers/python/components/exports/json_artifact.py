@@ -23,6 +23,8 @@ JSON_ARTIFACT_EXPORT_METADATA = ComponentMetadata.model_validate(
                 "key": "fileName",
                 "type": "text",
                 "labelKey": "components.exports.json.fileName",
+                "descriptionKey": "components.exports.json.fileNameDescription",
+                "placeholderKey": "components.exports.json.fileNameExample",
                 "required": True,
                 "secret": False,
             }

@@ -23,6 +23,8 @@ PARQUET_ARTIFACT_EXPORT_METADATA = ComponentMetadata.model_validate(
                 "key": "fileName",
                 "type": "text",
                 "labelKey": "components.exports.parquet.fileName",
+                "descriptionKey": "components.exports.parquet.fileNameDescription",
+                "placeholderKey": "components.exports.parquet.fileNameExample",
                 "required": True,
                 "secret": False,
             }

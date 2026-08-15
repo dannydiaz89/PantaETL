@@ -88,6 +88,49 @@ describe("ComponentConfigurationForm", () => {
     expect(markup).toContain('type="file"');
   });
 
+  it("demonstrates the shape a structured field expects", () => {
+    const rename = builtInComponentCapabilities.find((component) => component.type === "transform.columns.rename");
+    const markup = renderMetadata(rename as ComponentMetadata, {});
+
+    expect(markup).toContain(en["components.transforms.columns.rename.renamesExample"]
+      .replaceAll("&", "&amp;").replaceAll('"', "&quot;"));
+    expect(markup).toContain(en["components.transforms.columns.rename.renamesDescription"]);
+  });
+
+  it("prefers a declared example over a declared default", () => {
+    const markup = renderMetadata({
+      ...presentationMetadata,
+      configFields: [{
+        defaultValue: ",",
+        key: "separator",
+        labelKey: "components.sources.csv.separator",
+        placeholderKey: "components.sources.csv.sourcePath",
+        required: false,
+        secret: false,
+        type: "text",
+      }],
+    }, {});
+
+    expect(markup).toContain(`placeholder="${en["components.sources.csv.sourcePath"]}"`);
+    expect(markup).not.toContain('placeholder=","');
+  });
+
+  it("leaves a field with neither an example nor a default genuinely empty", () => {
+    const markup = renderMetadata(allFieldTypesMetadata, {});
+
+    // The leading space distinguishes a real placeholder from the select's own data-placeholder.
+    expect(markup).not.toContain(' placeholder="');
+  });
+
+  it("gives every configurable field of every built-in component some guidance", () => {
+    const undocumented = builtInComponentCapabilities.flatMap((component) =>
+      component.configFields
+        .filter((field) => !field.secret && field.descriptionKey === undefined)
+        .map((field) => `${component.type}.${field.key}`));
+
+    expect(undocumented).toEqual([]);
+  });
+
   it("includes every generated capability translation key in the English catalog", () => {
     const metadataKeys = builtInComponentCapabilities.flatMap((component) => [
       component.displayNameKey,

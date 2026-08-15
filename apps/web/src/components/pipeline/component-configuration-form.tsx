@@ -166,7 +166,7 @@ function renderFieldControl({
             const parsed = Number(nextValue);
             if (Number.isFinite(parsed)) onChange(parsed);
           }}
-          placeholder={unsetValuePlaceholder(field)}
+          placeholder={unsetValuePlaceholder(field, t)}
           required={field.required}
           type="number"
           value={typeof value === "number" ? value : ""}
@@ -209,7 +209,7 @@ function renderFieldControl({
           disabled={disabled}
           id={id}
           onChange={(event) => onChange(optionalStringValue(event.target.value))}
-          placeholder={unsetValuePlaceholder(field)}
+          placeholder={unsetValuePlaceholder(field, t)}
           required={field.required}
           value={typeof value === "string" ? value : ""}
         />
@@ -222,7 +222,7 @@ function renderFieldControl({
           id={id}
           invalid={invalid}
           onChange={(nextValue) => onChange(nextValue)}
-          placeholder={unsetValuePlaceholder(field)}
+          placeholder={unsetValuePlaceholder(field, t)}
           required={field.required}
           value={typeof value === "string" ? value : ""}
         />
@@ -235,7 +235,7 @@ function renderFieldControl({
           disabled={disabled}
           id={id}
           onChange={(event) => onChange(optionalStringValue(event.target.value))}
-          placeholder={unsetValuePlaceholder(field)}
+          placeholder={unsetValuePlaceholder(field, t)}
           required={field.required}
           value={typeof value === "string" ? value : ""}
         />
@@ -244,14 +244,17 @@ function renderFieldControl({
 }
 
 /**
- * Shows the value an empty control will actually execute with.
+ * Shows what belongs in an empty control.
  *
- * A declared default is applied by the executing component when the operator
- * leaves the field alone, so surfacing it as placeholder text keeps the form
- * from implying that an untouched field does nothing. Returns undefined when a
- * component declares no default, leaving the control genuinely empty.
+ * A declared example takes precedence, because a field whose value has a shape
+ * is far easier to fill in from a well-formed sample than from prose. Otherwise
+ * a declared default is surfaced, since the executing component applies it when
+ * the field is left alone and the form should not imply that nothing happens.
+ * Returns undefined when a component declares neither, leaving the control
+ * genuinely empty.
  */
-function unsetValuePlaceholder(field: ConfigField): string | undefined {
+function unsetValuePlaceholder(field: ConfigField, t: (key: TranslationKey) => string): string | undefined {
+  if (field.placeholderKey !== undefined) return translateMetadataKey(t, field.placeholderKey);
   return field.defaultValue === undefined ? undefined : String(field.defaultValue);
 }
 
@@ -314,6 +317,7 @@ function JsonConfigurationInput({
         disabled={disabled}
         id={id}
         onChange={(event) => changeJson(event.target.value)}
+        placeholder={unsetValuePlaceholder(field, t)}
         required={field.required}
         value={rawValue}
       />

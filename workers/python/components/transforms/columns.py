@@ -87,6 +87,8 @@ COLUMN_SELECT_METADATA = ComponentMetadata.model_validate(
                 "key": "columns",
                 "type": "json",
                 "labelKey": "components.transforms.columns.select.columns",
+                "descriptionKey": "components.transforms.columns.select.columnsDescription",
+                "placeholderKey": "components.transforms.columns.select.columnsExample",
                 "required": True,
                 "secret": False,
             }
@@ -108,6 +110,8 @@ COLUMN_RENAME_METADATA = ComponentMetadata.model_validate(
                 "key": "renames",
                 "type": "json",
                 "labelKey": "components.transforms.columns.rename.renames",
+                "descriptionKey": "components.transforms.columns.rename.renamesDescription",
+                "placeholderKey": "components.transforms.columns.rename.renamesExample",
                 "required": True,
                 "secret": False,
             }
@@ -129,6 +133,8 @@ COLUMN_DROP_METADATA = ComponentMetadata.model_validate(
                 "key": "columns",
                 "type": "json",
                 "labelKey": "components.transforms.columns.drop.columns",
+                "descriptionKey": "components.transforms.columns.drop.columnsDescription",
+                "placeholderKey": "components.transforms.columns.drop.columnsExample",
                 "required": True,
                 "secret": False,
             }
@@ -150,6 +156,8 @@ COLUMN_REORDER_METADATA = ComponentMetadata.model_validate(
                 "key": "columns",
                 "type": "json",
                 "labelKey": "components.transforms.columns.reorder.columns",
+                "descriptionKey": "components.transforms.columns.reorder.columnsDescription",
+                "placeholderKey": "components.transforms.columns.reorder.columnsExample",
                 "required": True,
                 "secret": False,
             }
