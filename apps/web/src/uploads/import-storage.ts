@@ -16,10 +16,7 @@ export const IMPORT_DIRECTORY = "imports";
 /** The subdirectory of the import directory that holds browser-supplied files. */
 const UPLOAD_DIRECTORY = "uploads";
 
-/** Reads the storage root shared with the execution and retention services. */
-export function resolveStorageRoot(environment: NodeJS.ProcessEnv = process.env): string {
-  return environment.STORAGE_ROOT?.trim() || "/var/lib/pantaetl/storage";
-}
+export { resolveStorageRoot } from "@pantaetl/config";
 
 /**
  * Writes browser-supplied files into the directory file Sources read from.

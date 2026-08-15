@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.6.27",
+    "@pantaetl/config": "workspace:*",
     "@pantaetl/contracts": "workspace:*",
     "@pantaetl/database": "workspace:*",
     "@pantaetl/pipeline": "workspace:*",

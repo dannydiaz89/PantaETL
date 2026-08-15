@@ -20,6 +20,11 @@ __pycache__/
 .pantaetl/
 *.log
 
+# Internal storage for a development stack. Datasets, artifacts, and uploads a
+# local run produces are disposable and belong to that machine.
+/storage/
+!/storage/.gitkeep
+
 # Operating systems and editors
 .DS_Store
 .idea/

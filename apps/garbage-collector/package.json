@@ -17,6 +17,7 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
+    "@pantaetl/config": "workspace:*",
     "@pantaetl/database": "workspace:*"
   }
 }

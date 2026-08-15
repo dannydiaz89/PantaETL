@@ -16,7 +16,7 @@ const repositoryRoot = path.resolve(
 );
 const localRuntimeDirectory = path.join(repositoryRoot, ".pantaetl");
 const stackStatePath = path.join(localRuntimeDirectory, "local-stack.json");
-const localStorageRoot = path.join(localRuntimeDirectory, "storage");
+const localStorageRoot = path.join(repositoryRoot, "storage");
 const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 const docker = process.platform === "win32" ? "docker.exe" : "docker";
 
@@ -415,21 +415,22 @@ async function checkGeneratedArtifacts() {
 }
 
 /**
- * Point locally supervised services at a storage root this machine can write.
+ * Mark supervised services as a development stack so they use writable storage.
  *
- * The packaged default lives under /var/lib, which a developer account cannot
- * create. Every service reads and writes the same tree, so they must agree: the
- * uploads one service accepts are the files another service later reads. An
- * explicit STORAGE_ROOT is left alone, so pointing the stack at a shared or
- * pre-seeded location stays possible.
+ * The packaged storage root lives under /var/lib, which a developer account
+ * cannot create. Services resolve their own storage root from this flag rather
+ * than being handed a path, so a service started on its own outside this
+ * supervisor reaches the same directory. An explicit STORAGE_ROOT still wins,
+ * leaving a shared or pre-seeded location possible.
  */
-async function useLocalStorageRoot() {
+async function useDevelopmentStorage() {
+  process.env.PANTAETL_ENV ??= "development";
+
   if (process.env.STORAGE_ROOT?.trim()) {
     return;
   }
 
   await mkdir(path.join(localStorageRoot, "imports"), { recursive: true });
-  process.env.STORAGE_ROOT = localStorageRoot;
 }
 
 /** Start Docker PostgreSQL, migrate it, then supervise all local services. */
@@ -459,7 +460,7 @@ async function startStack() {
     );
   }
 
-  await useLocalStorageRoot();
+  await useDevelopmentStorage();
 
   const children = services.map(startService);
   await mkdir(localRuntimeDirectory, { recursive: true });

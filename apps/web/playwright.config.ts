@@ -40,6 +40,7 @@ export default defineConfig({
         BETTER_AUTH_TRUSTED_ORIGINS: playwrightBaseUrl,
         BETTER_AUTH_URL: playwrightBaseUrl,
         DATABASE_URL: "postgresql://pantaetl:pantaetl-dev@127.0.0.1:5432/pantaetl",
+        PANTAETL_ENV: "development",
         SCHEDULER_INTERNAL_TOKEN: "scheduler-internal-token-for-a11y-tests",
         SCHEDULER_RUN_URL: schedulerRunUrl,
       },

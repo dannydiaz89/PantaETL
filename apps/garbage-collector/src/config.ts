@@ -1,3 +1,5 @@
+import { resolveStorageRoot } from '@pantaetl/config';
+
 /** Runtime configuration needed to start a TypeScript service shell. */
 export interface ServiceConfig {
   readonly cleanupBatchSize: number;
@@ -54,6 +56,6 @@ export function loadConfig(serviceName: string, defaultPort: number): ServiceCon
     host: process.env.HOST ?? '127.0.0.1',
     port: readPort(process.env.PORT, defaultPort),
     serviceName,
-    storageRoot: process.env.STORAGE_ROOT ?? '/var/lib/pantaetl/storage',
+    storageRoot: resolveStorageRoot(),
   };
 }

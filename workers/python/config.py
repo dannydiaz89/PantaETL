@@ -1,11 +1,18 @@
 """Configuration for the Python worker runtime."""
 
 import os
+from collections.abc import Mapping
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal, cast
 from uuid import UUID, uuid4
 
 LogLevel = Literal["debug", "info", "warning", "error"]
+
+PRODUCTION_STORAGE_ROOT = "/var/lib/pantaetl/storage"
+DEVELOPMENT_STORAGE_DIRECTORY = "storage"
+IMPORT_DIRECTORY = "imports"
+_WORKSPACE_MARKER = "pnpm-workspace.yaml"
 
 
 @dataclass(frozen=True)
@@ -18,8 +25,8 @@ class WorkerConfig:
     worker_id: UUID
     log_level: LogLevel
     database_url: str = ""
-    storage_root: str = "/var/lib/pantaetl/storage"
-    source_input_root: str = "/var/lib/pantaetl/storage/imports"
+    storage_root: str = PRODUCTION_STORAGE_ROOT
+    source_input_root: str = f"{PRODUCTION_STORAGE_ROOT}/{IMPORT_DIRECTORY}"
     poll_interval_seconds: float = 1.0
 
 
@@ -67,6 +74,49 @@ def _read_positive_seconds(value: str | None, fallback: float) -> float:
     return seconds
 
 
+def _workspace_root() -> Path:
+    """Locate the workspace root from this module rather than the working directory.
+
+    Services start from different directories, so resolving against the current
+    one would give each of them a different storage root. Falls back to the
+    working directory when the marker is absent, which means the worker runs
+    outside the workspace and should have been given an explicit STORAGE_ROOT.
+    """
+    for directory in Path(__file__).resolve().parents:
+        if (directory / _WORKSPACE_MARKER).is_file():
+            return directory
+    return Path.cwd()
+
+
+def resolve_storage_root(environment: Mapping[str, str] | None = None) -> str:
+    """Resolve the internal storage root shared with the web and retention services.
+
+    Web, worker, and collector read and write one tree, so a disagreement here
+    looks like data loss rather than a misconfiguration. An explicit STORAGE_ROOT
+    always wins. Otherwise a development process uses a directory inside the
+    workspace, which an ordinary account can write, and anything else uses the
+    packaged location. Production is the default so a deployment that omits the
+    variable cannot start writing into a working copy.
+    """
+    source = os.environ if environment is None else environment
+    configured = source.get("STORAGE_ROOT", "").strip()
+    if configured:
+        return str(Path(configured).resolve())
+
+    if source.get("PANTAETL_ENV", "").strip().lower() == "development":
+        return str(_workspace_root() / DEVELOPMENT_STORAGE_DIRECTORY)
+    return PRODUCTION_STORAGE_ROOT
+
+
+def resolve_source_input_root(environment: Mapping[str, str] | None = None) -> str:
+    """Resolve the directory file Sources read, which sits inside internal storage."""
+    source = os.environ if environment is None else environment
+    configured = source.get("SOURCE_INPUT_ROOT", "").strip()
+    if configured:
+        return str(Path(configured).resolve())
+    return str(Path(resolve_storage_root(source)) / IMPORT_DIRECTORY)
+
+
 def load_config(service_name: str, default_port: int) -> WorkerConfig:
     """Read worker settings from the environment and validate their safe bounds."""
     return WorkerConfig(
@@ -76,8 +126,8 @@ def load_config(service_name: str, default_port: int) -> WorkerConfig:
         worker_id=_read_worker_id(os.environ.get("WORKER_ID")),
         log_level=_read_log_level(os.environ.get("LOG_LEVEL")),
         database_url=os.environ.get("DATABASE_URL", "").strip(),
-        storage_root=os.environ.get("STORAGE_ROOT", "/var/lib/pantaetl/storage"),
-        source_input_root=os.environ.get("SOURCE_INPUT_ROOT", "/var/lib/pantaetl/storage/imports"),
+        storage_root=resolve_storage_root(),
+        source_input_root=resolve_source_input_root(),
         poll_interval_seconds=_read_positive_seconds(
             os.environ.get("WORKER_POLL_INTERVAL_SECONDS"), 1.0
         ),

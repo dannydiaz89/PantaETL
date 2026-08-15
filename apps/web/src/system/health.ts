@@ -3,6 +3,7 @@ import { access } from "node:fs/promises";
 
 import { count, eq, sql } from "drizzle-orm";
 
+import { resolveStorageRoot } from "@pantaetl/config";
 import { jobs, type DatabaseClient } from "@pantaetl/database";
 
 import type { HealthComponent, QueueHealth, SystemHealth } from "./types.js";
@@ -45,7 +46,7 @@ export function loadSystemHealthConfig(environment: NodeJS.ProcessEnv = process.
       "SCHEDULER_HEALTH_URL",
       "http://127.0.0.1:3010/health",
     ),
-    storageRoot: environment.STORAGE_ROOT?.trim() || "/var/lib/pantaetl/storage",
+    storageRoot: resolveStorageRoot(environment),
     workerHealthUrl: readHealthUrl(
       environment.WORKER_HEALTH_URL,
       "WORKER_HEALTH_URL",
