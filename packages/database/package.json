@@ -27,6 +27,6 @@
   "devDependencies": {
     "@types/node": "^26.2.0",
     "drizzle-kit": "^0.31.10",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   }
 }

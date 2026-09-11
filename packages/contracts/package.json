@@ -47,6 +47,6 @@
   },
   "devDependencies": {
     "json-schema-to-typescript": "^15.0.4",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   }
 }
