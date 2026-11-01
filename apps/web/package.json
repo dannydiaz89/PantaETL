@@ -27,7 +27,7 @@
     "@tanstack/react-query": "^5.101.4",
     "@tanstack/react-router": "latest",
     "@tanstack/react-start": "latest",
-    "better-auth": "^1.6.27",
+    "better-auth": "^1.7.7",
     "drizzle-orm": "^0.45.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
