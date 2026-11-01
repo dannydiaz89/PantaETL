@@ -18,7 +18,7 @@
     "check": "pnpm test && pnpm build"
   },
   "dependencies": {
-    "@better-auth/drizzle-adapter": "^1.6.27",
+    "@better-auth/drizzle-adapter": "^1.7.7",
     "@pantaetl/config": "workspace:*",
     "@pantaetl/contracts": "workspace:*",
     "@pantaetl/database": "workspace:*",
